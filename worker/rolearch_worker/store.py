@@ -117,7 +117,7 @@ class PostgresStore:
     def _company(self, cur, company: Company, count: int | None, error: str | None) -> None:
         cur.execute(
             """insert into companies (key, name, country, ats, token, careers_url, last_run_at, last_ok_at, last_job_count, last_error)
-               values (%s, %s, %s, %s, %s, %s, now(), case when %s is null then now() end, %s, %s)
+               values (%s, %s, %s, %s, %s, %s, now(), case when %s::text is null then now() end, %s::integer, %s::text)
                on conflict (key) do update set name = excluded.name, country = excluded.country, careers_url = excluded.careers_url,
                  last_run_at = now(),
                  last_ok_at = coalesce(excluded.last_ok_at, companies.last_ok_at),
@@ -140,30 +140,38 @@ class PostgresStore:
         cols = ", ".join(self.COLS)
         marks = ", ".join(["%s"] * len(self.COLS))
         updates = ", ".join(f"{c} = excluded.{c}" for c in self.COLS if c != "id")
-        with self.conn.cursor() as cur:
-            self._company(cur, company, len(jobs), None)
-            cur.execute("select id from jobs where company_key = %s", (company.key,))
-            known = {r[0] for r in cur.fetchall()}
-            if rows:
-                cur.executemany(
-                    f"""insert into jobs ({cols}) values ({marks})
-                        on conflict (id) do update set {updates}, last_seen_at = now(), status = 'open', closed_at = null""",
-                    rows,
+        try:
+            with self.conn.cursor() as cur:
+                self._company(cur, company, len(jobs), None)
+                cur.execute("select id from jobs where company_key = %s", (company.key,))
+                known = {r[0] for r in cur.fetchall()}
+                if rows:
+                    cur.executemany(
+                        f"""insert into jobs ({cols}) values ({marks})
+                            on conflict (id) do update set {updates}, last_seen_at = now(), status = 'open', closed_at = null""",
+                        rows,
+                    )
+                cur.execute(
+                    """update jobs set status = 'closed', closed_at = now()
+                       where company_key = %s and status = 'open' and not (id = any(%s))""",
+                    (company.key, [j["id"] for j in jobs]),
                 )
-            cur.execute(
-                """update jobs set status = 'closed', closed_at = now()
-                   where company_key = %s and status = 'open' and not (id = any(%s))""",
-                (company.key, [j["id"] for j in jobs]),
-            )
-            closed = cur.rowcount
-        self.conn.commit()
+                closed = cur.rowcount
+            self.conn.commit()
+        except Exception:
+            self.conn.rollback()  # leave the connection usable for the next company
+            raise
         added = sum(1 for j in jobs if j["id"] not in known)
         return added, len(jobs) - added, closed
 
     def record_error(self, company: Company, error: str) -> None:
-        with self.conn.cursor() as cur:
-            self._company(cur, company, None, error[:500])
-        self.conn.commit()
+        try:
+            with self.conn.cursor() as cur:
+                self._company(cur, company, None, error[:500])
+            self.conn.commit()
+        except Exception:
+            self.conn.rollback()
+            raise
 
     def retire_companies(self, keep: set[str]) -> int:
         with self.conn.cursor() as cur:
@@ -171,8 +179,8 @@ class PostgresStore:
                 "update jobs set status = 'closed', closed_at = now() where status = 'open' and not (company_key = any(%s))",
                 (list(keep),),
             )
-            cur.execute("update companies set active = (key = any(%s))", (list(keep),))
             n = cur.rowcount
+            cur.execute("update companies set active = (key = any(%s))", (list(keep),))
         self.conn.commit()
         return n
 

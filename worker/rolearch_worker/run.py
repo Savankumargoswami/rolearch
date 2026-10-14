@@ -79,7 +79,12 @@ async def pull_one(http: Fetcher, store: Store, company: Company) -> Result:
         return res
 
     res.total, res.launch = len(jobs), sum(j["launchField"] for j in jobs)
-    res.added, _, res.closed = store.save(company, jobs)
+    try:
+        res.added, _, res.closed = store.save(company, jobs)
+    except Exception as e:  # a storage error for one company never stops the run
+        res.error = f"save failed: {type(e).__name__}: {e}"[:300]
+        res.total = res.launch = 0
+        store.record_error(company, res.error)
     return res
 
 
