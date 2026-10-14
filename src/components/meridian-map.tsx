@@ -1,4 +1,4 @@
-import { jobs } from "@/data/jobs";
+import type { Job } from "@/data/types";
 import { t } from "@/i18n";
 
 // City coordinates [lat, lon] for the cities in the sample feed.
@@ -23,7 +23,7 @@ const y = (lat: number) => ((LAT_TOP - lat) / LAT_SPAN) * H;
 type Pin = { city: string; n: number; lat: number; lon: number };
 
 /** Group jobs into one pin per city; label the busiest cities whose labels don't collide. */
-function pinsFromJobs(): { pins: Pin[]; labels: Set<string> } {
+function pinsFromJobs(jobs: Job[]): { pins: Pin[]; labels: Set<string> } {
   const byCity = new Map<string, Pin>();
   for (const j of jobs) {
     if (j.city === "Remote") continue;
@@ -53,8 +53,8 @@ function pinsFromJobs(): { pins: Pin[]; labels: Set<string> } {
  * A map with no coastlines: meridians, a few parallels, and a pin per city with open roles.
  * Lines draw in once, then pins land west to east, like the day moving across the world.
  */
-export function MeridianMap() {
-  const { pins, labels } = pinsFromJobs();
+export function MeridianMap({ jobs }: { jobs: Job[] }) {
+  const { pins, labels } = pinsFromJobs(jobs);
   const max = Math.max(1, ...pins.map((p) => p.n));
   const meridians = Array.from({ length: 13 }, (_, i) => -180 + i * 30);
   const parallels = [60, 30, 0, -30];

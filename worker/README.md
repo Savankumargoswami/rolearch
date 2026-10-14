@@ -41,9 +41,11 @@ python -m venv .venv
 .venv\Scripts\python -m unittest discover -s tests # tests, no network
 ```
 
-Without `DATABASE_URL`, jobs go to `state/jobs.json` and the site's feed files in `src/data/` (`feed.json` for job pages, `feed-index.json` for search, `feed-suggest.json` for search suggestions). Rebuild the site after a run.
+With `DATABASE_URL` set (the normal setup), jobs go straight into Supabase and the site picks them up within an hour; no rebuild needed.
 
-With `DATABASE_URL` set to the Supabase **service-role** Postgres connection string, jobs go to the `companies` and `jobs` tables from `db/schema.sql` instead.
+Without it, jobs go to `state/jobs.json` and the site's fallback files in `src/data/` (`feed.json`, used when Supabase isn't configured, and `feed-suggest.json`, the search suggestions). Refresh those occasionally with a run that has no `DATABASE_URL`.
+
+`DATABASE_URL` is the Supabase Postgres connection string (Connect → Session pooler); the tables come from `db/schema.sql`.
 
 ## Adding companies
 

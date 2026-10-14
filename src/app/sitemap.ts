@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
-import { jobs } from "@/data/jobs";
+import { getJobFeed } from "@/data/db";
 
 const base = "https://rolearch.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const { jobs } = await getJobFeed();
   return [
     { url: base, changeFrequency: "daily", priority: 1 },
     { url: `${base}/jobs`, changeFrequency: "hourly", priority: 0.9 },

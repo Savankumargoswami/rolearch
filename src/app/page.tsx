@@ -3,7 +3,7 @@ import { ViewTransition } from "react";
 import { HeroSearch } from "@/components/hero-search";
 import { JobRow } from "@/components/job-row";
 import { MeridianMap } from "@/components/meridian-map";
-import { feedMeta, jobs } from "@/data/jobs";
+import { getJobFeed } from "@/data/db";
 import { m, t } from "@/i18n";
 import { count } from "@/lib/format";
 import { filterJobs, emptyFilters } from "@/lib/search";
@@ -21,8 +21,9 @@ const pageTransition = {
   exit: { "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" },
 } as const;
 
-export default function Home() {
-  const top = filterJobs(emptyFilters).slice(0, 5);
+export default async function Home() {
+  const feed = await getJobFeed();
+  const top = filterJobs(feed.jobs, emptyFilters).slice(0, 5);
   const copy = m().home;
 
   return (
@@ -55,7 +56,7 @@ export default function Home() {
             </div>
           </div>
           <div className="mt-14 sm:mt-16">
-            <MeridianMap />
+            <MeridianMap jobs={feed.jobs} />
           </div>
         </section>
 
@@ -66,7 +67,7 @@ export default function Home() {
               <h2 id="fresh" className="font-display text-3xl font-semibold tracking-[-0.025em] sm:text-4xl">
                 {t("home.freshTitle")}
               </h2>
-              <p className="mt-2 max-w-[60ch] text-muted">{t("home.freshLead", { n: count(jobs.length), k: feedMeta.companies, c: feedMeta.countries })}</p>
+              <p className="mt-2 max-w-[60ch] text-muted">{t("home.freshLead", { n: count(feed.jobs.length), k: feed.companies, c: feed.countries })}</p>
             </div>
             <Link href="/jobs" className="rounded-full border border-ink px-4 py-2.5 font-medium transition-colors duration-200 hover:bg-ink hover:text-paper">
               {t("home.seeAll")}

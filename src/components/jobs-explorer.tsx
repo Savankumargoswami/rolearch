@@ -3,9 +3,8 @@
 import { MapPin, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { startTransition, useDeferredValue, useEffect, useState, ViewTransition } from "react";
-import type { Level } from "@/data/types";
+import type { JobLite, Level } from "@/data/types";
 import { locale, t } from "@/i18n";
-import { indexMeta } from "@/data/jobs-index";
 import { emptyFilters, filterJobs, filtersToQuery, parseFilters, whereOptions, type Filters, type Where } from "@/lib/search";
 import { JobRow } from "./job-row";
 import { SearchCombobox } from "./search-combobox";
@@ -13,14 +12,14 @@ import { SearchCombobox } from "./search-combobox";
 const levels: (Level | "any")[] = ["any", "entry", "mid", "senior", "lead"];
 const PAGE = 40;
 
-export function JobsExplorer() {
+export function JobsExplorer({ jobs, updatedAt, companies }: { jobs: JobLite[]; updatedAt: string | null; companies: number }) {
   const params = useSearchParams();
   const [filters, setFilters] = useState<Filters>(() => parseFilters(new URLSearchParams(params.toString())));
   const [query, setQuery] = useState(filters.q);
   // Typing updates the field at once; the list follows as a transition, so rows glide instead of jumping.
   const deferredQuery = useDeferredValue(query);
   const active = { ...filters, q: deferredQuery };
-  const results = filterJobs(active);
+  const results = filterJobs(jobs, active);
 
   // Keep the URL shareable. Only write when it actually changes.
   const search = filtersToQuery(active);
@@ -129,7 +128,7 @@ export function JobsExplorer() {
         <p aria-live="polite" className="font-display text-xl font-semibold tabular-nums">
           {results.length === 1 ? t("jobs.countOne") : t("jobs.count", { n: results.length })}
         </p>
-        <p className="text-sm text-muted">{updatedNote()}</p>
+        <p className="text-sm text-muted">{updatedNote(updatedAt, companies)}</p>
       </div>
 
       {results.length > 0 ? (
@@ -244,8 +243,8 @@ function Chevron({ className = "text-muted" }: { className?: string }) {
   );
 }
 
-function updatedNote() {
-  if (!indexMeta.generatedAt) return t("jobs.sampleNote");
-  const when = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }).format(new Date(indexMeta.generatedAt));
-  return t("jobs.liveNote", { when: `${when} UTC`, k: indexMeta.companies });
+function updatedNote(updatedAt: string | null, companies: number) {
+  if (!updatedAt) return t("jobs.sampleNote");
+  const when = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }).format(new Date(updatedAt));
+  return t("jobs.liveNote", { when: `${when} UTC`, k: companies });
 }

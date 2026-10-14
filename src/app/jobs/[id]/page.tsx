@@ -7,19 +7,21 @@ import { ApplyButton } from "@/components/apply-button";
 import { JobRow } from "@/components/job-row";
 import { MatchRing } from "@/components/match-ring";
 import { SaveButton } from "@/components/save-button";
-import { getJob, jobs, type Job } from "@/data/jobs";
+import { getJob, getJobFeed } from "@/data/db";
+import type { Job } from "@/data/types";
 import { learning, youtubeSearch } from "@/data/learning";
 import { t } from "@/i18n";
 import { place, postedAgo, salaryRange } from "@/lib/format";
 import { matchJob, type ReqStatus } from "@/lib/match";
 
-export function generateStaticParams() {
-  return jobs.map((j) => ({ id: j.id }));
+// Pages for current jobs are built ahead; a job added later is rendered on its first visit.
+export async function generateStaticParams() {
+  return (await getJobFeed()).jobs.map((j) => ({ id: j.id }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const job = getJob(id);
+  const job = await getJob(id);
   if (!job) return {};
   const where = place(job);
   return {
@@ -29,7 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Pro
   };
 }
 
-function similarTo(job: Job) {
+function similarTo(job: Job, jobs: Job[]) {
   return jobs
     .filter((j) => j.id !== job.id)
     .map((j) => ({ j, shared: j.skills.filter((s) => job.skills.includes(s)).length }))
@@ -70,8 +72,9 @@ const reqIcon: Record<ReqStatus, { Icon: typeof Check; cls: string; label: strin
 
 export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
   const { id } = await params;
-  const job = getJob(id);
+  const job = await getJob(id);
   if (!job) notFound();
+  const { jobs } = await getJobFeed();
   const match = matchJob(job);
   const where = place(job);
   const gaps = match.missing.filter((s) => learning[s]);
@@ -241,7 +244,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
             {t("job.similar")}
           </h2>
           <ul className="-mx-3 divide-y divide-line sm:-mx-4">
-            {similarTo(job).map((j) => (
+            {similarTo(job, jobs).map((j) => (
               <li key={j.id}>
                 <JobRow job={j} />
               </li>

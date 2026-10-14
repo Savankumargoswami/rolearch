@@ -150,12 +150,10 @@ FULL = [
     "id", "title", "company", "city", "country", "countryCode", "region", "workplace", "visa", "salary", "level",
     "years", "skills", "nice", "postedAt", "postedDaysAgo", "source", "summary", "duties", "jobUrl", "applyUrl", "lat", "lon",
 ]
-# What the search page needs in the browser; everything else stays on the server.
-LITE = ["id", "title", "company", "city", "country", "region", "workplace", "visa", "salary", "level", "years", "skills", "postedDaysAgo"]
 
 
 def export_feed(store: Store, path: Path, limit: int) -> int:
-    """Write the site's feed: <path> (full records, server only) and <path>-index (compact, for the search page)."""
+    """Write the site's fallback feed (<path>, used when Supabase isn't configured) and <path>-suggest (search suggestions)."""
     jobs = store.open_jobs(launch_only=True, limit=limit)
     meta = {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
@@ -164,9 +162,7 @@ def export_feed(store: Store, path: Path, limit: int) -> int:
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     full = {**meta, "jobs": [{k: j.get(k) for k in FULL} for j in jobs]}
-    lite = {**meta, "jobs": [{k: j.get(k) for k in LITE} for j in jobs]}
     path.write_text(json.dumps(full, ensure_ascii=False, separators=(",", ":")), "utf-8")
-    path.with_name(f"{path.stem}-index{path.suffix}").write_text(json.dumps(lite, ensure_ascii=False, separators=(",", ":")), "utf-8")
     path.with_name(f"{path.stem}-suggest{path.suffix}").write_text(
         json.dumps({"terms": suggestion_terms(jobs)}, ensure_ascii=False, separators=(",", ":")), "utf-8"
     )

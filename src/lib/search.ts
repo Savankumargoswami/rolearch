@@ -1,9 +1,8 @@
-import { jobIndex as jobs } from "@/data/jobs-index";
 import type { JobLite as Job, Level } from "@/data/types";
+import { matchJob } from "./match";
 import { whereOptions, type Where } from "./regions";
 
 export { whereOptions, type Where };
-import { matchJob } from "./match";
 
 export type Filters = {
   q: string;
@@ -23,7 +22,7 @@ function haystack(job: Job) {
   return fold([job.title, job.company, job.city, job.country, ...job.skills].join(" "));
 }
 
-export function filterJobs(f: Filters): Job[] {
+export function filterJobs<T extends Job>(jobs: T[], f: Filters): T[] {
   const tokens = fold(f.q).split(/\s+/).filter(Boolean);
   const out = jobs.filter((job) => {
     if (tokens.length && !tokens.every((tok) => haystack(job).includes(tok))) return false;
@@ -35,9 +34,12 @@ export function filterJobs(f: Filters): Job[] {
     if (f.level !== "any" && job.level !== f.level) return false;
     return true;
   });
-  if (f.sort === "newest") return out.sort((a, b) => a.postedDaysAgo - b.postedDaysAgo);
+  // A search for "machine learning" should lead with ML titles, not jobs that only list it as a skill.
+  const titleHit = new Map(out.map((j) => [j.id, tokens.length > 0 && tokens.every((tok) => fold(j.title).includes(tok)) ? 1 : 0]));
+  const byTitle = (a: T, b: T) => titleHit.get(b.id)! - titleHit.get(a.id)!;
+  if (f.sort === "newest") return out.sort((a, b) => byTitle(a, b) || a.postedDaysAgo - b.postedDaysAgo);
   const score = new Map(out.map((j) => [j.id, matchJob(j).score]));
-  return out.sort((a, b) => score.get(b.id)! - score.get(a.id)! || a.postedDaysAgo - b.postedDaysAgo);
+  return out.sort((a, b) => byTitle(a, b) || score.get(b.id)! - score.get(a.id)! || a.postedDaysAgo - b.postedDaysAgo);
 }
 
 export function parseFilters(sp: URLSearchParams): Filters {
