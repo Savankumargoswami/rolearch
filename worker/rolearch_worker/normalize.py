@@ -1,0 +1,96 @@
+"""RawJob -> the job record Rolearch stores and shows."""
+
+from __future__ import annotations
+
+import hashlib
+import re
+import unicodedata
+from datetime import datetime, timezone
+
+from .geo import COUNTRIES, CITIES, parse_location
+from .models import Company, RawJob
+from .text import clean_title, extract_skills, in_launch_field, level_of, summarize, visa_offered, years_required
+
+SOURCE_LABEL = {
+    "greenhouse": "Greenhouse", "lever": "Lever", "lever-eu": "Lever", "ashby": "Ashby", "workable": "Workable",
+    "smartrecruiters": "SmartRecruiters", "recruitee": "Recruitee", "personio": "Personio", "jsonld": "Careers page",
+}
+
+
+def slug(s: str, n: int = 40) -> str:
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    s = re.sub(r"[^a-zA-Z0-9]+", "-", s).strip("-").lower()
+    return s[:n].rstrip("-") or "job"
+
+
+def job_id(company: Company, raw: RawJob) -> str:
+    """Stable and readable: same posting -> same id on every run."""
+    h = hashlib.sha1(f"{company.key}:{raw.external_id}".encode()).hexdigest()[:8]
+    return f"{slug(company.name, 24)}-{slug(raw.title, 48)}-{h}"
+
+
+def dedupe_key(company: Company, title: str, place: str) -> str:
+    return hashlib.sha1(f"{company.name.lower()}|{title.lower()}|{place.lower()}".encode()).hexdigest()
+
+
+def normalize(company: Company, raw: RawJob, now: datetime | None = None) -> dict | None:
+    if not raw.title or not raw.job_url:
+        return None
+    title = clean_title(raw.title, company.name)
+    now = now or datetime.now(timezone.utc)
+    place = parse_location(raw.location_text, default_country=company.country)
+    country = raw.country_hint if raw.country_hint in COUNTRIES else place.country
+    city = raw.city_hint or place.city
+    lat, lon = place.lat, place.lon
+    if city and (lat is None) and city.lower() in CITIES and CITIES[city.lower()][0] == country:
+        _, lat, lon = CITIES[city.lower()]
+
+    workplace = raw.workplace_hint or ("remote" if place.remote else "onsite")
+    remote = workplace == "remote"
+    country_name = COUNTRIES[country][0] if country in COUNTRIES else None
+    region = COUNTRIES[country][1] if country in COUNTRIES else "global"
+    if remote:
+        display_city, display_country = "Remote", country_name or "Worldwide"
+        if not country_name:
+            region = "global"
+    else:
+        display_city = (city or country_name or "").strip()
+        display_country = country_name or ""
+
+    text = f"{title}\n{raw.description}"
+    posted = raw.posted_at or now
+    days = max(0, (now - posted).days)
+    salary = raw.salary
+    return {
+        "id": job_id(company, raw),
+        "dedupeKey": dedupe_key(company, title, f"{display_city}|{display_country}"),
+        "companyKey": company.key,
+        "title": title,
+        "company": company.name,
+        "city": display_city,
+        "country": display_country,
+        "countryCode": country,
+        "region": region,
+        "workplace": workplace,
+        "visa": visa_offered(raw.description),
+        "salary": (
+            {"min": round(salary.min), "max": round(salary.max), "currency": salary.currency.upper(), "period": salary.period}
+            if salary and salary.min and salary.max and salary.max >= salary.min
+            else None
+        ),
+        "level": level_of(title),
+        "years": years_required(raw.description),
+        "skills": extract_skills(text),
+        "nice": [],
+        "postedAt": posted.isoformat(),
+        "postedDaysAgo": days,
+        "source": SOURCE_LABEL.get(company.ats, company.ats),
+        "summary": summarize(raw.description),
+        "duties": [],
+        "jobUrl": raw.job_url,
+        "applyUrl": raw.apply_url or raw.job_url,
+        "department": raw.department,
+        "lat": lat,
+        "lon": lon,
+        "launchField": in_launch_field(title),
+    }

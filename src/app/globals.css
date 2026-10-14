@@ -1,0 +1,246 @@
+@import "tailwindcss";
+
+/*
+  Atlas palette, matched to the logo kit (ink #0E1F2F, amber #E0A35B).
+  paper (ground), surface (raised), ink (text + primary), muted (secondary text),
+  line (rules), signal = the logo's amber dot (graphics only: 2.0:1 on paper).
+  signal-ink is the amber for text on light grounds (5.2:1).
+*/
+@theme {
+  --color-paper: #f4f5f1;
+  --color-surface: #ffffff;
+  --color-ink: #0e1f2f;
+  --color-ink-hover: #1d3247;
+  --color-muted: #4b5a6e;
+  --color-line: #d9ddd4;
+  --color-signal: #e0a35b;
+  --color-signal-ink: #8f5b12;
+  --color-ink-soft: #e6e9ee;
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: light;
+  --duration-exit: 150ms;
+  --duration-enter: 220ms;
+  --duration-move: 380ms;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+/* Focus: ink ring on light grounds (15:1), amber ring on the ink band (7.6:1). */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+.bg-ink :focus-visible {
+  outline-color: var(--color-signal);
+}
+
+/* ---------- One-time hero entrance (the page's single orchestrated moment) ---------- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pin-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: var(--len, 600);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.rise {
+  animation: rise 700ms var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+.pin-in {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pin-in 520ms var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+.draw {
+  stroke-dasharray: var(--len, 600);
+  animation: draw 1400ms var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* Map pins are drawn in a 1200-wide viewBox; on phones that shrinks them to specks. */
+@media (max-width: 767px) {
+  .pin-dot {
+    r: 11px;
+  }
+  .pin-halo {
+    r: 26px;
+  }
+}
+
+/* Blinking caret for the hero's suggestion typing; removed when typing stops. */
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+.caret {
+  animation: caret 1s steps(1) infinite;
+}
+
+/* ---------- View transitions (React <ViewTransition>) ---------- */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Header stays put during page transitions. */
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* Job title morphs from its row into the detail page. */
+::view-transition-group(.morph) {
+  animation-duration: var(--duration-move);
+  animation-timing-function: var(--ease-out-soft);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: via-blur;
+}
+@keyframes via-blur {
+  30% {
+    filter: blur(2px);
+  }
+}
+
+/* Result rows: moved rows glide, new rows rise in, removed rows fade out fast. */
+::view-transition-group(.row) {
+  animation-duration: var(--duration-move);
+  animation-timing-function: var(--ease-out-soft);
+}
+::view-transition-new(.row-in) {
+  animation:
+    var(--duration-enter) var(--ease-out-soft) var(--duration-exit) both fade-in,
+    var(--duration-move) var(--ease-out-soft) both nudge-up;
+}
+::view-transition-old(.row-out) {
+  animation: var(--duration-exit) ease-in both fade-out;
+}
+
+/* Directional page slides for forward / back links. */
+::view-transition-old(.nav-forward) {
+  --slide: -40px;
+  animation:
+    var(--duration-exit) ease-in both fade-out,
+    var(--duration-move) var(--ease-out-soft) both slide-to;
+}
+::view-transition-new(.nav-forward) {
+  --slide: 40px;
+  animation:
+    var(--duration-enter) ease-out var(--duration-exit) both fade-in,
+    var(--duration-move) var(--ease-out-soft) both slide-from;
+}
+::view-transition-old(.nav-back) {
+  --slide: 40px;
+  animation:
+    var(--duration-exit) ease-in both fade-out,
+    var(--duration-move) var(--ease-out-soft) both slide-to;
+}
+::view-transition-new(.nav-back) {
+  --slide: -40px;
+  animation:
+    var(--duration-enter) ease-out var(--duration-exit) both fade-in,
+    var(--duration-move) var(--ease-out-soft) both slide-from;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes nudge-up {
+  from {
+    transform: translateY(10px);
+  }
+}
+@keyframes slide-from {
+  from {
+    translate: var(--slide) 0;
+  }
+}
+@keyframes slide-to {
+  to {
+    translate: var(--slide) 0;
+  }
+}
+
+/* Reduced motion: keep content swaps, drop movement. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* Horizontally scrolling chip rails: scrollable, no visible scrollbar. */
+.rail {
+  scrollbar-width: none;
+}
+.rail::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": { "builder": "NIXPACKS" },
+  "deploy": {
+    "startCommand": "python -m rolearch_worker run --feed -",
+    "cronSchedule": "0 */6 * * *",
+    "restartPolicyType": "NEVER"
+  }
+}
