@@ -1,55 +1,49 @@
 "use client";
 
+import { MailCheck } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useId, useState } from "react";
+import { useActionState, useId, useState } from "react";
+import { signIn, signUp, type AuthState } from "@/app/auth/actions";
 import { t } from "@/i18n";
 
 type Kind = "seeker" | "company";
-type Errors = Partial<Record<"name" | "email" | "password" | "company" | "website", string>>;
-
-const emailOk = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
-
-function hostOf(url: string): string | null {
-  try {
-    const u = new URL(/^https?:\/\//.test(url) ? url : `https://${url}`);
-    return u.hostname.replace(/^www\./, "");
-  } catch {
-    return null;
-  }
-}
 
 export function AuthForm({ mode }: { mode: "signup" | "signin" }) {
   const params = useSearchParams();
-  return <AuthFormInner mode={mode} initialKind={params.get("as") === "company" ? "company" : "seeker"} />;
+  return (
+    <AuthFormInner
+      mode={mode}
+      initialKind={params.get("as") === "company" ? "company" : "seeker"}
+      linkError={params.get("error") === "link"}
+    />
+  );
 }
 
-export function AuthFormInner({ mode, initialKind }: { mode: "signup" | "signin"; initialKind: Kind }) {
-  const [kind, setKind] = useState<Kind>(initialKind);
-  const [errors, setErrors] = useState<Errors>({});
-  const [done, setDone] = useState(false);
+export function AuthFormInner({ mode, initialKind, linkError = false }: { mode: "signup" | "signin"; initialKind: Kind; linkError?: boolean }) {
   const signup = mode === "signup";
+  const [kind, setKind] = useState<Kind>(initialKind);
+  const [state, action, pending] = useActionState<AuthState, FormData>(signup ? signUp : signIn, {});
+  const errors = state.errors ?? {};
+  const v = state.values ?? {};
 
-  function validate(form: FormData): Errors {
-    const e: Errors = {};
-    const get = (k: string) => String(form.get(k) ?? "").trim();
-    if (signup && kind === "seeker" && !get("name")) e.name = t("auth.errName");
-    if (signup && kind === "company") {
-      if (!get("company")) e.company = t("auth.errCompany");
-      const host = hostOf(get("website"));
-      if (!host || !host.includes(".")) e.website = t("auth.errWebsite");
-      const email = get("email");
-      if (!emailOk(email)) e.email = t("auth.errEmail");
-      else if (host && !email.toLowerCase().endsWith(`@${host}`)) e.email = t("auth.errDomain", { d: host });
-    } else if (!emailOk(get("email"))) e.email = t("auth.errEmail");
-    if (get("password").length < 10) e.password = t("auth.errPassword");
-    return e;
+  if (state.sent) {
+    return (
+      <div className="w-full max-w-md" role="status">
+        <MailCheck aria-hidden="true" className="size-10 text-ink" strokeWidth={1.5} />
+        <h1 className="mt-4 font-display text-4xl font-semibold tracking-[-0.03em]">{t("auth.checkTitle")}</h1>
+        <p className="mt-3 text-lg text-pretty">{t("auth.checkBody", { email: state.sent })}</p>
+        <p className="mt-3 text-muted">{t("auth.checkHint")}</p>
+        <Link href="/signin" className="mt-8 inline-flex min-h-12 items-center rounded-full border border-ink px-6 font-medium transition-colors duration-200 hover:bg-ink hover:text-paper">
+          {t("auth.goSignIn")}
+        </Link>
+      </div>
+    );
   }
 
   return (
     <div className="w-full max-w-md">
       <h1 className="font-display text-4xl font-semibold tracking-[-0.03em]">{signup ? t("auth.signUpTitle") : t("auth.signInTitle")}</h1>
-      <p className="mt-3 rounded-xl bg-ink-soft px-4 py-3 text-sm">{t("auth.preview")}</p>
 
       {signup && (
         <div role="tablist" aria-label="Account type" className="mt-6 grid grid-cols-2 gap-1 rounded-full bg-ink-soft p-1">
@@ -59,11 +53,7 @@ export function AuthFormInner({ mode, initialKind }: { mode: "signup" | "signin"
               type="button"
               role="tab"
               aria-selected={kind === k}
-              onClick={() => {
-                setKind(k);
-                setErrors({});
-                setDone(false);
-              }}
+              onClick={() => setKind(k)}
               className={`min-h-11 cursor-pointer rounded-full text-[0.95rem] font-medium transition-[background-color,color,box-shadow] duration-200 ${
                 kind === k ? "bg-surface text-ink shadow-[0_1px_2px_rgba(14,31,47,0.15)]" : "text-muted hover:text-ink"
               }`}
@@ -74,41 +64,19 @@ export function AuthFormInner({ mode, initialKind }: { mode: "signup" | "signin"
         </div>
       )}
 
-      {kind === "seeker" && (
-        <>
-          <div className="mt-6 grid gap-2 sm:grid-cols-2">
-            <button type="button" className="min-h-12 cursor-pointer rounded-full border border-line bg-surface font-medium transition-colors duration-200 hover:border-ink">
-              {t("auth.google")}
-            </button>
-            <button type="button" className="min-h-12 cursor-pointer rounded-full border border-line bg-surface font-medium transition-colors duration-200 hover:border-ink">
-              {t("auth.github")}
-            </button>
-          </div>
-          <div className="my-5 flex items-center gap-3 text-sm text-muted">
-            <span className="h-px flex-1 bg-line" />
-            {t("auth.or")}
-            <span className="h-px flex-1 bg-line" />
-          </div>
-        </>
+      {(state.message || linkError) && (
+        <p role="alert" className="mt-5 rounded-xl border border-signal-ink/30 bg-[#fbf3e7] px-4 py-3 text-[0.95rem]">
+          {state.message ?? t("auth.errLink")}
+        </p>
       )}
 
-      <form
-        noValidate
-        className={`flex flex-col gap-4 ${kind === "company" ? "mt-6" : ""}`}
-        onSubmit={(e) => {
-          e.preventDefault();
-          const errs = validate(new FormData(e.currentTarget));
-          setErrors(errs);
-          setDone(Object.keys(errs).length === 0);
-          const first = Object.keys(errs)[0];
-          if (first) (e.currentTarget.elements.namedItem(first) as HTMLElement | null)?.focus();
-        }}
-      >
-        {signup && kind === "seeker" && <Field name="name" label={t("auth.name")} autoComplete="name" error={errors.name} />}
+      <form action={action} noValidate className="mt-6 flex flex-col gap-4">
+        <input type="hidden" name="kind" value={signup ? kind : "seeker"} />
+        {signup && <Field name="name" label={t("auth.name")} autoComplete="name" defaultValue={v.name} error={errors.name} />}
         {signup && kind === "company" && (
           <>
-            <Field name="company" label={t("auth.companyName")} autoComplete="organization" error={errors.company} />
-            <Field name="website" label={t("auth.website")} type="url" inputMode="url" placeholder="https://" error={errors.website} />
+            <Field name="company" label={t("auth.companyName")} autoComplete="organization" defaultValue={v.company} error={errors.company} />
+            <Field name="website" label={t("auth.website")} type="url" inputMode="url" placeholder="https://" defaultValue={v.website} error={errors.website} />
           </>
         )}
         <Field
@@ -117,6 +85,7 @@ export function AuthFormInner({ mode, initialKind }: { mode: "signup" | "signin"
           type="email"
           inputMode="email"
           autoComplete="email"
+          defaultValue={v.email}
           hint={signup && kind === "company" ? t("auth.workEmailHint") : undefined}
           error={errors.email}
         />
@@ -128,12 +97,13 @@ export function AuthFormInner({ mode, initialKind }: { mode: "signup" | "signin"
           hint={signup ? t("auth.passwordHint") : undefined}
           error={errors.password}
         />
-        <button type="submit" className="mt-2 min-h-12 cursor-pointer rounded-full bg-ink font-medium text-paper transition-colors duration-200 hover:bg-ink-hover">
-          {!signup ? t("auth.submitSignIn") : kind === "company" ? t("auth.submitCompany") : t("auth.submitSeeker")}
+        <button
+          type="submit"
+          disabled={pending}
+          className="mt-2 min-h-12 cursor-pointer rounded-full bg-ink font-medium text-paper transition-colors duration-200 hover:bg-ink-hover disabled:cursor-wait disabled:opacity-70"
+        >
+          {pending ? t("auth.working") : !signup ? t("auth.submitSignIn") : kind === "company" ? t("auth.submitCompany") : t("auth.submitSeeker")}
         </button>
-        <p role="status" className={`text-sm ${done ? "text-ink" : "sr-only"}`}>
-          {done ? t("auth.done") : ""}
-        </p>
       </form>
 
       {signup && <p className="mt-4 text-sm text-muted">{t("auth.terms")}</p>}
