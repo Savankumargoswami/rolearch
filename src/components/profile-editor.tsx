@@ -1,9 +1,10 @@
 "use client";
 
-import { FileUp, Plus, Trash2 } from "lucide-react";
+import { Camera, FileUp, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useId, useRef, useState, useTransition } from "react";
-import { readResumeAction, saveProfile } from "@/app/account/profile/actions";
+import { readResumeAction, removePhoto, saveProfile, uploadPhoto } from "@/app/account/profile/actions";
+import { Avatar } from "@/components/avatar";
 import { t } from "@/i18n";
 import type { ProfileData } from "@/lib/profile-schema";
 
@@ -50,12 +51,15 @@ const blank = {
   link: () => ({ label: "", url: "" }),
 };
 
-export function ProfileEditor({ initial, readerEnabled }: { initial: ProfileData; readerEnabled: boolean }) {
+export function ProfileEditor({ initial, initialPhoto, readerEnabled }: { initial: ProfileData; initialPhoto: string; readerEnabled: boolean }) {
   const [form, setForm] = useState<FormState>(() => toForm(initial));
   const [status, setStatus] = useState<{ kind: "ok" | "error" | "info"; text: string } | null>(null);
   const [reading, startReading] = useTransition();
   const [saving, startSaving] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [photo, setPhoto] = useState(initialPhoto);
+  const [photoBusy, startPhoto] = useTransition();
+  const photoRef = useRef<HTMLInputElement>(null);
 
   const r = form.resume;
   const setResume = (patch: Partial<FormState["resume"]>) => setForm((f) => ({ ...f, resume: { ...f.resume, ...patch } }));
@@ -87,6 +91,26 @@ export function ProfileEditor({ initial, readerEnabled }: { initial: ProfileData
         setForm((f) => toForm({ ...draft, full_name: draft.full_name || f.full_name }));
         setStatus({ kind: "ok", text: t("profile.drafted") });
       } else setStatus({ kind: "error", text: res.message ?? t("profile.errUnreadable") });
+    });
+  }
+
+  function pickPhoto(file: File | undefined) {
+    if (!file) return;
+    const data = new FormData();
+    data.set("photo", file);
+    startPhoto(async () => {
+      const res = await uploadPhoto(data);
+      if (res.ok) setPhoto(res.url);
+      setStatus(res.ok ? { kind: "ok", text: t("profile.photoSaved") } : { kind: "error", text: res.message });
+      if (photoRef.current) photoRef.current.value = "";
+    });
+  }
+
+  function dropPhoto() {
+    startPhoto(async () => {
+      const res = await removePhoto();
+      if (res.ok) setPhoto("");
+      setStatus(res.ok ? { kind: "ok", text: t("profile.photoRemoved") } : { kind: "error", text: res.message });
     });
   }
 
@@ -127,6 +151,34 @@ export function ProfileEditor({ initial, readerEnabled }: { initial: ProfileData
       </section>
 
       <Section title={t("profile.basics")}>
+        <div className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 sm:flex-row sm:items-center sm:gap-6">
+          <div className={`transition-opacity duration-200 ${photoBusy ? "opacity-50" : ""}`}>
+            <Avatar url={photo} name={form.full_name || "?"} size={112} className="ring-4 ring-signal ring-offset-4 ring-offset-surface" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-display text-lg font-semibold">{t("profile.photo")}</p>
+            <p className="mt-1 max-w-[46ch] text-sm text-muted">{t("profile.photoHint")}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <label className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink ${photoBusy ? "pointer-events-none opacity-60" : ""}`}>
+                <Camera aria-hidden="true" className="size-4" />
+                {photoBusy ? t("profile.photoUploading") : photo ? t("profile.photoChange") : t("profile.photoAdd")}
+                <input
+                  ref={photoRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  disabled={photoBusy}
+                  onChange={(e) => pickPhoto(e.target.files?.[0])}
+                  className="sr-only"
+                />
+              </label>
+              {photo && (
+                <button type="button" onClick={dropPhoto} disabled={photoBusy} className="min-h-11 cursor-pointer rounded-full px-4 font-medium text-muted hover:bg-ink-soft hover:text-ink disabled:opacity-60">
+                  {t("profile.photoRemove")}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Text label={t("auth.name")} value={form.full_name} onChange={(v) => setForm({ ...form, full_name: v })} autoComplete="name" />
           <Text label={t("profile.location")} value={form.location} onChange={(v) => setForm({ ...form, location: v })} placeholder="Berlin, Germany" />

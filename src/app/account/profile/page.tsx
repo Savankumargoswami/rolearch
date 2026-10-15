@@ -26,6 +26,6 @@ export default function EditProfilePage() {
 }
 
 async function Editor() {
-  const { profile } = await loadAccount();
-  return <ProfileEditor initial={profile} readerEnabled={resumeReaderEnabled} />;
+  const { profile, avatarUrl } = await loadAccount();
+  return <ProfileEditor initial={profile} initialPhoto={avatarUrl} readerEnabled={resumeReaderEnabled} />;
 }

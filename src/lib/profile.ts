@@ -9,6 +9,7 @@ export type AccountProfile = {
   companyName: string;
   website: string;
   companyDomainMatches: boolean;
+  avatarUrl: string;
   profile: ProfileData;
 };
 
@@ -22,7 +23,7 @@ export async function loadAccount(): Promise<AccountProfile> {
 
   const { data } = await supabase
     .from("profiles")
-    .select("account_type, full_name, company_name, website, company_domain_matches, headline, location, status, links, resume")
+    .select("account_type, full_name, company_name, website, company_domain_matches, headline, location, status, links, resume, avatar_url")
     .eq("id", user.id)
     .single();
 
@@ -32,6 +33,7 @@ export async function loadAccount(): Promise<AccountProfile> {
     companyName: data?.company_name ?? "",
     website: data?.website ?? "",
     companyDomainMatches: Boolean(data?.company_domain_matches),
+    avatarUrl: data?.avatar_url ?? "",
     profile: withDefaults({
       full_name: data?.full_name ?? "",
       headline: data?.headline ?? "",

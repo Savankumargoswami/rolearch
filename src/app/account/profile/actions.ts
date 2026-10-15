@@ -71,3 +71,44 @@ export async function readResumeAction(_: ReadState, form: FormData): Promise<Re
   }
   return { draft: result.draft };
 }
+
+const PHOTO_MAX_BYTES = 2 * 1024 * 1024;
+const PHOTO_TYPES = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" } as const;
+
+export type PhotoResult = { ok: true; url: string } | { ok: false; message: string };
+
+/** Uploads a profile photo to the public avatars bucket and removes the person's older photos. */
+export async function uploadPhoto(form: FormData): Promise<PhotoResult> {
+  const { supabase, user } = await currentUser();
+  if (!user) return { ok: false, message: t("profile.errSignedOut") };
+  const file = form.get("photo");
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: t("profile.errNoFile") };
+  if (file.size > PHOTO_MAX_BYTES) return { ok: false, message: t("profile.errPhotoTooBig") };
+  const ext = PHOTO_TYPES[file.type as keyof typeof PHOTO_TYPES];
+  if (!ext) return { ok: false, message: t("profile.errPhotoType") };
+
+  // A new file name each time, so browsers and the image cache never show the old photo.
+  const path = `${user.id}/photo-${Date.now()}.${ext}`;
+  const { error } = await supabase.storage.from("avatars").upload(path, Buffer.from(await file.arrayBuffer()), { contentType: file.type });
+  if (error) return { ok: false, message: t("profile.errPhoto") };
+  const url = supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+  const { error: saveError } = await supabase.from("profiles").update({ avatar_url: url, updated_at: new Date().toISOString() }).eq("id", user.id);
+  if (saveError) return { ok: false, message: t("profile.errPhoto") };
+  await removeOldPhotos(supabase, user.id, path);
+  return { ok: true, url };
+}
+
+export async function removePhoto(): Promise<PhotoResult> {
+  const { supabase, user } = await currentUser();
+  if (!user) return { ok: false, message: t("profile.errSignedOut") };
+  const { error } = await supabase.from("profiles").update({ avatar_url: "", updated_at: new Date().toISOString() }).eq("id", user.id);
+  if (error) return { ok: false, message: t("profile.errPhoto") };
+  await removeOldPhotos(supabase, user.id);
+  return { ok: true, url: "" };
+}
+
+async function removeOldPhotos(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, keep?: string) {
+  const { data } = await supabase.storage.from("avatars").list(userId);
+  const old = (data ?? []).map((f) => `${userId}/${f.name}`).filter((p) => p !== keep);
+  if (old.length) await supabase.storage.from("avatars").remove(old);
+}

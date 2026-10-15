@@ -84,7 +84,8 @@ async function fromSupabase(): Promise<JobFeed | null> {
   for (let from = 0; ; from += PAGE) {
     const res = await fetch(
       `${URL}/rest/v1/jobs?select=${COLUMNS}&status=eq.open&launch_field=eq.true&order=posted_at.desc.nullslast,id`,
-      { headers: { apikey: KEY, "Range-Unit": "items", Range: `${from}-${from + PAGE - 1}` } },
+      // getJobFeed's "use cache" already caches the result; a second fetch-level cache only risks a stale or broken copy.
+      { headers: { apikey: KEY, "Range-Unit": "items", Range: `${from}-${from + PAGE - 1}` }, cache: "no-store" },
     );
     if (!res.ok) throw new Error(`Supabase jobs request failed: ${res.status} ${await res.text()}`);
     const page = (await res.json()) as Row[];
