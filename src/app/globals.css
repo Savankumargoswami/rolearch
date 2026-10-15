@@ -101,6 +101,24 @@ body {
   animation-delay: var(--delay, 0ms);
 }
 
+/* Bars that fill in from the start edge (skill bars, career timeline). */
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: none;
+  }
+}
+.grow-x {
+  transform-origin: left center;
+  animation: grow-x 900ms var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+[dir="rtl"] .grow-x {
+  transform-origin: right center;
+}
+
 /* Map pins are drawn in a 1200-wide viewBox; on phones that shrinks them to specks. */
 @media (max-width: 767px) {
   .pin-dot {

@@ -30,8 +30,13 @@ export async function HeaderAccount() {
   } = await supabase.auth.getUser();
   if (!user) return <GuestLinks />;
   return (
-    <Link href="/account" className={buttonClass}>
-      {t("auth.account")}
-    </Link>
+    <>
+      <Link href="/feed" className="whitespace-nowrap rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft">
+        {t("nav.posts")}
+      </Link>
+      <Link href="/account" className={buttonClass}>
+        {t("auth.account")}
+      </Link>
+    </>
   );
 }

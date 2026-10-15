@@ -8,11 +8,16 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   images: {
-    remotePatterns: supabaseHost ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/avatars/**" }] : [],
+    remotePatterns: supabaseHost
+      ? [
+          { protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/avatars/**" },
+          { protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/post-images/**" },
+        ]
+      : [],
   },
   experimental: {
-    // Resume uploads go through a Server Action: 5 MB file plus multipart overhead.
-    serverActions: { bodySizeLimit: "6mb" },
+    // Uploads go through Server Actions: a 5 MB resume, or a post with up to four 2 MB images, plus multipart overhead.
+    serverActions: { bodySizeLimit: "9mb" },
   },
   turbopack: {
     rules: {
