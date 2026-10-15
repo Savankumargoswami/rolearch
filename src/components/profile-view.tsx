@@ -5,16 +5,13 @@ import { Avatar } from "@/components/avatar";
 import { FollowButton } from "@/components/follow-button";
 import { PostComposer } from "@/components/post-composer";
 import { PostList } from "@/components/post-card";
+import { ResumeView } from "@/components/resume-view";
 import { t } from "@/i18n";
 import { expertiseOf, formatMonths, totalMonths } from "@/lib/expertise";
 import type { AccountProfile } from "@/lib/profile";
 import type { ProfileData } from "@/lib/profile-schema";
 import type { Post, Social } from "@/lib/social";
 
-const fmtMonth = (ym: string) => {
-  const m = /^(\d{4})-(\d{2})$/.exec(ym);
-  return m ? new Intl.DateTimeFormat("en", { month: "short", year: "numeric", timeZone: "UTC" }).format(Date.UTC(+m[1], +m[2] - 1)) : ym;
-};
 const toMonth = (ym: string) => {
   const m = /^(\d{4})-(\d{2})$/.exec(ym);
   return m ? Number(m[1]) * 12 + Number(m[2]) - 1 : null;
@@ -39,8 +36,8 @@ export function ProfileView({ account, mode, social, posts, viewerId, canPost = 
   const hasResume = r.experience.length + r.education.length + r.projects.length + r.certifications.length + r.skills.length > 0;
   const expertise = expertiseOf(p);
   const fromRoles = expertise.filter((e) => e.source === "experience");
-  const bars = fromRoles.slice(0, 8);
-  const projectSkills = expertise.filter((e) => e.source === "projects").slice(0, 12);
+  const top = fromRoles.slice(0, 3);
+  const more = expertise.filter((e) => !top.includes(e)).slice(0, 10);
   const years = totalMonths(p);
 
   const now = r.experience.find((e) => e.current) ?? r.experience[0];
@@ -160,37 +157,30 @@ export function ProfileView({ account, mode, social, posts, viewerId, canPost = 
         </Link>
       )}
 
-      {bars.length > 0 && (
+      {top.length > 0 && (
         <section aria-labelledby="expertise-h" className="mt-10">
           <h2 id="expertise-h" className="font-display text-2xl font-semibold tracking-[-0.02em]">
             {t("profile.expertise")}
           </h2>
           <p className="text-sm text-muted">{t("profile.expertiseHint")}</p>
-          <ul className="mt-5 flex flex-col gap-3 rounded-2xl border border-line bg-surface p-5 sm:p-6">
-            {bars.map((e, i) => (
-              <li key={e.skill} className="grid grid-cols-[minmax(0,7rem)_1fr_auto] items-center gap-3 sm:grid-cols-[10rem_1fr_6.5rem]">
-                <span className="truncate font-medium" title={e.skill}>
-                  {e.skill}
-                </span>
-                <span className="h-3 overflow-hidden rounded-full bg-ink-soft">
-                  <span
-                    className="grow-x block h-full rounded-full bg-gradient-to-r from-ink to-[#3b6ea5]"
-                    style={{ width: `${Math.max(6, (e.months / bars[0].months) * 100)}%`, "--delay": `${150 + i * 70}ms` } as React.CSSProperties}
-                  />
-                </span>
-                <span className="text-end text-sm tabular-nums text-muted">{formatMonths(e.months)}</span>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+            {top.map((e) => (
+              <li key={e.skill} className="relative overflow-hidden rounded-2xl border border-line bg-surface p-5">
+                <span aria-hidden="true" className="absolute inset-y-0 start-0 w-1 bg-signal" />
+                <span className="block font-display text-2xl font-semibold whitespace-nowrap tabular-nums tracking-[-0.02em] md:text-3xl">{formatMonths(e.months)}</span>
+                <span className="mt-1 block font-medium">{e.skill}</span>
               </li>
             ))}
           </ul>
-          {projectSkills.length > 0 && (
-            <p className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-muted">{t("profile.alsoFromProjects")}</span>
-              {projectSkills.map((e) => (
-                <span key={e.skill} className="rounded-full border border-line bg-surface px-3 py-1">
-                  {e.skill}
-                </span>
+          {more.length > 0 && (
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {more.map((e) => (
+                <li key={e.skill} className="rounded-full border border-line bg-surface px-3 py-1.5 text-sm">
+                  <span className="font-medium">{e.skill}</span>
+                  <span className="text-muted"> · {e.source === "projects" ? t("profile.fromProjects") : formatMonths(e.months)}</span>
+                </li>
               ))}
-            </p>
+            </ul>
           )}
         </section>
       )}
@@ -212,92 +202,7 @@ export function ProfileView({ account, mode, social, posts, viewerId, canPost = 
         </div>
       </section>
 
-      {hasResume && (
-        <article aria-label={t("profile.resumeLabel")} className="mt-10 rounded-sm border border-line bg-surface p-6 sm:p-10">
-          <div className="grid gap-8 md:grid-cols-[1fr_15rem]">
-            <div className="min-w-0">
-              {r.experience.length > 0 && (
-                <ResumeSection title={t("profile.experience")}>
-                  {r.experience.map((e, i) => (
-                    <div key={i} className="mb-5">
-                      <div className="flex flex-wrap justify-between gap-x-4">
-                        <p>
-                          <strong>{e.title}</strong>
-                          {e.company && <span>, {e.company}</span>}
-                        </p>
-                        <p className="text-sm tabular-nums text-muted">
-                          {[fmtMonth(e.start), e.current ? t("profile.present") : fmtMonth(e.end)].filter(Boolean).join(" – ")}
-                        </p>
-                      </div>
-                      {e.location && <p className="text-sm text-muted">{e.location}</p>}
-                      {e.bullets.length > 0 && (
-                        <ul className="mt-1.5 list-disc space-y-1 ps-5 marker:text-muted">
-                          {e.bullets.map((b, j) => (
-                            <li key={j}>{b}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  ))}
-                </ResumeSection>
-              )}
-              {r.projects.length > 0 && (
-                <ResumeSection title={t("profile.projects")}>
-                  {r.projects.map((pr, i) => (
-                    <div key={i} className="mb-4">
-                      <p>
-                        <strong>{pr.name}</strong>
-                        {pr.url && (
-                          <a href={pr.url} target="_blank" rel="noopener noreferrer" className="ms-2 text-sm underline decoration-line underline-offset-4">
-                            {t("profile.link")}
-                          </a>
-                        )}
-                      </p>
-                      {pr.summary && <p>{pr.summary}</p>}
-                      {pr.skills.length > 0 && <p className="text-sm text-muted">{pr.skills.join(", ")}</p>}
-                    </div>
-                  ))}
-                </ResumeSection>
-              )}
-            </div>
-            <div className="min-w-0">
-              {r.skills.length > 0 && (
-                <ResumeSection title={t("profile.skills")}>
-                  <p className="leading-relaxed">{r.skills.join(", ")}</p>
-                </ResumeSection>
-              )}
-              {r.certifications.length > 0 && (
-                <ResumeSection title={t("profile.certifications")}>
-                  {r.certifications.map((c, i) => (
-                    <div key={i} className="mb-3">
-                      <p className="font-medium">
-                        {c.url ? (
-                          <a href={c.url} target="_blank" rel="noopener noreferrer" className="underline decoration-line underline-offset-4">
-                            {c.name}
-                          </a>
-                        ) : (
-                          c.name
-                        )}
-                      </p>
-                      <p className="text-sm text-muted">{[c.issuer, fmtMonth(c.issued)].filter(Boolean).join(" · ")}</p>
-                    </div>
-                  ))}
-                </ResumeSection>
-              )}
-              {r.education.length > 0 && (
-                <ResumeSection title={t("profile.education")}>
-                  {r.education.map((e, i) => (
-                    <div key={i} className="mb-3">
-                      <p className="font-medium">{[e.degree, e.field].filter(Boolean).join(", ")}</p>
-                      <p className="text-sm text-muted">{[e.school, [e.start, e.end].filter(Boolean).join("–")].filter(Boolean).join(" · ")}</p>
-                    </div>
-                  ))}
-                </ResumeSection>
-              )}
-            </div>
-          </div>
-        </article>
-      )}
+      {hasResume && <ResumeView resume={r} />}
 
       {own && (
         <>
@@ -388,15 +293,6 @@ function Stat({ label, children }: { label: string; children: React.ReactNode })
       <dt className="text-xs font-semibold tracking-[0.12em] text-[#c9d2de] uppercase">{label}</dt>
       <dd className="mt-1">{children}</dd>
     </div>
-  );
-}
-
-function ResumeSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-6">
-      <h3 className="mb-3 border-b border-ink pb-1 text-sm font-semibold tracking-wide text-signal-ink">{title}</h3>
-      {children}
-    </section>
   );
 }
 
