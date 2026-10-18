@@ -96,7 +96,7 @@ class PostgresStore:
 
     COLS = (
         "id company_key dedupe_key title company city country country_code region workplace visa salary_min salary_max "
-        "salary_currency salary_period level years skills summary department job_url apply_url source launch_field lat lon posted_at"
+        "salary_currency salary_period level years skills summary department job_url apply_url source launch_field lat lon posted_at description"
     ).split()
 
     def __init__(self, dsn: str) -> None:
@@ -133,7 +133,7 @@ class PostgresStore:
                 j["region"], j["workplace"], j["visa"],
                 (j["salary"] or {}).get("min"), (j["salary"] or {}).get("max"), (j["salary"] or {}).get("currency"),
                 (j["salary"] or {}).get("period"), j["level"], j["years"], j["skills"], j["summary"], j["department"],
-                j["jobUrl"], j["applyUrl"], j["source"], j["launchField"], j["lat"], j["lon"], j["postedAt"],
+                j["jobUrl"], j["applyUrl"], j["source"], j["launchField"], j["lat"], j["lon"], j["postedAt"], j.get("description", ""),
             )
             for j in jobs
         ]

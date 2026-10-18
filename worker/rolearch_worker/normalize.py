@@ -86,6 +86,8 @@ def normalize(company: Company, raw: RawJob, now: datetime | None = None) -> dic
         "postedDaysAgo": days,
         "source": SOURCE_LABEL.get(company.ats, company.ats),
         "summary": summarize(raw.description),
+        # Full text for the ATS check, kept for the launch field only (the jobs the site shows).
+        "description": (raw.description or "")[:20000] if in_launch_field(title) else "",
         "duties": [],
         "jobUrl": raw.job_url,
         "applyUrl": raw.apply_url or raw.job_url,

@@ -106,7 +106,19 @@ export function AuthFormInner({ mode, initialKind, linkError = false }: { mode: 
         </button>
       </form>
 
-      {signup && <p className="mt-4 text-sm text-muted">{t("auth.terms")}</p>}
+      {signup && (
+        <p className="mt-4 text-sm text-muted">
+          {t("auth.termsLead")}{" "}
+          <Link href="/terms" className="font-medium text-ink underline underline-offset-4">
+            {t("footer.terms")}
+          </Link>{" "}
+          {t("auth.termsAnd")}{" "}
+          <Link href="/privacy" className="font-medium text-ink underline underline-offset-4">
+            {t("footer.privacy")}
+          </Link>
+          .
+        </p>
+      )}
       <p className="mt-6 text-[0.95rem]">
         {signup ? t("auth.haveAccount") : t("auth.noAccount")}{" "}
         <Link href={signup ? "/signin" : "/signup"} className="font-medium underline underline-offset-4">

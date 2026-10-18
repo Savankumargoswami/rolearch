@@ -33,7 +33,54 @@ export const learning: Record<string, Resource> = {
   Scala: { course: { name: "Tour of Scala", by: "scala-lang.org", url: "https://docs.scala-lang.org/tour/tour-of-scala.html" }, book: "Programming in Scala (Odersky, Spoon, Venners)" },
   Java: { course: { name: "Learn Java", by: "dev.java", url: "https://dev.java/learn/" }, book: "Effective Java (Bloch)" },
   "Power BI": { course: { name: "Power BI learning paths", by: "Microsoft Learn", url: "https://learn.microsoft.com/training/powerplatform/power-bi" }, book: "Storytelling with Data (Knaflic)" },
+  // Names used by the job matcher's skills dictionary
+  PostgreSQL: { course: { name: "PostgreSQL tutorial", by: "postgresql.org", url: "https://www.postgresql.org/docs/current/tutorial.html" }, book: "PostgreSQL: Up and Running (Obe, Hsu)" },
+  Pandas: { course: { name: "Pandas", by: "Kaggle Learn", url: "https://www.kaggle.com/learn/pandas" }, book: "Python for Data Analysis (McKinney), free online" },
+  NumPy: { course: { name: "Learn NumPy", by: "numpy.org", url: "https://numpy.org/learn/" }, book: "Python for Data Analysis (McKinney), free online" },
+  "scikit-learn": { course: { name: "Getting started", by: "scikit-learn.org", url: "https://scikit-learn.org/stable/getting_started.html" }, book: "Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow (Géron)" },
+  "Feature engineering": { course: { name: "Feature Engineering", by: "Kaggle Learn", url: "https://www.kaggle.com/learn/feature-engineering" }, book: "Feature Engineering for Machine Learning (Zheng, Casari)" },
+  "Data visualization": { course: { name: "Data Visualization", by: "Kaggle Learn", url: "https://www.kaggle.com/learn/data-visualization" }, book: "Storytelling with Data (Knaflic)" },
+  Docker: { course: { name: "Get started with Docker", by: "Docker docs", url: "https://docs.docker.com/get-started/" }, book: "Docker Deep Dive (Poulton)" },
+  MongoDB: { course: { name: "MongoDB University", by: "MongoDB", url: "https://learn.mongodb.com/" }, book: "MongoDB: The Definitive Guide (Bradshaw, Brazil, Chodorow)" },
+  Redis: { course: { name: "Redis learning", by: "redis.io", url: "https://redis.io/learn" }, book: "Redis in Action (Carlson)" },
+  Elasticsearch: { course: { name: "Free Elastic training", by: "Elastic", url: "https://www.elastic.co/training/free" }, book: "Elasticsearch in Action (Konda)" },
+  Git: { course: { name: "Pro Git", by: "git-scm.com", url: "https://git-scm.com/book/en/v2" }, book: "Pro Git (Chacon, Straub), free online" },
+  Linux: { course: { name: "Command line for beginners", by: "Ubuntu", url: "https://ubuntu.com/tutorials/command-line-for-beginners" }, book: "The Linux Command Line (Shotts), free online" },
+  Bash: { course: { name: "Command line for beginners", by: "Ubuntu", url: "https://ubuntu.com/tutorials/command-line-for-beginners" }, book: "The Linux Command Line (Shotts), free online" },
+  "CI/CD": { course: { name: "GitHub Actions quickstart", by: "GitHub Docs", url: "https://docs.github.com/en/actions/writing-workflows/quickstart" }, book: "Continuous Delivery (Humble, Farley)" },
+  FastAPI: { course: { name: "FastAPI tutorial", by: "fastapi.tiangolo.com", url: "https://fastapi.tiangolo.com/tutorial/" }, book: "FastAPI (Lubanovic)" },
+  TypeScript: { course: { name: "TypeScript handbook", by: "typescriptlang.org", url: "https://www.typescriptlang.org/docs/handbook/intro.html" }, book: "Effective TypeScript (Vanderkam)" },
+  JavaScript: { course: { name: "The Modern JavaScript Tutorial", by: "javascript.info", url: "https://javascript.info/" }, book: "Eloquent JavaScript (Haverbeke), free online" },
+  Dagster: { course: { name: "Getting started", by: "Dagster docs", url: "https://docs.dagster.io/getting-started" }, book: "Fundamentals of Data Engineering (Reis, Housley)" },
+  MLflow: { course: { name: "MLflow docs", by: "mlflow.org", url: "https://mlflow.org/docs/latest/index.html" }, book: "Designing Machine Learning Systems (Huyen)" },
+  RAG: { course: { name: "Short courses", by: "DeepLearning.AI", url: "https://www.deeplearning.ai/short-courses/" }, book: "AI Engineering (Huyen)" },
+  Hadoop: { course: { name: "Hadoop documentation", by: "Apache Hadoop", url: "https://hadoop.apache.org/docs/stable/" }, book: "Hadoop: The Definitive Guide (White)" },
+  "Data modeling": { course: { name: "dbt Fundamentals", by: "dbt Labs", url: "https://learn.getdbt.com" }, book: "The Data Warehouse Toolkit (Kimball, Ross)" },
+  "Data warehousing": { course: { name: "Hands-On Essentials", by: "Snowflake", url: "https://learn.snowflake.com" }, book: "The Data Warehouse Toolkit (Kimball, Ross)" },
+  "ETL/ELT": { course: { name: "dbt Fundamentals", by: "dbt Labs", url: "https://learn.getdbt.com" }, book: "Fundamentals of Data Engineering (Reis, Housley)" },
 };
+
+export type FreeLink = { label: string; by: string; url: string; kind: "course" | "video" | "docs" };
+
+const q = (s: string) => encodeURIComponent(s);
+
+/**
+ * Free ways to learn a skill: the curated course when we have one, then searches on the big free
+ * platforms (YouTube, freeCodeCamp, edX, Coursera's free-to-audit courses, Udemy's free courses, MIT OCW).
+ */
+export function freeResources(skill: string): { featured: Resource | null; links: FreeLink[] } {
+  const featured = learning[skill] ?? null;
+  const theory = /statistic|machine learning|deep learning|nlp|computer vision|forecasting|a\/b/i.test(skill);
+  const links: FreeLink[] = [
+    { label: `${skill} full course`, by: "YouTube", url: `https://www.youtube.com/results?search_query=${q(`${skill} full course for beginners`)}`, kind: "video" },
+    { label: `${skill} on freeCodeCamp`, by: "freeCodeCamp", url: `https://www.youtube.com/@freecodecamp/search?query=${q(skill)}`, kind: "video" },
+    { label: `${skill} courses`, by: "edX (free to audit)", url: `https://www.edx.org/search?q=${q(skill)}`, kind: "course" },
+    { label: `${skill} courses`, by: "Coursera (free to audit)", url: `https://www.coursera.org/search?query=${q(skill)}`, kind: "course" },
+    { label: `Free ${skill} courses`, by: "Udemy", url: `https://www.udemy.com/courses/search/?price=price-free&q=${q(skill)}`, kind: "course" },
+  ];
+  if (theory) links.push({ label: `${skill} lectures`, by: "MIT OpenCourseWare", url: `https://ocw.mit.edu/search/?q=${q(skill)}`, kind: "course" });
+  return { featured, links };
+}
 
 export function youtubeSearch(skill: string) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent(skill + " tutorial for beginners")}`;

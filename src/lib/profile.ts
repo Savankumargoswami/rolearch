@@ -1,5 +1,7 @@
 import "server-only";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { createClient } from "./supabase/server";
 import { withDefaults, type ProfileData } from "./profile-schema";
 
@@ -56,3 +58,16 @@ export async function loadProfile(id: string): Promise<AccountProfile | null> {
   const { data } = await supabase.from("profiles").select(COLUMNS).eq("id", id).maybeSingle();
   return data ? toAccount(id, "", data) : null;
 }
+
+/** The signed-in member's profile, or null for visitors. Cached per request so page sections can share it. */
+export const loadViewer = cache(async (): Promise<AccountProfile | null> => {
+  const store = await cookies();
+  if (!store.getAll().some((c) => c.name.startsWith("sb-"))) return null;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data } = await supabase.from("profiles").select(COLUMNS).eq("id", user.id).single();
+  return toAccount(user.id, user.email ?? "", data);
+});

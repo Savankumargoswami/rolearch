@@ -134,3 +134,24 @@ export async function getJobFeed(): Promise<JobFeed> {
 export async function getJob(id: string): Promise<Job | undefined> {
   return (await getJobFeed()).jobs.find((j) => j.id === id);
 }
+
+/**
+ * The job's full description as plain text, for matching and the ATS check (pages show the summary
+ * and link to the employer's own posting). Falls back to the summary when there's no full text.
+ */
+export async function getJobText(id: string): Promise<string> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("jobs");
+  const job = await getJob(id);
+  const fallback = job ? [job.summary, ...job.duties].filter(Boolean).join("\n") : "";
+  if (!URL || !KEY) return fallback;
+  try {
+    const res = await fetch(`${URL}/rest/v1/jobs?select=description&id=eq.${encodeURIComponent(id)}`, { headers: { apikey: KEY }, cache: "no-store" });
+    if (!res.ok) return fallback;
+    const [row] = (await res.json()) as { description: string }[];
+    return row?.description || fallback;
+  } catch {
+    return fallback;
+  }
+}
