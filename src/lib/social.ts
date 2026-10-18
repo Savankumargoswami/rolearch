@@ -99,3 +99,24 @@ export async function viewerId(supabase: Supabase): Promise<string | null> {
   } = await supabase.auth.getUser();
   return user?.id ?? null;
 }
+
+export type Person = { id: string; name: string; headline: string; location: string; avatarUrl: string; isCompany: boolean; skills: string[] };
+
+/** Members matching every word of the query, best matches first (name, then headline, then skills). */
+export async function searchPeople(supabase: Supabase, q: string, limit = 20): Promise<Person[]> {
+  if (!q.trim()) return [];
+  const { data, error } = await supabase.rpc("search_profiles", { q: q.slice(0, 100), lim: limit });
+  if (error) {
+    console.error("[search] people failed:", error.message);
+    return [];
+  }
+  return (data as { id: string; full_name: string; company_name: string; headline: string; location: string; avatar_url: string; account_type: string; skills: string[] | null }[]).map((r) => ({
+    id: r.id,
+    name: r.account_type === "company" ? r.company_name || r.full_name : r.full_name || r.company_name,
+    headline: r.headline,
+    location: r.location,
+    avatarUrl: r.avatar_url,
+    isCompany: r.account_type === "company",
+    skills: r.skills ?? [],
+  }));
+}
