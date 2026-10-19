@@ -15,6 +15,7 @@ import { t } from "@/i18n";
 import { place, postedAgo, salaryRange } from "@/lib/format";
 import type { Match, ReqStatus } from "@/lib/match";
 import { loadViewer } from "@/lib/profile";
+import { requireMember } from "@/lib/require-member";
 import { matchProfile } from "@/lib/role-match";
 
 // Pages for current jobs are built ahead; a job added later is rendered on its first visit.
@@ -25,13 +26,15 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Promise<Metadata> {
   const { id } = await params;
+  // Job details are for members, including the page title.
+  if (!(await loadViewer())) return { title: t("jobs.title"), robots: { index: false } };
   const job = await getJob(id);
   if (!job) return {};
   const where = place(job);
   return {
     title: `${job.title} at ${job.company}`,
     description: [job.summary, `${job.company} · ${where}.`, job.salary ? `${salaryRange(job.salary)}.` : ""].filter(Boolean).join(" "),
-    alternates: { canonical: `/jobs/${job.id}` },
+    robots: { index: false },
   };
 }
 
@@ -83,8 +86,17 @@ async function viewerMatch(job: Job): Promise<{ signedIn: boolean; hasProfile: b
   return { signedIn: true, hasProfile, match: matchProfile({ title: job.title, skills: job.skills, years: job.years, description }, p) };
 }
 
-export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
+export default function JobPage({ params }: PageProps<"/jobs/[id]">) {
+  return (
+    <Suspense fallback={<div className="mx-auto h-[70vh] max-w-6xl animate-pulse px-4 pt-10 sm:px-6" aria-hidden="true" />}>
+      <JobBody params={params} />
+    </Suspense>
+  );
+}
+
+async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }) {
   const { id } = await params;
+  await requireMember(`/jobs/${id}`);
   const job = await getJob(id);
   if (!job) notFound();
   const similar = await similarTo(job);

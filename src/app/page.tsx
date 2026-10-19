@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { ViewTransition } from "react";
+import { Suspense, ViewTransition } from "react";
 import { HeroSearch } from "@/components/hero-search";
 import { JobRow } from "@/components/job-row";
 import { MeridianMap } from "@/components/meridian-map";
 import { getJobFeed } from "@/data/db";
+import type { JobLite } from "@/data/types";
 import { m, t } from "@/i18n";
 import { count } from "@/lib/format";
+import { loadViewer } from "@/lib/profile";
 import { filterJobs, emptyFilters } from "@/lib/search";
 
 const quick = [
@@ -67,19 +69,15 @@ export default async function Home() {
               <h2 id="fresh" className="font-display text-3xl font-semibold tracking-[-0.025em] sm:text-4xl">
                 {t("home.freshTitle")}
               </h2>
-              <p className="mt-2 max-w-[60ch] text-muted">{t("home.freshLead", { n: count(feed.jobs.length), k: feed.companies, c: feed.countries })}</p>
+              <p className="mt-2 max-w-[60ch] text-muted">{t("home.freshLead", { n: count(feed.total), k: feed.companies, c: feed.countries })}</p>
             </div>
             <Link href="/jobs" className="rounded-full border border-ink px-4 py-2.5 font-medium transition-colors duration-200 hover:bg-ink hover:text-paper">
               {t("home.seeAll")}
             </Link>
           </div>
-          <ul className="-mx-3 divide-y divide-line sm:-mx-4">
-            {top.map((job) => (
-              <li key={job.id}>
-                <JobRow job={job} />
-              </li>
-            ))}
-          </ul>
+          <Suspense fallback={<JoinToSee n={feed.total} />}>
+            <FreshJobs jobs={top} total={feed.total} />
+          </Suspense>
         </section>
 
         {/* How it works: a real sequence, so it's numbered */}
@@ -150,5 +148,33 @@ export default async function Home() {
         </section>
       </div>
     </ViewTransition>
+  );
+}
+
+/** Members see the newest jobs; visitors see how many are waiting and a sign-up button. */
+async function FreshJobs({ jobs, total }: { jobs: JobLite[]; total: number }) {
+  if (!(await loadViewer())) return <JoinToSee n={total} />;
+  return (
+    <ul className="-mx-3 divide-y divide-line sm:-mx-4">
+      {jobs.map((job) => (
+        <li key={job.id}>
+          <JobRow job={job} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function JoinToSee({ n }: { n: number }) {
+  return (
+    <div className="mt-6 flex flex-col items-start gap-4 rounded-3xl bg-ink p-6 text-paper sm:flex-row sm:items-center sm:justify-between sm:p-8">
+      <div>
+        <p className="font-display text-2xl font-semibold">{t("home.joinTitle", { n: count(n) })}</p>
+        <p className="mt-1 text-[#c9d2de]">{t("home.joinBody")}</p>
+      </div>
+      <Link href="/signup?next=/jobs" className="inline-flex min-h-12 shrink-0 items-center rounded-full bg-signal px-6 font-medium text-ink transition-colors duration-200 hover:bg-[#ebb877]">
+        {t("nav.signUp")}
+      </Link>
+    </div>
   );
 }

@@ -83,7 +83,7 @@ async function Results({ searchParams }: { searchParams: Search }) {
   const me = await viewerId(supabase);
   const [people, found] = await Promise.all([
     me && tab !== "jobs" ? searchPeople(supabase, q, tab === "people" ? 50 : 12) : Promise.resolve([] as Person[]),
-    tab === "people"
+    tab === "people" || !me
       ? Promise.resolve({ jobs: [], total: 0 })
       : searchJobs({ q, cat: "all", where: "anywhere", remote: false, visa: false, pay: false, level: "any", sort: "match" }, 1, tab === "jobs" ? 40 : 6),
   ]);
@@ -106,7 +106,7 @@ async function Results({ searchParams }: { searchParams: Search }) {
         </Link>
         <Link href={href("jobs")} aria-current={tab === "jobs" ? "page" : undefined} className={tabClass(tab === "jobs")}>
           {t("search.tabJobs")}
-          {tab !== "people" && <span className="rounded-full bg-signal/25 px-2 text-xs tabular-nums">{jobs.length}</span>}
+          {tab !== "people" && me && <span className="rounded-full bg-signal/25 px-2 text-xs tabular-nums">{jobs.length}</span>}
         </Link>
       </nav>
 
@@ -157,7 +157,14 @@ async function Results({ searchParams }: { searchParams: Search }) {
               </Link>
             )}
           </div>
-          {shownJobs.length === 0 ? (
+          {!me ? (
+            <p className="mt-4 rounded-2xl border border-dashed border-line px-5 py-6 text-muted">
+              <Link href={`/signup?next=${encodeURIComponent(href("jobs"))}`} className="font-medium text-ink underline underline-offset-4">
+                {t("nav.signUp")}
+              </Link>{" "}
+              {t("search.signUpForJobs")}
+            </p>
+          ) : shownJobs.length === 0 ? (
             <p className="mt-4 rounded-2xl border border-dashed border-line px-5 py-6 text-muted">{t("search.noJobs", { q })}</p>
           ) : (
             <ul className="-mx-3 mt-2 divide-y divide-line sm:-mx-4">

@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { safeNext } from "@/lib/safe-next";
 import { t } from "@/i18n";
 import { authConfigured, createClient } from "@/lib/supabase/server";
 
@@ -73,13 +74,13 @@ export async function signUp(_: AuthState, form: FormData): Promise<AuthState> {
     email,
     password,
     options: {
-      emailRedirectTo: `${await siteOrigin()}/auth/confirm?next=/account`,
+      emailRedirectTo: `${await siteOrigin()}/auth/confirm?next=${encodeURIComponent(safeNext(form.get("next")))}`,
       data: kind === "company" ? { account_type: "company", full_name: name, company_name: company, website } : { account_type: "seeker", full_name: name },
     },
   });
   if (error) return { message: friendly(error.message), values };
   // Email confirmation off: Supabase signs the person in right away.
-  if (data.session) redirect("/account");
+  if (data.session) redirect(safeNext(form.get("next")));
   return { sent: email };
 }
 
@@ -95,7 +96,21 @@ export async function signIn(_: AuthState, form: FormData): Promise<AuthState> {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { message: friendly(error.message), values: { email } };
-  redirect("/account");
+  redirect(safeNext(form.get("next")));
+}
+
+/** "Continue with Google / GitHub": sends the person to the provider, then back through /auth/confirm. */
+export async function oauthSignIn(form: FormData): Promise<void> {
+  const provider = form.get("provider") === "github" ? "github" : "google";
+  const next = safeNext(form.get("next"));
+  if (!authConfigured) redirect(`/signin?error=oauth`);
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: `${await siteOrigin()}/auth/confirm?next=${encodeURIComponent(next)}` },
+  });
+  if (error || !data.url) redirect(`/signin?error=oauth&next=${encodeURIComponent(next)}`);
+  redirect(data.url);
 }
 
 export async function signOut() {

@@ -8,11 +8,12 @@ import { getJobFeed, jobCategories, searchJobs, type JobQuery } from "@/data/db"
 import { locale, t } from "@/i18n";
 import { isCategory } from "@/lib/categories";
 import { toQueryString } from "@/lib/job-query";
+import { requireMember } from "@/lib/require-member";
 import { whereOptions, type Where } from "@/lib/regions";
 
 export const metadata: Metadata = {
   title: t("jobs.title"),
-  alternates: { canonical: "/jobs" },
+  robots: { index: false },
 };
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
@@ -52,6 +53,7 @@ export default function JobsPage({ searchParams }: { searchParams: Search }) {
 
 async function Results({ searchParams }: { searchParams: Search }) {
   const { filters, page } = parse(await searchParams);
+  await requireMember(`/jobs${toQueryString(filters, page)}`);
   const [{ jobs, total }, cats, feed] = await Promise.all([searchJobs(filters, page, PER_PAGE), jobCategories(), getJobFeed()]);
   const counts = Object.fromEntries(cats.map((c) => [c.category, c.n]));
   const pages = Math.ceil(total / PER_PAGE);
