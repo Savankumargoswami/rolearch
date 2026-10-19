@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Protocol
 
+from .sources import AGGREGATORS
 from .models import Company
 
 DROP_GUARD = 20  # a board that had this many open jobs and suddenly returns 0 is treated as a feed failure
@@ -19,6 +20,8 @@ def _now() -> str:
 
 class Store(Protocol):
     def previous_count(self, company: Company) -> int: ...
+    def hours_since_ok(self, company: Company) -> float | None: ...
+    def described_ids(self, company: Company) -> set[str]: ...
     def known_ids(self, company: Company) -> set[str]: ...
     def save(self, company: Company, jobs: list[dict]) -> tuple[int, int, int]: ...
     def record_error(self, company: Company, error: str) -> None: ...
@@ -33,6 +36,12 @@ class JsonStore:
     def __init__(self, path: Path) -> None:
         self.path = path
         self.data = json.loads(path.read_text("utf-8")) if path.exists() else {"companies": {}, "jobs": {}}
+
+    def hours_since_ok(self, company: Company) -> float | None:
+        return None  # the JSON store keeps no run history; aggregators run every time
+
+    def described_ids(self, company: Company) -> set[str]:
+        return {jid for jid, j in self.data["jobs"].items() if j["companyKey"] == company.key and j.get("description")}
 
     def previous_count(self, company: Company) -> int:
         return sum(1 for j in self.data["jobs"].values() if j["companyKey"] == company.key and j["status"] == "open")
@@ -96,13 +105,24 @@ class PostgresStore:
 
     COLS = (
         "id company_key dedupe_key title company city country country_code region workplace visa salary_min salary_max "
-        "salary_currency salary_period level years skills summary department job_url apply_url source launch_field lat lon posted_at description"
+        "salary_currency salary_period level years skills summary department job_url apply_url source launch_field lat lon posted_at description category verified"
     ).split()
 
     def __init__(self, dsn: str) -> None:
         import psycopg
 
         self.conn = psycopg.connect(dsn, autocommit=False)
+
+    def described_ids(self, company: Company) -> set[str]:
+        with self.conn.cursor() as cur:
+            cur.execute("select id from jobs where company_key = %s and description <> ''", (company.key,))
+            return {r[0] for r in cur.fetchall()}
+
+    def hours_since_ok(self, company: Company) -> float | None:
+        with self.conn.cursor() as cur:
+            cur.execute("select extract(epoch from now() - last_ok_at) / 3600 from companies where key = %s", (company.key,))
+            row = cur.fetchone()
+            return float(row[0]) if row and row[0] is not None else None
 
     def previous_count(self, company: Company) -> int:
         with self.conn.cursor() as cur:
@@ -127,13 +147,16 @@ class PostgresStore:
         )
 
     def save(self, company: Company, jobs: list[dict]) -> tuple[int, int, int]:
+        touch = [j["id"] for j in jobs if j.get("touchOnly")]
+        all_ids = [j["id"] for j in jobs]
+        jobs = [j for j in jobs if not j.get("touchOnly")]
         rows = [
             (
                 j["id"], company.key, j["dedupeKey"], j["title"], j["company"], j["city"], j["country"], j["countryCode"],
                 j["region"], j["workplace"], j["visa"],
                 (j["salary"] or {}).get("min"), (j["salary"] or {}).get("max"), (j["salary"] or {}).get("currency"),
                 (j["salary"] or {}).get("period"), j["level"], j["years"], j["skills"], j["summary"], j["department"],
-                j["jobUrl"], j["applyUrl"], j["source"], j["launchField"], j["lat"], j["lon"], j["postedAt"], j.get("description", ""),
+                j["jobUrl"], j["applyUrl"], j["source"], j["launchField"], j["lat"], j["lon"], j["postedAt"], j.get("description", ""), j.get("category", "other"), j.get("verified", True),
             )
             for j in jobs
         ]
@@ -151,18 +174,31 @@ class PostgresStore:
                             on conflict (id) do update set {updates}, last_seen_at = now(), status = 'open', closed_at = null""",
                         rows,
                     )
-                cur.execute(
-                    """update jobs set status = 'closed', closed_at = now()
-                       where company_key = %s and status = 'open' and not (id = any(%s))""",
-                    (company.key, [j["id"] for j in jobs]),
-                )
+                if touch:
+                    cur.execute(
+                        "update jobs set last_seen_at = now(), status = 'open', closed_at = null where company_key = %s and id = any(%s)",
+                        (company.key, touch),
+                    )
+                if company.ats in AGGREGATORS:
+                    # Each run fetches a different slice: close by age, not by absence.
+                    cur.execute(
+                        """update jobs set status = 'closed', closed_at = now()
+                           where company_key = %s and status = 'open' and coalesce(posted_at, first_seen_at) < now() - interval '30 days'""",
+                        (company.key,),
+                    )
+                else:
+                    cur.execute(
+                        """update jobs set status = 'closed', closed_at = now()
+                           where company_key = %s and status = 'open' and not (id = any(%s))""",
+                        (company.key, all_ids),
+                    )
                 closed = cur.rowcount
             self.conn.commit()
         except Exception:
             self.conn.rollback()  # leave the connection usable for the next company
             raise
         added = sum(1 for j in jobs if j["id"] not in known)
-        return added, len(jobs) - added, closed
+        return added, len(jobs) + len(touch) - added, closed
 
     def record_error(self, company: Company, error: str) -> None:
         try:

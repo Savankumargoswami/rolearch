@@ -36,6 +36,13 @@ def main(argv: list[str] | None = None) -> int:
     d.add_argument("--candidates", type=Path, default=DEFAULTS["candidates"])
     d.add_argument("--out", type=Path, default=DEFAULTS["companies"])
 
+    h = sub.add_parser("harvest", help="add employers that are hiring (from Adzuna) to candidates.csv, for discover")
+    h.add_argument("--candidates", type=Path, default=DEFAULTS["candidates"])
+    h.add_argument("--companies", type=Path, default=DEFAULTS["companies"])
+    h.add_argument("--countries", default="us,gb,ca,in,au")
+    h.add_argument("--calls", type=int, default=12, help="Adzuna calls per country (free plan: a few thousand a month)")
+    h.add_argument("--limit", type=int, default=300, help="most new candidates to add")
+
     r = sub.add_parser("run", help="pull jobs from every company in companies.csv")
     r.add_argument("--companies", type=Path, default=DEFAULTS["companies"])
     r.add_argument("--state", type=Path, default=DEFAULTS["state"], help="JSON state file (when DATABASE_URL is unset)")
@@ -44,11 +51,20 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--only", help="run companies whose name or token contains this text")
     r.add_argument("--concurrency", type=int, default=8)
 
-    for s in (d, r):
+    for s in (d, h, r):
         s.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)
+
+    if args.cmd == "harvest":
+        from .harvest import add_candidates, adzuna_employers
+
+        found = asyncio.run(adzuna_employers([c.strip() for c in args.countries.split(",") if c.strip()], args.calls))
+        existing = {c.name.lower() for c in company_file.load(args.companies)}
+        n = add_candidates(args.candidates, found, existing, args.limit)
+        print(f"{len(found)} employers seen on Adzuna · {n} new candidates added to {args.candidates.name}. Next: python -m rolearch_worker discover")
+        return 0
 
     if args.cmd == "discover":
         candidates = company_file.load_candidates(args.candidates)

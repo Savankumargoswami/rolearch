@@ -11,6 +11,7 @@ class Company:
     ats: str  # greenhouse | lever | lever-eu | ashby | workable | smartrecruiters | recruitee | personio | jsonld
     token: str  # board token / site name / account id; for jsonld, unused
     careers_url: str = ""
+    described: set[str] | None = field(default=None, compare=False, repr=False)  # ids with a stored description
 
     @property
     def key(self) -> str:
@@ -42,3 +43,6 @@ class RawJob:
     salary: Salary | None = None
     department: str = ""
     extra_locations: list[str] = field(default_factory=list)
+    company_name: str | None = None  # set by aggregator sources, where one feed carries many employers
+    category_hint: str | None = None  # the source's own category label, if it has one
+    touch_only: bool = False  # already stored with full details: just mark it as still open

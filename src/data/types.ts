@@ -26,6 +26,11 @@ export type JobLite = {
   years: number;
   skills: string[];
   postedDaysAgo: number;
+  /** Occupation category, e.g. "software", "healthcare", "driving" (see CATEGORIES in lib/categories). */
+  category?: string;
+  /** True when the job comes straight from the employer's own careers page; false for aggregators. */
+  verified?: boolean;
+  source?: string;
 };
 
 /** The full record, read on the server for job pages. */

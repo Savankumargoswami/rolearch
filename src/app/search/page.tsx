@@ -5,9 +5,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
 import { JobRow } from "@/components/job-row";
-import { getJobFeed } from "@/data/db";
+import { searchJobs } from "@/data/db";
 import { t } from "@/i18n";
-import { emptyFilters, filterJobs } from "@/lib/search";
 import { searchPeople, viewerId, type Person } from "@/lib/social";
 import { createClient } from "@/lib/supabase/server";
 
@@ -82,9 +81,14 @@ async function Results({ searchParams }: { searchParams: Search }) {
 
   const supabase = await createClient();
   const me = await viewerId(supabase);
-  const [people, feed] = await Promise.all([me && tab !== "jobs" ? searchPeople(supabase, q, tab === "people" ? 50 : 12) : Promise.resolve([] as Person[]), getJobFeed()]);
-  const jobs = tab === "people" ? [] : filterJobs(feed.jobs, { ...emptyFilters, q });
-  const shownJobs = jobs.slice(0, tab === "jobs" ? 40 : 6);
+  const [people, found] = await Promise.all([
+    me && tab !== "jobs" ? searchPeople(supabase, q, tab === "people" ? 50 : 12) : Promise.resolve([] as Person[]),
+    tab === "people"
+      ? Promise.resolve({ jobs: [], total: 0 })
+      : searchJobs({ q, cat: "all", where: "anywhere", remote: false, visa: false, pay: false, level: "any", sort: "match" }, 1, tab === "jobs" ? 40 : 6),
+  ]);
+  const jobs = { length: found.total };
+  const shownJobs = found.jobs;
   const href = (type: Tab) => `/search?q=${encodeURIComponent(q)}${type === "all" ? "" : `&type=${type}`}`;
   const tabClass = (active: boolean) =>
     `inline-flex min-h-11 items-center gap-2 rounded-full px-4 font-medium transition-colors duration-200 ${active ? "bg-ink text-paper" : "text-ink hover:bg-ink-soft"}`;

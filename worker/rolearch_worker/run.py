@@ -14,12 +14,13 @@ from pathlib import Path
 from .http import Fetcher
 from .models import Company
 from .normalize import normalize
-from .sources import PROBE_ORDER, SOURCES
+from .sources import AGGREGATORS, PROBE_ORDER, SOURCES
 from .store import DROP_GUARD, Store
 
 log = logging.getLogger(__name__)
 
 LINK_CHECKS = 3
+AGGREGATOR_EVERY_HOURS = 20
 
 
 async def link_dead(http: Fetcher, url: str) -> bool:
@@ -43,7 +44,14 @@ class Result:
 
 async def pull_one(http: Fetcher, store: Store, company: Company) -> Result:
     res = Result(company)
+    if company.ats in AGGREGATORS:
+        hours = store.hours_since_ok(company)
+        if hours is not None and hours < AGGREGATOR_EVERY_HOURS:
+            res.error = f"skipped: last fetched {hours:.0f}h ago (runs once every {AGGREGATOR_EVERY_HOURS}h to stay inside the API quota)"
+            return res
     source = SOURCES.get(company.ats)
+    if company.ats in ("workday", "oracle"):
+        company.described = store.described_ids(company)
     if not source:
         res.error = f"unknown ats '{company.ats}'"
         store.record_error(company, res.error)

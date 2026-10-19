@@ -33,13 +33,13 @@ class Fetcher:
     async def __aexit__(self, *exc) -> None:
         await self.client.aclose()
 
-    async def get(self, url: str, *, params: dict | None = None, attempts: int = 3) -> httpx.Response:
+    async def get(self, url: str, *, params: dict | None = None, headers: dict | None = None, attempts: int = 3) -> httpx.Response:
         """GET with per-host limits. Retries timeouts, 429 and 5xx with backoff; returns 4xx as-is."""
         host = urlsplit(url).netloc
         for attempt in range(1, attempts + 1):
             async with self._hosts[host]:
                 try:
-                    r = await self.client.get(url, params=params)
+                    r = await self.client.get(url, params=params, headers=headers)
                 except (httpx.TimeoutException, httpx.TransportError) as e:
                     if attempt == attempts:
                         raise
@@ -53,6 +53,25 @@ class Fetcher:
                     if retry_after.isdigit():
                         await asyncio.sleep(min(int(retry_after), 60))
                         continue
+            await asyncio.sleep(2**attempt + random.random())
+        raise RuntimeError("unreachable")
+
+    async def post_json(self, url: str, body: dict, attempts: int = 3):
+        """POST a JSON body (Workday's job search). Same per-host limit and retries as get()."""
+        host = urlsplit(url).netloc
+        for attempt in range(1, attempts + 1):
+            async with self._hosts[host]:
+                try:
+                    r = await self.client.post(url, json=body, headers={"Content-Type": "application/json"})
+                except (httpx.TimeoutException, httpx.TransportError):
+                    if attempt == attempts:
+                        raise
+                else:
+                    if r.status_code != 429 and r.status_code < 500:
+                        r.raise_for_status()
+                        return r.json()
+                    if attempt == attempts:
+                        r.raise_for_status()
             await asyncio.sleep(2**attempt + random.random())
         raise RuntimeError("unreachable")
 

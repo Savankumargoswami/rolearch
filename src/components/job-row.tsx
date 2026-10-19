@@ -3,12 +3,10 @@ import { ViewTransition } from "react";
 import type { JobLite } from "@/data/types";
 import { t } from "@/i18n";
 import { place, postedAgo, salaryRange } from "@/lib/format";
-import { matchJob } from "@/lib/match";
-import { MatchRing } from "./match-ring";
+import type { MessageKey } from "@/i18n";
 
 /** One job in a list. Plain component (no hooks) so server and client lists share it. */
 export function JobRow({ job }: { job: JobLite }) {
-  const match = matchJob(job);
   return (
     <Link
       href={`/jobs/${job.id}`}
@@ -24,8 +22,10 @@ export function JobRow({ job }: { job: JobLite }) {
         <span className="block truncate text-[0.95rem] text-muted">{job.company}</span>
       </span>
 
-      <span className="col-start-2 row-span-2 row-start-1 md:[grid-area:1/4]">
-        <MatchRing score={match.score} verdict={match.verdict} size={48} />
+      <span className="col-start-2 row-span-2 row-start-1 flex flex-col items-end gap-1 text-end md:[grid-area:1/4]">
+        {job.category && job.category !== "other" && (
+          <span className="rounded-full bg-ink-soft px-2.5 py-0.5 text-xs font-medium whitespace-nowrap">{t(`categories.${job.category}` as MessageKey)}</span>
+        )}
       </span>
 
       <span className="min-w-0 truncate text-[0.95rem] text-muted md:text-ink md:[grid-area:1/2]">

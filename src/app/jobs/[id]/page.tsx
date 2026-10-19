@@ -8,7 +8,7 @@ import { AtsPanel } from "@/components/ats-panel";
 import { JobRow } from "@/components/job-row";
 import { MatchRing } from "@/components/match-ring";
 import { SaveButton } from "@/components/save-button";
-import { getJob, getJobFeed, getJobText } from "@/data/db";
+import { getJob, getJobFeed, getJobText, searchJobs } from "@/data/db";
 import { freeResources } from "@/data/learning";
 import type { Job } from "@/data/types";
 import { t } from "@/i18n";
@@ -20,7 +20,7 @@ import { matchProfile } from "@/lib/role-match";
 // Pages for current jobs are built ahead; a job added later is rendered on its first visit.
 // The personal parts (match, missing skills, ATS check) stream in per visitor.
 export async function generateStaticParams() {
-  return (await getJobFeed()).jobs.map((j) => ({ id: j.id }));
+  return (await getJobFeed()).jobs.slice(0, 300).map((j) => ({ id: j.id }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Promise<Metadata> {
@@ -35,13 +35,11 @@ export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Pro
   };
 }
 
-function similarTo(job: Job, jobs: Job[]) {
-  return jobs
-    .filter((j) => j.id !== job.id)
-    .map((j) => ({ j, shared: j.skills.filter((s) => job.skills.includes(s)).length }))
-    .sort((a, b) => b.shared - a.shared || a.j.postedDaysAgo - b.j.postedDaysAgo)
-    .slice(0, 3)
-    .map((x) => x.j);
+/** Same kind of role: the title's core words, within the same category. */
+async function similarTo(job: Job) {
+  const core = job.title.replace(/\(.*?\)|[-–—|,].*$/g, " ").replace(/\b(senior|sr|junior|jr|staff|lead|principal|ii|iii|iv)\b\.?/gi, " ").trim().split(/\s+/).slice(0, 3).join(" ");
+  const { jobs } = await searchJobs({ q: core, cat: job.category ?? "all", where: "anywhere", remote: false, visa: false, pay: false, level: "any", sort: "match" }, 1, 4);
+  return jobs.filter((j) => j.id !== job.id).slice(0, 3);
 }
 
 /** Only for jobs posted directly on Rolearch; feed jobs already carry this on the employer's own page. */
@@ -89,7 +87,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
   const { id } = await params;
   const job = await getJob(id);
   if (!job) notFound();
-  const { jobs } = await getJobFeed();
+  const similar = await similarTo(job);
   const where = place(job);
 
   return (
@@ -200,7 +198,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
             {t("job.similar")}
           </h2>
           <ul className="-mx-3 divide-y divide-line sm:-mx-4">
-            {similarTo(job, jobs).map((j) => (
+            {similar.map((j) => (
               <li key={j.id}>
                 <JobRow job={j} />
               </li>

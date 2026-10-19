@@ -8,12 +8,13 @@ import unicodedata
 from datetime import datetime, timezone
 
 from .geo import COUNTRIES, CITIES, parse_location
+from .categories import category_of
 from .models import Company, RawJob
 from .text import clean_title, extract_skills, in_launch_field, level_of, summarize, visa_offered, years_required
 
 SOURCE_LABEL = {
     "greenhouse": "Greenhouse", "lever": "Lever", "lever-eu": "Lever", "ashby": "Ashby", "workable": "Workable",
-    "smartrecruiters": "SmartRecruiters", "recruitee": "Recruitee", "personio": "Personio", "jsonld": "Careers page",
+    "smartrecruiters": "SmartRecruiters", "recruitee": "Recruitee", "personio": "Personio", "jsonld": "Careers page", "usajobs": "USAJOBS", "adzuna": "Adzuna", "workday": "Workday", "oracle": "Oracle",
 }
 
 
@@ -26,7 +27,7 @@ def slug(s: str, n: int = 40) -> str:
 def job_id(company: Company, raw: RawJob) -> str:
     """Stable and readable: same posting -> same id on every run."""
     h = hashlib.sha1(f"{company.key}:{raw.external_id}".encode()).hexdigest()[:8]
-    return f"{slug(company.name, 24)}-{slug(raw.title, 48)}-{h}"
+    return f"{slug(raw.company_name or company.name, 24)}-{slug(raw.title, 48)}-{h}"
 
 
 def dedupe_key(company: Company, title: str, place: str) -> str:
@@ -36,7 +37,8 @@ def dedupe_key(company: Company, title: str, place: str) -> str:
 def normalize(company: Company, raw: RawJob, now: datetime | None = None) -> dict | None:
     if not raw.title or not raw.job_url:
         return None
-    title = clean_title(raw.title, company.name)
+    employer = raw.company_name or company.name
+    title = clean_title(raw.title, employer)
     now = now or datetime.now(timezone.utc)
     place = parse_location(raw.location_text, default_country=company.country)
     country = raw.country_hint if raw.country_hint in COUNTRIES else place.country
@@ -63,10 +65,10 @@ def normalize(company: Company, raw: RawJob, now: datetime | None = None) -> dic
     salary = raw.salary
     return {
         "id": job_id(company, raw),
-        "dedupeKey": dedupe_key(company, title, f"{display_city}|{display_country}"),
+        "dedupeKey": dedupe_key(Company(employer, company.country, company.ats, company.token), title, f"{display_city}|{display_country}"),
         "companyKey": company.key,
         "title": title,
-        "company": company.name,
+        "company": employer,
         "city": display_city,
         "country": display_country,
         "countryCode": country,
@@ -86,8 +88,11 @@ def normalize(company: Company, raw: RawJob, now: datetime | None = None) -> dic
         "postedDaysAgo": days,
         "source": SOURCE_LABEL.get(company.ats, company.ats),
         "summary": summarize(raw.description),
-        # Full text for the ATS check, kept for the launch field only (the jobs the site shows).
-        "description": (raw.description or "")[:20000] if in_launch_field(title) else "",
+        # Full text for matching and the ATS check.
+        "description": (raw.description or "")[:20000],
+        "category": "data" if in_launch_field(title) else category_of(title, raw.category_hint),
+        "verified": company.ats not in ("usajobs", "adzuna"),
+        "touchOnly": raw.touch_only,
         "duties": [],
         "jobUrl": raw.job_url,
         "applyUrl": raw.apply_url or raw.job_url,
