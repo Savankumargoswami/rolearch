@@ -2,8 +2,9 @@ import { ArrowLeft, ArrowUpRight, BookOpen, Check, CircleDashed, GraduationCap, 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense, ViewTransition } from "react";
+import { cache, Suspense, ViewTransition } from "react";
 import { ApplyButton } from "@/components/apply-button";
+import { JobDescription } from "@/components/job-description";
 import { AtsPanel } from "@/components/ats-panel";
 import { JobRow } from "@/components/job-row";
 import { MatchRing } from "@/components/match-ring";
@@ -11,9 +12,10 @@ import { SaveButton } from "@/components/save-button";
 import { getJob, getJobFeed, getJobText, searchJobs } from "@/data/db";
 import { freeResources } from "@/data/learning";
 import type { Job } from "@/data/types";
-import { t } from "@/i18n";
+import { t, type MessageKey } from "@/i18n";
 import { place, postedAgo, salaryRange } from "@/lib/format";
-import type { Match, ReqStatus } from "@/lib/match";
+import { jobRequirements, type JobRequirements } from "@/lib/job-requirements";
+import type { Match, ReqStatus, Requirement } from "@/lib/match";
 import { loadViewer } from "@/lib/profile";
 import { requireMember } from "@/lib/require-member";
 import { matchProfile } from "@/lib/role-match";
@@ -75,16 +77,23 @@ const reqIcon: Record<ReqStatus, { Icon: typeof Check; cls: string; label: strin
   missing: { Icon: Minus, cls: "border border-line text-muted", label: t("job.reqMissing") },
 };
 
-/** The viewer's match with this job, computed from their saved profile (the viewer is read once per request). */
-async function viewerMatch(job: Job): Promise<{ signedIn: boolean; hasProfile: boolean; match: Match | null }> {
+type ViewerMatch = { signedIn: boolean; hasProfile: boolean; match: Match | null; req: JobRequirements | null };
+
+/**
+ * The viewer's match with this job, from their saved profile and the job's requirements (read from its
+ * description once, then stored). Cached per request: the match card, ATS panel and list all share it.
+ */
+const viewerMatch = cache(async (id: string): Promise<ViewerMatch> => {
+  const job = await getJob(id);
   const viewer = await loadViewer();
-  if (!viewer) return { signedIn: false, hasProfile: false, match: null };
+  if (!job || !viewer) return { signedIn: Boolean(viewer), hasProfile: false, match: null, req: null };
+  const description = await getJobText(job.id);
+  const req = await jobRequirements(job, description);
   const p = viewer.profile;
   const hasProfile = p.resume.experience.length + p.resume.skills.length > 0;
-  if (!hasProfile) return { signedIn: true, hasProfile, match: null };
-  const description = await getJobText(job.id);
-  return { signedIn: true, hasProfile, match: matchProfile({ title: job.title, skills: job.skills, years: job.years, description }, p) };
-}
+  if (!hasProfile) return { signedIn: true, hasProfile, match: null, req };
+  return { signedIn: true, hasProfile, match: matchProfile({ title: job.title, skills: job.skills, years: job.years, description }, p, req), req };
+});
 
 export default function JobPage({ params }: PageProps<"/jobs/[id]">) {
   return (
@@ -147,7 +156,9 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
               <h2 id="about" className="border-b border-ink pb-3 font-display text-2xl font-semibold tracking-[-0.02em]">
                 {t("job.about")}
               </h2>
-              {job.summary && <p className="mt-4 max-w-[65ch] text-lg text-pretty">{job.summary}</p>}
+              <Suspense fallback={job.summary ? <p className="mt-4 max-w-[65ch] text-lg text-pretty">{job.summary}</p> : null}>
+                <FullDescription job={job} />
+              </Suspense>
               {job.duties.length > 0 && (
                 <>
                   <h3 className="mt-6 font-semibold">{t("job.youllDo")}</h3>
@@ -165,13 +176,13 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
                   rel="noopener noreferrer"
                   className="mt-5 inline-flex min-h-11 items-center gap-1.5 font-medium underline decoration-line underline-offset-4 hover:decoration-ink"
                 >
-                  {t("job.fullDescription", { c: job.company })}
+                  {t("job.applyOnSite", { c: job.company })}
                   <ArrowUpRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
                 </a>
               )}
             </section>
 
-            <Suspense fallback={<Requirements job={job} match={null} />}>
+            <Suspense fallback={<Requirements job={job} match={null} req={null} />}>
               <PersonalRequirements job={job} />
             </Suspense>
           </div>
@@ -223,17 +234,27 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
 }
 
 async function PersonalMatch({ job }: { job: Job }) {
-  return <MatchSummary {...await viewerMatch(job)} />;
+  return <MatchSummary {...await viewerMatch(job.id)} />;
 }
 
 async function PersonalAts({ job }: { job: Job }) {
-  const { signedIn, hasProfile } = await viewerMatch(job);
+  const { signedIn, hasProfile } = await viewerMatch(job.id);
   return <AtsPanel jobId={job.id} jobTitle={job.title} company={job.company} signedIn={signedIn} hasProfile={hasProfile} />;
 }
 
 async function PersonalRequirements({ job }: { job: Job }) {
-  const { match } = await viewerMatch(job);
-  return <Requirements job={job} match={match} />;
+  const { match, req } = await viewerMatch(job.id);
+  return <Requirements job={job} match={match} req={req} />;
+}
+
+async function FullDescription({ job }: { job: Job }) {
+  const text = await getJobText(job.id);
+  if (text.trim().length < 120) return job.summary ? <p className="mt-4 max-w-[65ch] text-lg text-pretty">{job.summary}</p> : null;
+  return (
+    <div className="mt-4">
+      <JobDescription text={text} moreLabel={t("job.showFull")} />
+    </div>
+  );
 }
 
 function MatchSummary({ signedIn, hasProfile, match }: { signedIn: boolean; hasProfile: boolean; match: Match | null }) {
@@ -277,36 +298,60 @@ function MatchSummary({ signedIn, hasProfile, match }: { signedIn: boolean; hasP
   );
 }
 
-function Requirements({ job, match }: { job: Job; match: Match | null }) {
-  const reqs = match?.reqs ?? job.skills.map((name) => ({ name, status: "missing" as ReqStatus, isYears: false }));
+const GROUPS = ["required", "certification", "experience", "education", "preferred"] as const;
+
+function Requirements({ job, match, req }: { job: Job; match: Match | null; req: JobRequirements | null }) {
+  // Without a match (visitor without a profile) still list what the job asks for, just without statuses.
+  const reqs: Requirement[] =
+    match?.reqs ??
+    (req
+      ? [
+          ...req.required.map((name) => ({ name, status: "missing" as ReqStatus, group: "required" as const })),
+          ...req.certifications.map((name) => ({ name, status: "missing" as ReqStatus, group: "certification" as const })),
+          ...(req.years ? [{ name: String(req.years), status: "missing" as ReqStatus, isYears: true, group: "experience" as const }] : []),
+          ...(req.education !== "none" ? [{ name: req.education, status: "missing" as ReqStatus, group: "education" as const }] : []),
+          ...req.preferred.map((name) => ({ name, status: "missing" as ReqStatus, group: "preferred" as const })),
+        ]
+      : job.skills.map((name) => ({ name, status: "missing" as ReqStatus, group: "required" as const })));
+  const label = (r: Requirement) =>
+    r.isYears ? t("job.reqYears", { n: r.name }) : r.group === "education" ? t(`job.edu_${r.name}` as MessageKey) : r.name;
+  const groups = GROUPS.map((g) => ({ g, items: reqs.filter((r) => (r.group ?? "required") === g) })).filter((x) => x.items.length > 0);
+  if (!groups.length) return null;
+
   return (
     <>
       <section aria-labelledby="reqs" className="mt-10">
         <h2 id="reqs" className="border-b border-ink pb-3 font-display text-2xl font-semibold tracking-[-0.02em]">
           {t("job.requirements")}
         </h2>
-        <ul className="divide-y divide-line">
-          {reqs.map((r) => {
-            const { Icon, cls, label } = reqIcon[r.status];
-            return (
-              <li key={r.name} className="flex items-center gap-4 py-3.5">
-                {match ? (
-                  <span className={`grid size-7 shrink-0 place-items-center rounded-full ${cls}`}>
-                    <Icon aria-hidden="true" className="size-4" strokeWidth={2.25} />
-                  </span>
-                ) : (
-                  <span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-full bg-ink-soft">
-                    <span className="size-1.5 rounded-full bg-ink" />
-                  </span>
-                )}
-                <span className="min-w-0 flex-1 font-medium">{r.isYears ? t("job.reqYears", { n: r.name }) : r.name}</span>
-                {match && <span className="text-end text-sm text-muted">{label}</span>}
-              </li>
-            );
-          })}
-        </ul>
+        {req && <p className="mt-2 text-sm text-muted">{t("job.reqFromDescription")}</p>}
+        {groups.map(({ g, items }) => (
+          <div key={g} className="mt-5">
+            <h3 className="text-sm font-semibold tracking-wide text-signal-ink uppercase">{t(`job.reqGroup_${g}` as MessageKey)}</h3>
+            <ul className="mt-1 divide-y divide-line">
+              {items.map((r) => {
+                const { Icon, cls, label: statusLabel } = reqIcon[r.status];
+                return (
+                  <li key={`${g}-${r.name}`} className="flex items-center gap-4 py-3">
+                    {match ? (
+                      <span className={`grid size-7 shrink-0 place-items-center rounded-full ${cls}`}>
+                        <Icon aria-hidden="true" className="size-4" strokeWidth={2.25} />
+                      </span>
+                    ) : (
+                      <span aria-hidden="true" className="grid size-7 shrink-0 place-items-center rounded-full bg-ink-soft">
+                        <span className="size-1.5 rounded-full bg-ink" />
+                      </span>
+                    )}
+                    <span className="min-w-0 flex-1 font-medium">{label(r)}</span>
+                    {match && <span className="text-end text-sm text-muted">{statusLabel}</span>}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
       </section>
-      {match && match.missing.length > 0 && <Learn skills={match.missing} />}
+      {match && match.missing.length > 0 && <Learn skills={match.missing.slice(0, 8)} />}
     </>
   );
 }
