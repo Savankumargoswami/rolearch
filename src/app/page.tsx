@@ -3,7 +3,7 @@ import { Suspense, ViewTransition } from "react";
 import { HeroSearch } from "@/components/hero-search";
 import { JobRow } from "@/components/job-row";
 import { MeridianMap } from "@/components/meridian-map";
-import { getJobFeed } from "@/data/db";
+import { getJobFeed, jobMap } from "@/data/db";
 import type { JobLite } from "@/data/types";
 import { m, t } from "@/i18n";
 import { count } from "@/lib/format";
@@ -11,10 +11,12 @@ import { loadViewer } from "@/lib/profile";
 import { filterJobs, emptyFilters } from "@/lib/search";
 
 const quick = [
-  { label: "Remote data engineer", href: "/jobs?q=data+engineer&where=remote" },
+  { label: "Software engineer", href: "/jobs?q=software+engineer" },
+  { label: "Nurse", href: "/jobs?cat=healthcare" },
+  { label: "Truck driver", href: "/jobs?cat=driving" },
+  { label: "Warehouse", href: "/jobs?cat=logistics" },
+  { label: "Remote", href: "/jobs?where=remote" },
   { label: "Visa sponsorship", href: "/jobs?visa=1" },
-  { label: "India", href: "/jobs?where=india" },
-  { label: "Europe", href: "/jobs?where=europe" },
   { label: "Entry level", href: "/jobs?level=entry" },
 ];
 
@@ -24,7 +26,7 @@ const pageTransition = {
 } as const;
 
 export default async function Home() {
-  const feed = await getJobFeed();
+  const [feed, pins] = await Promise.all([getJobFeed(), jobMap()]);
   const top = filterJobs(feed.jobs, emptyFilters).slice(0, 5);
   const copy = m().home;
 
@@ -58,7 +60,7 @@ export default async function Home() {
             </div>
           </div>
           <div className="mt-14 sm:mt-16">
-            <MeridianMap jobs={feed.jobs} />
+            <MeridianMap pins={pins} />
           </div>
         </section>
 

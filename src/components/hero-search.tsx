@@ -7,7 +7,7 @@ import { t } from "@/i18n";
 import { whereOptions } from "@/lib/regions";
 import { SearchCombobox } from "./search-combobox";
 
-const hints = ["Data engineer", "Machine learning engineer", "Analytics engineer", "Python", "Junior data analyst"];
+const hints = ["Software engineer", "Registered nurse", "Truck driver", "Data analyst", "Warehouse associate", "Electrician"];
 
 /** Works without JavaScript: it's a plain GET form to /jobs. JS adds suggestions and client navigation. */
 export function HeroSearch() {

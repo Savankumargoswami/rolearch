@@ -274,3 +274,14 @@ export async function getJobText(id: string): Promise<string> {
     return fallback;
   }
 }
+
+export type MapPin = { city: string; country: string; lat: number; lon: number; n: number };
+
+/** One pin per metro area with how many open jobs it has, for the home page map. */
+export async function jobMap(): Promise<MapPin[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("jobs");
+  const rows = await rpc<MapPin[]>("job_map", { max_pins: 80 });
+  return (rows ?? []).map((r) => ({ ...r, n: Number(r.n) }));
+}

@@ -42,14 +42,17 @@ const en = {
     global: "Worldwide",
   },
   globe: {
-    caption: "Open roles by city this week",
+    caption: "Open roles by city",
     roles: "{n} roles",
+    jobs: "open jobs",
+    total: "{n} jobs pinned across {c} cities",
+    topCities: "Top cities right now",
   },
   home: {
     joinTitle: "{n} open jobs, straight from employers' own careers pages",
     joinBody: "Create a free account to see them, check your match and tailor your resume for each one.",
-    freshTitle: "Top matches right now",
-    freshLead: "{n} open data and ML roles at {k} companies in {c} countries, pulled straight from each company's own careers page.",
+    freshTitle: "Newest jobs",
+    freshLead: "{n} open jobs at {k} employers in {c} countries, office and hands-on, pulled straight from each employer's own careers page.",
     seeAll: "See all jobs",
     howTitle: "How it works",
     steps: [
