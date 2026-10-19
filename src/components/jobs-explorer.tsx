@@ -8,25 +8,11 @@ import type { Level } from "@/data/types";
 import { t, type MessageKey } from "@/i18n";
 import { BLUE, WHITE } from "@/lib/categories";
 import { whereOptions, type Where } from "@/lib/regions";
+import { toQueryString } from "@/lib/job-query";
 import { SearchCombobox } from "./search-combobox";
 
 const levels: (Level | "any")[] = ["any", "entry", "mid", "senior", "lead"];
 const nf = new Intl.NumberFormat("en");
-
-export function toQueryString(f: JobQuery, page = 1): string {
-  const sp = new URLSearchParams();
-  if (f.q) sp.set("q", f.q);
-  if (f.cat && f.cat !== "all") sp.set("cat", f.cat);
-  if (f.where !== "anywhere") sp.set("where", f.where);
-  if (f.remote) sp.set("remote", "1");
-  if (f.visa) sp.set("visa", "1");
-  if (f.pay) sp.set("pay", "1");
-  if (f.level !== "any") sp.set("level", f.level);
-  if (f.sort !== "match") sp.set("sort", f.sort);
-  if (page > 1) sp.set("page", String(page));
-  const s = sp.toString();
-  return s ? `?${s}` : "";
-}
 
 /**
  * Search box, category rail and filters for /jobs. Results are rendered on the server from the URL;

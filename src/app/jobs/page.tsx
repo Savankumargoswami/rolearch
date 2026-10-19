@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { JobRow } from "@/components/job-row";
-import { JobsControls, toQueryString } from "@/components/jobs-explorer";
+import { JobsControls } from "@/components/jobs-explorer";
 import { getJobFeed, jobCategories, searchJobs, type JobQuery } from "@/data/db";
 import { locale, t } from "@/i18n";
 import { isCategory } from "@/lib/categories";
+import { toQueryString } from "@/lib/job-query";
 import { whereOptions, type Where } from "@/lib/regions";
 
 export const metadata: Metadata = {
