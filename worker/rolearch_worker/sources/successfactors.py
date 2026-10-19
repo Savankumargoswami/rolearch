@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import html
+import os
 import re
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -18,6 +19,7 @@ from ..models import Company, RawJob
 from ..text import html_to_text
 
 MAX_PAGES = 200
+DETAILS_PER_RUN = int(os.environ.get("SUCCESSFACTORS_DETAILS_PER_RUN", "400"))
 _ITEM = re.compile(r"<item>(.*?)</item>", re.S)
 _ROW = re.compile(r'<tr class="data-row">(.*?)</tr>', re.S)
 
@@ -104,6 +106,62 @@ def _from_page(page: str, host: str) -> list[RawJob]:
     return jobs
 
 
+_PROP = lambda name: re.compile(rf'itemprop="{name}"[^>]*?(?:content="([^"]*)"[^>]*>|>(.*?)</)', re.S)
+_TITLE, _DESC, _CITY, _REGION, _COUNTRY, _DATE = (_PROP(n) for n in ("title", "description", "addressLocality", "addressRegion", "addressCountry", "datePosted"))
+
+
+def _prop(rx: re.Pattern[str], page: str) -> str:
+    m = rx.search(page)
+    return html.unescape((m.group(1) or m.group(2) or "").strip()) if m else ""
+
+
+def _from_job_page(page: str, url: str) -> RawJob | None:
+    """A job page's schema.org microdata (itemprop="title", "description", ...)."""
+    title = re.sub(r"<[^>]+>", "", _prop(_TITLE, page)).strip()
+    if not title:
+        return None
+    desc_m = re.search(r'itemprop="description"[^>]*>(.*?)</(?:span|div)>\s*</(?:span|div)>', page, re.S) or _DESC.search(page)
+    city, region, country = _prop(_CITY, page), _prop(_REGION, page), _prop(_COUNTRY, page)
+    jid = re.search(r"/(\d+)/?$", url)
+    return RawJob(
+        external_id=jid.group(1) if jid else url,
+        title=title,
+        job_url=url,
+        apply_url=url,
+        location_text=", ".join(x for x in (city, region, country) if x),
+        city_hint=city or None,
+        country_hint=country.upper() if re.fullmatch(r"[A-Za-z]{2}", country) else None,
+        posted_at=_date(_prop(_DATE, page)),
+        description=html_to_text(desc_m.group(1) if desc_m else "")[:20000],
+    )
+
+
+async def _from_sitemap(http: Fetcher, company: Company, host: str) -> list[RawJob]:
+    """Sites with neither the feed nor working search pages: job URLs from the sitemap, details from each page."""
+    from .sitemap import job_urls
+    urls = await job_urls(http, f"https://{host}/sitemap.xml")
+    known = company.known_urls or {}
+    budget = DETAILS_PER_RUN
+    sem = asyncio.Semaphore(4)
+
+    async def one(url: str) -> RawJob | None:
+        nonlocal budget
+        if url in known:
+            jid = re.search(r"/(\d+)/?$", url)
+            return RawJob(external_id=jid.group(1) if jid else url, title=known[url], job_url=url, apply_url=url, touch_only=True)
+        if budget <= 0:
+            return None
+        budget -= 1
+        try:
+            async with sem:
+                r = await http.get(url, attempts=2)
+            return _from_job_page(r.text, url) if r.status_code == 200 else None
+        except Exception:
+            return None
+
+    return [r for r in await asyncio.gather(*(one(u) for u in urls)) if r]
+
+
 async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     host = company.token.strip().lower()
     feed = await http.get(f"https://{host}/sitemap.xml")
@@ -113,7 +171,8 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
             return jobs
 
     first = await http.get(f"https://{host}/search/", params={"q": "", "startrow": 0})
-    first.raise_for_status()
+    if first.status_code != 200:
+        return await _from_sitemap(http, company, host)
     total_m = re.search(r"of\s*<b>\s*([\d,]+)\s*</b>", first.text)
     total = int(total_m.group(1).replace(",", "")) if total_m else 0
     jobs = _from_page(first.text, host)
@@ -128,4 +187,6 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     unique: dict[str, RawJob] = {}
     for j in jobs:
         unique.setdefault(j.external_id, j)
-    return list(unique.values())
+    if unique:
+        return list(unique.values())
+    return await _from_sitemap(http, company, host)
