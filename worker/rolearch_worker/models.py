@@ -12,6 +12,7 @@ class Company:
     token: str  # board token / site name / account id; for jsonld, unused
     careers_url: str = ""
     described: set[str] | None = field(default=None, compare=False, repr=False)  # ids with a stored description
+    known_urls: dict[str, str] | None = field(default=None, compare=False, repr=False)  # job URL -> stored title
 
     @property
     def key(self) -> str:

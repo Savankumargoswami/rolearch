@@ -24,7 +24,7 @@ SIGNATURES: list[tuple[str, re.Pattern[str]]] = [
     ("ashby", re.compile(r"jobs\.ashbyhq\.com/([A-Za-z0-9_.-]+)", re.I)),
     ("smartrecruiters", re.compile(r"(?:jobs|careers)\.smartrecruiters\.com/([A-Za-z0-9_-]+)", re.I)),
     ("icims", re.compile(r"https?://((?:[a-z0-9-]+\.)?[a-z0-9-]+)\.icims\.com", re.I)),
-    ("oracle", re.compile(r"https?://([a-z0-9-]+)\.fa\.([a-z0-9-]+)\.oraclecloud\.com/hcmUI/CandidateExperience/[a-z-]+/sites/([A-Za-z0-9_]+)", re.I)),
+    ("oracle", re.compile(r"https?://([a-z0-9-]+)\.fa\.(?:([a-z0-9-]+)\.)?oraclecloud\.com/hcmUI/CandidateExperience/[a-z-]+/sites/([A-Za-z0-9_]+)", re.I)),
     ("successfactors", re.compile(r"https?://(career\d*)\.(?:sapsf|successfactors)\.(?:com|eu|cn)/(?:career|portalcareer)[^\"'\s]*?company=([A-Za-z0-9_]+)", re.I)),
     ("eightfold", re.compile(r"https?://([a-z0-9-]+)\.eightfold\.ai", re.I)),
     ("taleo", re.compile(r"https?://([a-z0-9-]+)\.taleo\.net", re.I)),
@@ -49,7 +49,7 @@ def match(html: str) -> list[Found]:
     out: list[Found] = []
     for ats, rx in SIGNATURES:
         for m in rx.finditer(html):
-            groups = [g for g in m.groups()] if m.groups() else []
+            groups = [g or "" for g in m.groups()] if m.groups() else []
             if ats == "workday" and groups and groups[0].lower().startswith("wd"):  # myworkdaysite.com form: wdN, tenant, site
                 groups = [groups[1], groups[0], groups[2]]
             token = "|".join(groups) if ats in ("workday", "oracle") else (groups[0] if groups else "")

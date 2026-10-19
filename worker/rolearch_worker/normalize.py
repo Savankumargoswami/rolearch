@@ -14,7 +14,7 @@ from .text import clean_title, extract_skills, in_launch_field, level_of, summar
 
 SOURCE_LABEL = {
     "greenhouse": "Greenhouse", "lever": "Lever", "lever-eu": "Lever", "ashby": "Ashby", "workable": "Workable",
-    "smartrecruiters": "SmartRecruiters", "recruitee": "Recruitee", "personio": "Personio", "jsonld": "Careers page", "usajobs": "USAJOBS", "adzuna": "Adzuna", "workday": "Workday", "oracle": "Oracle",
+    "smartrecruiters": "SmartRecruiters", "recruitee": "Recruitee", "personio": "Personio", "jsonld": "Careers page", "usajobs": "USAJOBS", "adzuna": "Adzuna", "workday": "Workday", "oracle": "Oracle", "eightfold": "Eightfold", "successfactors": "SuccessFactors", "jibe": "iCIMS", "icims": "iCIMS", "phenom": "Phenom", "sitemap": "Careers page", "amazon": "Amazon",
 }
 
 
@@ -58,6 +58,9 @@ def normalize(company: Company, raw: RawJob, now: datetime | None = None) -> dic
     else:
         display_city = (city or country_name or "").strip()
         display_country = country_name or ""
+        # Some feeds shout ("AUSTIN"); show place names in normal case.
+        if display_city.isupper() and len(display_city) > 3:
+            display_city = display_city.title()
 
     text = f"{title}\n{raw.description}"
     posted = raw.posted_at or now

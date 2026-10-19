@@ -10,7 +10,7 @@ from collections.abc import Awaitable, Callable
 
 from ..http import Fetcher
 from ..models import Company, RawJob
-from . import adzuna, ashby, greenhouse, jsonld, lever, oracle, personio, recruitee, smartrecruiters, usajobs, workable, workday
+from . import adzuna, amazon, ashby, eightfold, greenhouse, icims, jibe, jsonld, lever, oracle, personio, phenom, recruitee, sitemap, smartrecruiters, successfactors, usajobs, workable, workday
 
 Source = Callable[[Fetcher, Company], Awaitable[list[RawJob]]]
 
@@ -26,6 +26,13 @@ SOURCES: dict[str, Source] = {
     "jsonld": jsonld.fetch,
     "workday": workday.fetch,
     "oracle": oracle.fetch,
+    "eightfold": eightfold.fetch,
+    "successfactors": successfactors.fetch,
+    "jibe": jibe.fetch,
+    "icims": icims.fetch,
+    "phenom": phenom.fetch,
+    "sitemap": sitemap.fetch,
+    "amazon": amazon.fetch,
     # Aggregators: one "company" row per feed; each job carries its real employer's name.
     "usajobs": usajobs.fetch,
     "adzuna": adzuna.fetch,

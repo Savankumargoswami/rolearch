@@ -32,7 +32,8 @@ def _date(s: str | None) -> datetime | None:
 
 async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     host, dc, site = company.token.split("|")
-    origin = f"https://{host}.fa.{dc}.oraclecloud.com"
+    # Most tenants are {host}.fa.{dc}.oraclecloud.com; some (e.g. jpmc.fa.oraclecloud.com) have no data-centre part.
+    origin = f"https://{host}.fa.{dc}.oraclecloud.com" if dc else f"https://{host}.fa.oraclecloud.com"
     api = f"{origin}/hcmRestApi/resources/latest"
 
     listed: list[dict] = []

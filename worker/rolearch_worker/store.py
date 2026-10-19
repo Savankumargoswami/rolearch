@@ -22,6 +22,7 @@ class Store(Protocol):
     def previous_count(self, company: Company) -> int: ...
     def hours_since_ok(self, company: Company) -> float | None: ...
     def described_ids(self, company: Company) -> set[str]: ...
+    def known_urls(self, company: Company) -> dict[str, str]: ...
     def known_ids(self, company: Company) -> set[str]: ...
     def save(self, company: Company, jobs: list[dict]) -> tuple[int, int, int]: ...
     def record_error(self, company: Company, error: str) -> None: ...
@@ -42,6 +43,9 @@ class JsonStore:
 
     def described_ids(self, company: Company) -> set[str]:
         return {jid for jid, j in self.data["jobs"].items() if j["companyKey"] == company.key and j.get("description")}
+
+    def known_urls(self, company: Company) -> dict[str, str]:
+        return {j["jobUrl"]: j["title"] for j in self.data["jobs"].values() if j["companyKey"] == company.key}
 
     def previous_count(self, company: Company) -> int:
         return sum(1 for j in self.data["jobs"].values() if j["companyKey"] == company.key and j["status"] == "open")
@@ -112,6 +116,11 @@ class PostgresStore:
         import psycopg
 
         self.conn = psycopg.connect(dsn, autocommit=False)
+
+    def known_urls(self, company: Company) -> dict[str, str]:
+        with self.conn.cursor() as cur:
+            cur.execute("select job_url, title from jobs where company_key = %s", (company.key,))
+            return {r[0]: r[1] for r in cur.fetchall()}
 
     def described_ids(self, company: Company) -> set[str]:
         with self.conn.cursor() as cur:
