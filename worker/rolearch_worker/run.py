@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import random
 import json
 import logging
 import re
@@ -19,7 +20,7 @@ from .store import DROP_GUARD, Store
 
 log = logging.getLogger(__name__)
 
-LINK_CHECKS = 3
+LINK_CHECKS = 6  # sampled at random: the first postings are often tests or just-closed roles
 AGGREGATOR_EVERY_HOURS = 20
 
 
@@ -82,7 +83,8 @@ async def pull_one(http: Fetcher, store: Store, company: Company) -> Result:
     # A board can keep serving postings whose pages are gone (abandoned ATS account).
     # Spot-check a few new jobs' apply links; if every one is dead, don't import the board.
     known = store.known_ids(company)
-    new = [j for j in jobs if j["id"] not in known][:LINK_CHECKS]
+    fresh = [j for j in jobs if j["id"] not in known]
+    new = random.sample(fresh, min(LINK_CHECKS, len(fresh)))
     if new and all(await asyncio.gather(*(link_dead(http, j["applyUrl"]) for j in new))):
         res.error = f"apply links are dead ({len(new)} checked); board looks abandoned, not imported"
         store.record_error(company, res.error)
