@@ -86,6 +86,29 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     described = company.described or set()
     budget = DETAILS_PER_RUN
     sem = asyncio.Semaphore(4)
+    # Some career hosts rate-limit hard (429). After the first one, read one page at a time with a pause
+    # that grows on each further 429, rather than losing every page of the run.
+    slow = asyncio.Lock()
+    pause = 0.0
+
+    async def get(url: str):
+        nonlocal pause, budget
+        for _ in range(4):
+            if pause >= 30:
+                budget = 0  # still throttled at the longest pause: stop for this run
+                return None
+            if pause:
+                async with slow:
+                    await asyncio.sleep(pause)
+                    r = await http.client.get(url)
+            else:
+                async with sem:
+                    r = await http.client.get(url)
+            if r.status_code != 429:
+                return r
+            pause = min(max(pause * 2, 2.0), 30.0)
+        return r
+
     known = company.known_urls or {}
 
     async def one(url: str) -> RawJob | None:
@@ -97,9 +120,8 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
             return None
         budget -= 1
         try:
-            async with sem:
-                r = await http.get(url, attempts=2)
-            if r.status_code != 200:
+            r = await get(url)
+            if r is None or r.status_code != 200:
                 return None
             posts = _postings(r.text)
             if not posts:
