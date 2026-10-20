@@ -113,6 +113,40 @@ export default async function Home() {
           </dl>
         </section>
 
+        {/* Job tracker: members get it in the header; visitors learn about it here */}
+        <section aria-labelledby="tracker-h" className="mx-auto mt-24 grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+          <div>
+            <h2 id="tracker-h" className="max-w-[14ch] font-display text-3xl font-semibold leading-[1.05] tracking-[-0.025em] text-balance sm:text-5xl">
+              {t("home.trackerTitle")}
+            </h2>
+            <p className="mt-4 max-w-[48ch] text-lg text-muted text-pretty">{t("home.trackerBody")}</p>
+            <Link
+              href="/tracker"
+              className="mt-6 inline-flex min-h-12 items-center rounded-full bg-ink px-6 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
+            >
+              {t("home.trackerCta")}
+            </Link>
+          </div>
+          <div className="rounded-3xl border border-line bg-surface p-5 sm:p-7">
+            <ol aria-label={t("home.trackerFlowLabel")} className="flex flex-wrap items-center gap-2 text-sm">
+              {(["saved", "applied", "interviewing", "offer"] as const).map((s, i) => (
+                <li key={s} className="flex items-center gap-2">
+                  {i > 0 && <span aria-hidden="true" className="text-muted">→</span>}
+                  <span className={`rounded-full px-3 py-1.5 font-medium ${i === 3 ? "bg-signal/30" : "bg-ink-soft"}`}>{t(`tracker.s_${s}`)}</span>
+                </li>
+              ))}
+            </ol>
+            <dl className="mt-6 divide-y divide-line border-t border-line">
+              {copy.trackerPoints.map((p) => (
+                <div key={p.title} className="py-4">
+                  <dt className="font-semibold">{p.title}</dt>
+                  <dd className="mt-1 text-muted text-pretty">{p.body}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
         {/* Companies */}
         <section id="companies" aria-labelledby="companies-h" className="mt-24 scroll-mt-20 bg-ink text-paper">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-6 md:grid-cols-[1.3fr_1fr] md:items-end md:py-20">

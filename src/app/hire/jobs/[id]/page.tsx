@@ -17,11 +17,7 @@ export const metadata: Metadata = { title: "Manage job", robots: { index: false 
 export default function ManageJobPage({ params, searchParams }: PageProps<"/hire/jobs/[id]">) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
-      <Link href="/hire" className="inline-flex min-h-10 items-center gap-1.5 text-sm text-muted hover:text-ink">
-        <ArrowLeft aria-hidden="true" className="size-4 rtl:-scale-x-100" />
-        {t("hire.dashboardTitle")}
-      </Link>
-      <Suspense fallback={<div className="mt-4 h-96 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
+      <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
         <Manage params={params} searchParams={searchParams} />
       </Suspense>
     </div>
@@ -43,6 +39,10 @@ async function Manage({ params, searchParams }: { params: PageProps<"/hire/jobs/
 
   return (
     <>
+      <Link href="/hire" className="inline-flex min-h-10 items-center gap-1.5 text-sm text-muted hover:text-ink">
+        <ArrowLeft aria-hidden="true" className="size-4 rtl:-scale-x-100" />
+        {t("hire.dashboardTitle")}
+      </Link>
       {posted && (
         <p role="status" className="mt-4 flex items-center gap-2 rounded-xl border border-line bg-signal/20 p-3 font-medium">
           <CircleCheck aria-hidden="true" className="size-5" />

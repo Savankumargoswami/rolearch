@@ -14,9 +14,7 @@ export const metadata: Metadata = { title: "Job tracker", robots: { index: false
 export default function TrackerPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
-      <h1 className="font-display text-3xl font-semibold tracking-[-0.025em] sm:text-4xl">{t("tracker.title")}</h1>
-      <p className="mt-2 text-muted">{t("tracker.lead")}</p>
-      <Suspense fallback={<div className="mt-8 h-96 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
+      <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
         <Tracker />
       </Suspense>
     </div>
@@ -43,9 +41,17 @@ async function Tracker() {
   }));
   const appByJob = new Map(apps.map((a) => [a.jobId, a]));
   const history = await events(db, apps.map((a) => a.id));
+  const heading = (
+    <>
+      <h1 className="font-display text-3xl font-semibold tracking-[-0.025em] sm:text-4xl">{t("tracker.title")}</h1>
+      <p className="mt-2 text-muted">{t("tracker.lead")}</p>
+    </>
+  );
 
   if (!tracked.length) {
     return (
+      <>
+      {heading}
       <div className="mt-10 rounded-2xl border border-dashed border-line p-8 text-center">
         <p className="text-muted">{t("tracker.empty")}</p>
         <Link href="/jobs" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-ink px-5 font-medium text-paper hover:bg-ink-hover">
@@ -53,12 +59,14 @@ async function Tracker() {
           {t("tracker.findJobs")}
         </Link>
       </div>
+      </>
     );
   }
 
   const counts = Object.fromEntries(TRACKER_STATUSES.map((s) => [s, tracked.filter((j) => j.status === s).length]));
   return (
     <>
+      {heading}
       <ul className="mt-6 flex flex-wrap gap-2" aria-label={t("tracker.status")}>
         {TRACKER_STATUSES.filter((s) => counts[s] > 0).map((s) => (
           <li key={s}>
