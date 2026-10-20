@@ -1,718 +1,718 @@
-name,country,ats,token,careers_url
-Careem,AE,greenhouse,careem,
-Accor,AU,smartrecruiters,accor,
-Airwallex,AU,ashby,airwallex,
-Canva,AU,smartrecruiters,canva,
-Culture Amp,AU,greenhouse,cultureamp,
-EBANX,BR,greenhouse,ebanx,
-Nubank,BR,ashby,nubank,
-QuintoAndar,BR,greenhouse,quintoandar,
-1Password,CA,ashby,1password,
-Carta,CA,greenhouse,carta,
-Cohere,CA,ashby,cohere,
-Lightspeed,CA,ashby,lightspeedhq,
-Wealthsimple,CA,ashby,wealthsimple,
-Novartis,CH,workday,novartis|wd3|Novartis_Careers,
-Proton,CH,greenhouse,proton,
-Scandit,CH,greenhouse,scandit,
-Celonis,DE,greenhouse,celonis,
-Contentful,DE,greenhouse,contentful,
-Delivery Hero,DE,smartrecruiters,deliveryhero,
-GetYourGuide,DE,greenhouse,getyourguide,
-Helsing,DE,greenhouse,helsing,
-N26,DE,greenhouse,n26,
-Trade Republic,DE,greenhouse,traderepublicbank,
-Cabify,ES,greenhouse,cabify,
-Typeform,ES,greenhouse,typeform,
-Wallapop,ES,greenhouse,wallapop,
-Wolt,FI,greenhouse,wolt,
-Alan,FR,ashby,alan,
-BlaBlaCar,FR,lever,blablacar,
-Doctolib,FR,greenhouse,doctolib,
-Qonto,FR,lever,qonto,
-Sanofi,FR,workday,sanofi|wd3|SanofiCareers,
-AstraZeneca,GB,workday,astrazeneca|wd3|Careers,
-BP,GB,workday,bpinternational|wd3|bpCareers,
-Deliveroo,GB,greenhouse,deliveroo,
-Entain,GB,smartrecruiters,entain,
-Forvis Mazars,GB,greenhouse,forvismazars,
-GoCardless,GB,greenhouse,gocardless,
-GSK,GB,workday,gsk|wd5|GSKCareers,
-Monzo,GB,greenhouse,monzo,
-Randstad Construction and Property,GB,personio,randstad,
-Shell,GB,workday,shell|wd3|ShellCareers,
-Synthesia,GB,ashby,synthesia,
-Xendit,ID,greenhouse,xendit,
-Accenture,IE,workday,accenture|wd103|AccentureCareers,
-Intercom,IE,greenhouse,intercom,
-Lemonade,IL,ashby,lemonade,
-Wiz,IL,greenhouse,wizinc,
-Acme Services Private Limited,IN,personio,acme,
-Alembic,IN,ashby,alembic,
-Atlan,IN,ashby,atlan,
-CRED,IN,lever,cred,
-Fresh Prints,IN,greenhouse,freshprints,
-Freshworks,IN,smartrecruiters,freshworks,
-Groww,IN,greenhouse,groww,
-Meesho,IN,lever,meesho,
-Sarvam AI,IN,ashby,sarvam,
-Swiggy,IN,smartrecruiters,swiggy,
-Syndigo,IN,greenhouse,syndigo,
-Zeta,IN,lever,zeta,
-Satispay,IT,ashby,satispay,
-Mercari,JP,workable,mercari,
-SmartNews,JP,workable,smartnews,
-M-KOPA,KE,ashby,m-kopa,
-Kavak,MX,lever,kavak,
-Andela,NG,ashby,andela,
-Moniepoint,NG,greenhouse,moniepoint,
-Adyen,NL,greenhouse,adyen,
-bunq,NL,recruitee,bunq,
-Mollie,NL,ashby,mollie,
-Philips,NL,workday,philips|wd3|jobs-and-careers,
-Picnic,NL,smartrecruiters,picnic,
-Xero,NZ,ashby,xero,
-DocPlanner,PL,ashby,docplanner,
-Farfetch,PT,lever,farfetch,
-Feedzai,PT,greenhouse,feedzai,
-UiPath,RO,ashby,uipath,
-Spotify,SE,lever,spotify,
-Grab,SG,smartrecruiters,grab,
-Ninja Van,SG,lever,ninjavan,
-3M,US,workday,3m|wd1|Search,
-Adobe,US,workday,adobe|wd5|external_experienced,
-Airbnb,US,greenhouse,airbnb,
-Airtable,US,greenhouse,airtable,
-Amgen,US,workday,amgen|wd1|Careers,
-Analog Devices,US,workday,analogdevices|wd1|External,
-Anthropic,US,greenhouse,anthropic,
-Applied Materials,US,workday,amat|wd1|External,
-Asana,US,greenhouse,asana,
-AT&T,US,workday,att|wd1|ATTGeneral,
-Bank of America,US,workday,ghr|wd1|lateral-us,
-BlackRock,US,workday,blackrock|wd1|BlackRock_Professional,
-Boeing,US,workday,boeing|wd1|EXTERNAL_CAREERS,
-Booz Allen,US,workday,bah|wd1|BAH_Jobs,
-Brex,US,greenhouse,brex,
-Bristol Myers Squibb,US,workday,bristolmyerssquibb|wd5|BMS,
-Broadcom,US,workday,broadcom|wd1|External_Career,
-Capital One,US,workday,capitalone|wd12|Capital_One,
-Cardinal Health,US,workday,cardinalhealth|wd1|EXT,
-Caterpillar,US,workday,cat|wd5|CaterpillarCareers,
-Centene,US,workday,centene|wd5|Centene_External,
-Chevron,US,workday,chevron|wd5|jobs,
-Cigna,US,workday,cigna|wd5|cignacareers,
-Cisco,US,workday,cisco|wd5|Cisco_Careers,
-Citi,US,workday,citi|wd5|2,
-Cloudflare,US,greenhouse,cloudflare,
-Coca-Cola,US,workday,coke|wd1|coca-cola-careers,
-Coinbase,US,greenhouse,coinbase,
-CrowdStrike,US,workday,crowdstrike|wd5|crowdstrikecareers,
-Danaher,US,workday,danaher|wd1|DanaherJobs,
-Databricks,US,greenhouse,databricks,
-Datadog,US,greenhouse,datadog,
-David Hersch - State Farm Agent,US,greenhouse,david,
-Discord,US,greenhouse,discord,
-Disney,US,workday,disney|wd5|disneycareer,
-Dropbox,US,greenhouse,dropbox,
-Elastic,US,greenhouse,elastic,
-Elevance Health,US,workday,elevancehealth|wd1|ANT,
-Equinix,US,workday,equinix|wd1|External,
-Faire,US,greenhouse,faire,
-Figma,US,greenhouse,figma,
-Fivetran,US,greenhouse,fivetran,
-Gap Inc.,US,workday,gapinc|wd1|GAPINC,
-GE Aerospace,US,workday,geaerospace|wd5|GE_ExternalSite,
-General Dynamics IT,US,workday,gdit|wd5|External_Career_Site,
-General Motors,US,workday,generalmotors|wd5|Careers_GM,
-Gilead,US,workday,gilead|wd1|gileadcareers,
-GitLab,US,greenhouse,gitlab,
-Gusto,US,greenhouse,gusto,
-Hex,US,ashby,hex,
-HP,US,workday,hp|wd5|ExternalCareerSite,
-Hugging Face,US,workable,huggingface,
-Instacart,US,greenhouse,instacart,
-Intel,US,workday,intel|wd1|External,
-Johnson & Johnson,US,workday,jj|wd5|JJ,
-Koch Trucking,US,smartrecruiters,kochtrucking,
-Leidos,US,workday,leidos|wd5|External,
-Linear,US,ashby,linear,
-Lyft,US,greenhouse,lyft,
-Mastercard,US,workday,mastercard|wd1|CorporateCareers,
-McKesson,US,workday,mckesson|wd3|External_Careers,
-Medtronic,US,workday,medtronic|wd1|MedtronicCareers,
-Merck,US,workday,msd|wd5|SearchJobs,
-Moderna,US,workday,modernatx|wd1|M_tx,
-MongoDB,US,greenhouse,mongodb,
-Morgan Stanley,US,workday,ms|wd5|External,
-Motorola Solutions,US,workday,motorolasolutions|wd5|Careers,
-Nike,US,workday,nike|wd1|nke,
-Nordstrom,US,workday,nordstrom|wd501|nordstrom_careers,
-Notion,US,ashby,notion,
-NVIDIA,US,workday,nvidia|wd5|NVIDIAExternalCareerSite,
-Okta,US,greenhouse,okta,
-OpenAI,US,ashby,openai,
-Palantir,US,lever,palantir,
-PayPal,US,workday,paypal|wd1|jobs,
-Perplexity,US,ashby,perplexity,
-Pfizer,US,workday,pfizer|wd1|PfizerCareers,
-Pinterest,US,greenhouse,pinterest,
-Plaid,US,ashby,plaid,
-PostHog,US,ashby,posthog,
-Procter & Gamble,US,workday,pg|wd5|1000,
-Ramp,US,ashby,ramp,
-Reddit,US,greenhouse,reddit,
-Robinhood,US,greenhouse,robinhood,
-Samsara,US,greenhouse,samsara,
-Scale AI,US,greenhouse,scaleai,
-Securitas,US,smartrecruiters,securitas,
-Snowflake,US,ashby,snowflake,
-Southwest Airlines,US,workday,swa|wd1|external,
-State Street,US,workday,statestreet|wd1|Global,
-Stripe,US,greenhouse,stripe,
-Stryker,US,workday,stryker|wd1|StrykerCareers,
-Supabase,US,ashby,supabase,
-Sysco,US,workday,sysco|wd5|syscocareers,
-Target,US,workday,target|wd5|targetcareers,
-The Home Depot,US,workday,homedepot|wd5|CareerDepot,
-Twilio,US,greenhouse,twilio,
-USAJOBS,US,usajobs,all,https://www.usajobs.gov
-Vercel,US,greenhouse,vercel,
-Veterans Health Administration,US,greenhouse,veterans,
-Visa,US,workday,visa|wd5|Visa,
-Wells Fargo,US,workday,wf|wd1|WellsFargoJobs,
-Workday,US,workday,workday|wd5|Workday,
-Zillow,US,workday,zillow|wd5|Zillow_Group_External,
-NXP Semiconductors,NL,workday,nxp|wd3|careers,
-Comcast,US,workday,comcast|wd115|Comcast_Careers,
-Allstate,US,workday,allstate|wd5|allstate_careers,
-Abbott Laboratories,US,workday,abbott|wd5|abbottcareers,
-J.B. Hunt,US,workday,jbhunt|wd501|Careers,
-Kohl's,US,workday,kohls|wd504|kohlscareers,
-Expedia Group,US,workday,expedia|wd108|search,
-Travelers,US,workday,travelers|wd5|External,
-Biogen,US,workday,biibhr|wd3|external,
-Carrier,US,workday,carrier|wd5|jobs,
-Otis,US,workday,otis|wd504|REC_Ext_Gateway,
-Johnson Controls,US,workday,jci|wd5|JCI,
-Constellation Brands,US,workday,cbrands|wd5|CBI_External_Careers,
-Verizon,US,workday,verizon|wd12|verizon-careers,
-Unilever,GB,workday,unilever|wd3|Unilever_Experienced_Professionals,
-Toyota North America,US,workday,toyota|wd503|TMNA,
-KLA,US,workday,kla|wd1|Search,
-Cadence Design Systems,US,workday,cadence|wd1|External_Careers,
-Fannie Mae,US,workday,fanniemae|wd1|FannieMaeCareers,
-Fidelity Investments,US,workday,fmr|wd1|FidelityCareers,
-U.S. Bank,US,workday,usbank|wd1|US_Bank_Careers,
-Ally Financial,US,workday,ally|wd1|Ally,
-USAA,US,workday,usaa|wd1|USAAJOBSWD,
-Cleveland Clinic,US,workday,ccf|wd1|ClevelandClinicCareers,
-Becton Dickinson,US,workday,bdx|wd1|EXTERNAL_CAREER_SITE_USA,
-Baxter,US,workday,baxter|wd1|baxter,
-Illumina,US,workday,illumina|wd1|illumina-careers,
-Dow,US,workday,dow|wd1|ExternalCareers,
-General Mills,US,workday,genmills|wd1|GMI_External_Careers,
-ConocoPhillips,US,workday,conocophillips|wd1|External,
-onsemi,US,oracle,hctz|us2|CX_1001,
-Coherent,US,oracle,hcwp|us2|CX_1,
-Albertsons,US,oracle,eofd|us6|CX_1001,
-Honeywell,US,oracle,ibqbjb|ocs|Honeywell,
-Dollar General,US,oracle,ibxwjb|ocs|CX_1,
-Marriott International,US,oracle,ejwl|us2|CX,
-Hilton,US,oracle,efet|us2|CX_1,
-Waste Management,US,oracle,emcm|us2|WMCareers,
-Macy's,US,oracle,ebwh|us2|CX_1,
-Uber,US,oracle,iaziqy|ocs|UberCareers,
-Citizens Financial,US,oracle,hcgn|us2|CX_1,
-Chubb,US,oracle,fa-ewgu-saasfaprod1|ocs|CX_2001,
-Tenet Healthcare,US,oracle,eodr|us2|CX_1001,
-Ascension,US,oracle,ibpcjb|ocs|CX_1004,
-Providence,US,oracle,evac|us2|CX_1,
-Mayo Clinic,US,oracle,fa-euwp-saasfaprod1|ocs|Mayo,
-Quest Diagnostics,US,oracle,hdox|us6|CX_1,
-Molina Healthcare,US,oracle,hckd|us2|CX_1,
-Emerson,US,oracle,hdjq|us2|CX_1,
-International Paper,US,oracle,iazbqy|ocs|CX_1,
-Sherwin-Williams,US,oracle,ejhp|us6|CX_2,
-Hormel Foods,US,oracle,ekkh|us2|CX_2002,
-Micron Technology,US,eightfold,micron.eightfold.ai|micron.com,
-Qualcomm,US,eightfold,app.eightfold.ai|qualcomm.com,
-Lam Research,US,eightfold,app.eightfold.ai|lamresearch.com,
-Starbucks,US,eightfold,starbucks.eightfold.ai|starbucks.com,
-Northrop Grumman,US,eightfold,ngc.eightfold.ai|ngc.com,
-Whirlpool,US,eightfold,whirlpool.eightfold.ai|whirlpool.com,
-Estee Lauder Companies,US,eightfold,elcompanies.eightfold.ai|elcompanies.com,
-CACI,US,eightfold,app.eightfold.ai|caci.com,
-Fluor,US,eightfold,fluor.eightfold.ai|fluor.com,
-Netflix,US,eightfold,netflix.eightfold.ai|netflix.com,
-Microsoft,US,eightfold,apply.careers.microsoft.com|microsoft.com,
-Aflac,US,successfactors,careers.aflac.com,
-Dominion Energy,US,successfactors,careers.dominionenergy.com,
-ExxonMobil,US,successfactors,jobs.exxonmobil.com,
-LyondellBasell,US,successfactors,careers.lyondellbasell.com,
-McDonald's,US,successfactors,jobs.mcdonalds.com,
-NextEra Energy,US,successfactors,jobs.nexteraenergy.com,
-XPO,US,successfactors,jobs.xpo.com,
-Nucor,US,successfactors,jobs.nucor.com,
-Skyworks Solutions,US,successfactors,careers.skyworksinc.com,
-Halliburton,US,successfactors,jobs.halliburton.com,
-Teradyne,US,successfactors,jobs.teradyne.com,
-AMD,US,jibe,careers.amd.com,
-State Farm,US,jibe,jobs.statefarm.com,
-Keysight Technologies,US,jibe,jobs.keysight.com,
-PepsiCo,US,jibe,www.pepsicojobs.com,
-Universal Health Services,US,jibe,jobs.uhsinc.com,
-Rivian,US,jibe,careers.rivian.com,
-Ulta Beauty,US,jibe,careers.ulta.com,
-Rambus,US,icims,careers-rambus,
-Steel Dynamics,US,icims,careers-steeldynamics,
-Cencora,US,phenom,careers.cencora.com|CHKCENUS|en_us,
-Lowe's,US,phenom,talent.lowes.com|LOWEUS|en_us,
-Freddie Mac,US,phenom,careers.freddiemac.com|FRMAUS|en_us,
-UPS,US,phenom,www.jobs-ups.com|UPBUPSGLOBAL|en_us,
-Raytheon (RTX),US,phenom,careers.rtx.com|RAYTGLOBAL|en_global,
-TJX Companies,US,workday,tjx|wd1|TJX_EXTERNAL,
-Dollar Tree,US,phenom,careers.dollartree.com|DTYDTJUS|en_us,
-United Airlines,US,phenom,careers.united.com|UAIUADUS|en_us,
-Republic Services,US,phenom,jobs.republicservices.com|ROURSAUS|en_us,
-O'Reilly Auto Parts,US,phenom,careers.oreillyauto.com|OAPOAPUS|en_us,
-Chewy,US,phenom,careers.chewy.com|CHINUS|en_us,
-Truist,US,phenom,careers.truist.com|TBJTBFUS|en_us,
-PNC,US,phenom,careers.pnc.com|PNC1GLOBAL|en_global,
-LabCorp,US,phenom,careers.labcorp.com|COVAGLOBAL|en_global,
-DaVita,US,phenom,careers.davita.com|DAVIUS|en_us,
-CVS Health,US,phenom,jobs.cvshealth.com|CVSCHLUS|en_us,
-Zimmer Biomet,US,phenom,careers.zimmerbiomet.com|ZBUZBRUS|en_us,
-Bechtel,US,phenom,jobs.bechtel.com|BCFBCKUS|en_us,
-Illinois Tool Works,US,phenom,careers.itw.com|ITWITWUS|en_us,
-Trane Technologies,US,phenom,careers.tranetechnologies.com|TRTEGLOBAL|en_global,
-DuPont,US,phenom,careers.dupont.com|DUPOUS|en_us,
-PPG Industries,US,phenom,careers.ppg.com|PIIPIIUS|en_us,
-Conagra Brands,US,phenom,careers.conagrabrands.com|CXGCONUS|en_us,
-Honda America,US,phenom,careers.honda.com|AHMAHMUS|en_us,
-Humana,US,phenom,careers.humana.com|HUMHUMUS|en_us,
-UnitedHealth Group,US,sitemap,careers.unitedhealthgroup.com,
-Kaiser Permanente,US,sitemap,www.kaiserpermanentejobs.org,
-Walgreens,US,sitemap,jobs.walgreens.com,
-FedEx,US,sitemap,careers.fedex.com,
-AbbVie,US,sitemap,careers.abbvie.com,
-Synopsys,US,sitemap,careers.synopsys.com,
-Qorvo,US,successfactors,careers.qorvo.com,
-Eli Lilly,US,phenom,careers.lilly.com|LILLUS|en_us,
-JPMorgan Chase,US,oracle,jpmc||CX_1001,
-Ford Motor,US,oracle,efds|em5|CX_1,
-Marvell Technology,US,workday,marvell|wd1|MarvellCareers,
-Amazon,US,amazon,all,https://www.amazon.jobs
-Kroger,US,oracle,eluq|us2|CX_2001,
-Texas Instruments,US,oracle,edbz|us2|CX,
-Dell Technologies,US,oracle,enterpriseplatform.dell.com||CX_1,
-Tractor Supply,US,successfactors,www.tractorsupply.careers,
-Norfolk Southern,US,successfactors,jobs.nscorp.com,
-Cargill,US,sitemap,careers.cargill.com,
-Valero Energy,US,taleo,valero|2|101430233,
-Textron,US,taleo,textron|textron|8140753014,
-IBM,US,ibm,all,https://www.ibm.com/careers
-Best Buy,US,bestbuy,all,https://jobs.bestbuy.com
-Google,US,google,all,https://www.google.com/about/careers
-Apple,US,apple,all,https://jobs.apple.com
-TSMC,TW,sitemap,https://careers.tsmc.com/en_US/careers/sitemap.xml,
-Morgan Lewis,US,workday,morganlewis|wd5|morganlewis,
-Goodwin Procter,US,workday,goodwinprocter|wd5|External_Careers,
-Greenberg Traurig,US,workday,gtlaw|wd1|GTLAW,
-McDermott Will & Emery,US,workday,mwe|wd5|mwe_careers,
-Holland & Knight,US,workday,hklaw|wd1|Holland_Knight,
-Seyfarth Shaw,US,jibe,careers.seyfarth.com,
-Ogletree Deakins,US,jibe,careers.ogletree.com,
-Perkins Coie,US,workday,perkinscoie|wd115|perkinscoieexternal,
-Alston & Bird,US,workday,alston|wd1|ExternalCareer,
-Linklaters,GB,workday,linklaters|wd3|Linklaters,
-Herbert Smith Freehills,GB,phenom,careers.hsfkramer.com|HSFHSFUK|en_global,
-Faegre Drinker,US,workday,esswd|wd501|External,
-Boston Consulting Group,US,eightfold,bcg.eightfold.ai|bcg.com,
-Grant Thornton,US,oracle,ehzq|us2|CX_1,
-RSM,US,workday,rsm|wd1|RSMCareers,
-BDO,US,oracle,ebqb|us2|BDOExperiencedCareers,
-Crowe,US,phenom,careers.crowe.com|CROCROUS|en_us,
-Marsh McLennan,US,phenom,careers.marsh.com|MAMCGLOBAL|en_global,
-Aon,US,jibe,jobs.aon.com,
-JLL,US,workday,jll|wd1|jllcareers,
-Cushman & Wakefield,US,workday,cw|wd1|External,
-Robert Half,US,phenom,careers.roberthalf.com|ROHAGLOBAL|en_global,
-Insight Enterprises,US,eightfold,insight.eightfold.ai|insight.com,
-Gen Digital,US,ashby,gen-digital,
-Western Digital,US,smartrecruiters,WesternDigital,
-Jabil,US,workday,jabil|wd5|Jabil_Careers,
-Flex,US,workday,flextronics|wd1|Careers,
-Arrow Electronics,US,workday,arrow|wd1|AC,
-Zebra Technologies,US,workday,zebra|wd501|Zebra_careers,
-Hewlett Packard Enterprise,US,phenom,careers.hpe.com|HPE1US|en_us,
-NetApp,US,eightfold,netapp.eightfold.ai|netapp.com,
-F5,US,workday,ffive|wd5|f5jobs,
-Autodesk,US,eightfold,app.eightfold.ai|autodesk.com,
-Palo Alto Networks,US,workday,paloaltonetworks|wd5|panwexternalcareers,
-Fortinet,US,oracle,edel|us2|CX_2001,
-Activision Blizzard,US,phenom,careers.activisionblizzard.com|ACCOUS|en_us,
-Fiserv,US,phenom,careers.fiserv.com|FFFYJUS|en_us,
-FIS,US,workday,fis|wd5|SearchJobs,
-Broadridge,US,workday,broadridge|wd5|Careers,
-Paychex,US,jibe,careers.paychex.com,
-DXC Technology,US,workday,dxctechnology|wd1|DXCJobs,
-Kyndryl,US,workday,kyndryl|wd5|KyndrylEarlyCareers,
-Unisys,US,workday,unisys|wd5|External,
-Northern Trust,US,workday,ntrs|wd1|northerntrust,
-BNY,US,oracle,eofe|us2|BNY,
-KeyCorp,US,workday,keybank|wd5|External_Career_Site,
-Regions Financial,US,phenom,careers.regions.com|RFCOUS|en_us,
-M&T Bank,US,workday,mtb|wd5|MTB,
-First Citizens,US,jibe,jobs.firstcitizens.com,
-Ameriprise,US,workday,ameriprise|wd5|Ameriprise,
-LPL Financial,US,phenom,career.lpl.com|LFMLFFUS|en_us,
-Franklin Templeton,US,phenom,careers.franklintempleton.com|FTGFTMUS|en_us,
-T. Rowe Price,US,workday,troweprice|wd5|TRowePrice,
-Invesco,US,workday,invesco|wd1|IVZ,
-Principal Financial,US,jibe,careers.principal.com,
-Unum,US,workday,unum|wd1|External,
-AIG,US,workday,aig|wd1|aig,
-Markel,US,workday,markelcorp|wd5|GlobalCareers,
-Assurant,US,workday,assurant|wd1|Assurant_Careers,
-Genworth,US,workday,gnw|wd1|GNW,
-CNO Financial,US,workday,cnoinc|wd5|Careers,
-Arthur J. Gallagher,US,jibe,jobs.ajg.com,
-Brown & Brown,US,workday,bbinsurance|wd1|Careers_Europe,
-S&P Global,US,workday,spgi|wd5|SPGI_Careers,
-Intercontinental Exchange,US,jibe,careers.ice.com,
-Thermo Fisher,US,phenom,jobs.thermofisher.com|TFSCGLOBAL|en_global,
-Agilent,US,workday,agilent|wd5|Agilent_Student_Careers,
-Dexcom,US,eightfold,app.eightfold.ai|dexcom.com,
-Owens & Minor,US,workday,owensminor|wd1|OMCareers,
-Zoetis,US,workday,zoetis|wd5|zoetis,
-Viatris,US,workday,viatris|wd5|External,
-Organon,US,phenom,jobs.organon.com|MECEUS|en_us,
-Lockheed Martin,US,eightfold,lockheedmartin.eightfold.ai|lockheedmartin.com,
-Howmet Aerospace,US,oracle,fa-exty-saasfaprod1|ocs|CX_1,
-Spirit AeroSystems,US,jibe,careers.spiritaero.com,
-Rockwell Automation,US,workday,rockwellautomation|wd1|External_Rockwell_Automation,
-Dover,US,workday,dover|wd103|Dover,
-Fortive,US,eightfold,fortive.eightfold.ai|fortive.com,
-United Rentals,US,workday,ur|wd1|URcareers,
-Oshkosh,US,phenom,careers.oshkoshcorp.com|OCNOCKUS|en_us,
-Goodyear,US,workday,goodyear|wd1|GoodyearCareers,
-C.H. Robinson,US,workday,chrobinson|wd5|CHRobinson,
-Old Dominion,US,workday,odfl|wd1|ODFL_Careers,
-CSX,US,oracle,fa-eowa-saasfaprod1|ocs|CSXCareers,
-Exelon,US,jibe,careers.exeloncorp.com,
-American Electric Power,US,workday,aep|wd1|AEPCareerSite,
-Xcel Energy,US,workday,xcelenergy|wd1|External,
-Consolidated Edison,US,oracle,ejcu|us6|CX_1033,
-Ameren,US,workday,ameren|wd1|External,
-PPL,US,jibe,careers.pplweb.com,
-Occidental,US,workday,oxy|wd5|Corporate,
-Devon Energy,US,workday,devonenergy|wd5|Careers,
-Williams Companies,US,workday,williams|wd5|External,
-Kinder Morgan,US,jibe,careers.kindermorgan.com,
-ONEOK,US,workday,oneok|wd1|ONEOK,
-Vistra,US,workday,vst|wd5|vistra_careers,
-Clorox,US,workday,clorox|wd1|Clorox,
-Church & Dwight,US,workday,churchdwight|wd1|chdcareers,
-J.M. Smucker,US,workday,smucker|wd5|US_External_Careers,
-Molson Coors,US,phenom,careers.molsoncoors.com|MQXMOLUS|en_us,
-Brown-Forman,US,workday,bf|wd5|USA_Canada,
-Hasbro,US,greenhouse,hasbro,
-VF Corporation,US,workday,vfc|wd5|vfc_careers,
-PVH,US,phenom,careers.pvh.com|PCAPCAUS|en_us,
-Tapestry,US,workday,tapestry|wd108|Tapestry_Careers,
-Foot Locker,US,jibe,careers.footlocker.com,
-Advance Auto Parts,US,phenom,jobs.advanceautoparts.com|ADVAAPUS|en_us,
-CarMax,US,workday,carmax|wd1|External,
-AutoNation,US,phenom,careers.autonation.com|AUMAIHUS|en_us,
-Sally Beauty,US,oracle,eigx|us6|CX_13,
-Sprouts Farmers Market,US,jibe,jobs.sprouts.com,
-BJ's Wholesale,US,workday,bjswholesaleclub|wd1|BJsCareers,
-US Foods,US,phenom,careers.usfoods.com|UFSUFAUS|en_us,
-Restaurant Brands,US,phenom,careers.rbi.com|RBINGLOBAL|en_global,
-Texas Roadhouse,US,phenom,careers.becomearoadie.com|TTYTRSUS|en_us,
-Warner Bros. Discovery,US,phenom,careers.wbd.com|WAMEGLOBAL|en_global,
-Lumen Technologies,US,eightfold,app.eightfold.ai|lumen.com,
-DLA Piper,US,workday,dlapiper|wd1|dlapiper,
-Global Payments,US,workday,worldpay|wd5|Worldpay_External_Careers_Site,
-Huntington Bancshares,US,workday,huntington|wd12|HNBcareers,
-IQVIA,US,workday,iqvia|wd1|IQVIA,
-Xylem,US,workday,xylem|wd5|xylem-careers,
-Duke Energy,US,workday,dukeenergy|wd1|search,
-FirstEnergy,US,oracle,fa-etjd-saasfaprod1|ocs|FirstEnergyCareers,
-Kellanova,US,successfactors,jobs.kellanova.com,
-T-Mobile,US,workday,tmobile|wd1|External,
-Baker McKenzie,US,avature,careers.bakermckenzie.com|en_US/opportunities,
-Gibson Dunn,US,virecruit,selfapplygibsondunn.viglobalcloud.com,
-Foley & Lardner,US,icims,careers-foley,
-Foley & Lardner,US,virecruit,foleytalent.viglobalcloud.com,
-Allen & Overy Shearman,GB,sitemap,careers.aoshearman.com,
-Dentons,US,successfactors,careers.dentons.com,
-Nelson Mullins,US,icims,careers-nelsonmullins,
-Willis Towers Watson,US,sitemap,careers.wtwco.com,
-Gartner,US,sitemap,jobs.gartner.com,
-Ciena,US,workday,ciena|wd5|Careers,
-Xerox,US,avature,xerox.avature.net|en_US/careers,
-Oracle,US,oracle,eeho|us2|CX_45001,
-Electronic Arts,US,avature,jobs.ea.com|en_US/careers,
-Jack Henry,US,sitemap,careers.jackhenry.com,
-MetLife,US,avature,www.metlifecareers.com|en_US/ml,
-W. R. Berkley,US,icims,careers-berkley,
-Moody's,US,sitemap,careers.moodys.com,
-Equifax,US,sitemap,careers.equifax.com,
-MSCI,US,icims,uscareers-msci,
-MSCI,US,icims,globalcareers-msci,
-Bio-Rad,US,sitemap,careers.bio-rad.com,
-Intuitive Surgical,US,smartrecruiters,Intuitive,
-Experian,US,smartrecruiters,Experian,
-Teleflex,US,successfactors,careers.teleflex.com,
-Encompass Health,US,sitemap,careers.encompasshealth.com,
-L3Harris,US,sitemap,careers.l3harris.com,
-Ingersoll Rand,US,successfactors,careers.irco.com,
-TransUnion,US,workday,transunion|wd5|TransUnion,
-Lennox,US,icims,globalcareers-lennox,
-Hubbell,US,successfactors,careers.hubbell.com,
-JetBlue,US,successfactors,careers.jetblue.com,
-PG&E,US,sitemap,jobs.pge.com,
-CenterPoint Energy,US,successfactors,careers.centerpointenergy.com,
-Phillips 66,US,successfactors,careers.phillips66.com,
-Entergy,US,successfactors,jobs.entergy.com,
-McCormick,US,successfactors,careers.mccormick.com,
-Hershey,US,successfactors,careers.thehersheycompany.com,
-Mattel,US,smartrecruiters,MattelInc,
-Gap,US,sitemap,www.gapinc.com,
-Bath & Body Works,US,sitemap,careers.bathandbodyworks.com,
-Compass Group USA,US,sitemap,careers.compass-usa.com,
-Wyndham,US,successfactors,careers.wyndhamhotels.com,
-Chipotle,US,sitemap,jobs.chipotle.com,
-Charter,US,sitemap,jobs.spectrum.com,
-Frontier Communications,US,sitemap,careers.frontier.com,
-Latham & Watkins,US,icims,careers-lw,
-Latham & Watkins,US,icims,ukcareers-lw,
-Simpson Thacher,US,workday,stblaw|wd1|careers,
-Norton Rose Fulbright,GB,workday,nrf|wd3|External,
-Gibson Dunn,US,greenhouse,gibsondunn,
-Skadden,US,workday,skadden|wd5|Skadden_Careers,
-Sidley Austin,US,workday,sidley|wd501|US,
-Hogan Lovells,US,workday,hoganlovells|wd3|Search,
-Cooley,US,workday,cooley|wd1|Cooley_US_LLP,
-Wilson Sonsini,US,workday,wsgr|wd503|WSGR,
-King & Spalding,US,workday,kslaw|wd1|careers,
-Paul Hastings,US,workday,paulhastings|wd1|PH-Staff,
-Jackson Lewis,US,workday,jacksonlewis|wd1|JacksonLewisLawyerCareers,
-Freshfields,GB,workday,freshfields|wd3|FBD_101,
-Troutman Pepper,US,workday,troutman|wd5|TPRecruit1,
-Haynes Boone,US,workday,haynesboone|wd503|HaynesandBoone,
-CDW,US,workday,cdw|wd5|Careers,
-Trimble,US,workday,trimble|wd1|TrimbleCareers,
-Salesforce,US,workday,salesforce|wd12|External_Career_Site,
-Fifth Third,US,workday,fifththird|wd5|53careers,
-Raymond James,US,workday,raymondjames|wd1|RaymondJamesCareers,
-Vanguard,US,workday,vanguard|wd5|vanguard_external,
-Prudential,US,workday,prudential|wd3|prudential,
-Hartford,US,workday,thehartford|wd5|Careers_External,
-Globe Life,US,workday,globelife|wd5|Globe-Life-Careers,
-Nasdaq,US,workday,nasdaq|wd1|Global_External_Site,
-CME Group,US,workday,cmegroup|wd1|cme_careers,
-ResMed,US,workday,resmed|wd3|ResMed_External_Careers,
-Henry Schein,US,workday,henryschein|wd1|External_Careers,
-Generac,US,workday,generac|wd5|External,
-BorgWarner,US,workday,borgwarner|wd5|BorgWarner_Careers,
-Aptiv,US,workday,aptiv|wd5|APTIV_CAREERS,
-Polaris,US,workday,polaris|wd5|PolarisJobs,
-Kimberly-Clark,US,workday,kimberlyclark|wd1|GLOBAL,
-Dick's Sporting Goods,US,workday,dickssportinggoods|wd1|DSG,
-Burlington,US,workday,burlington|wd5|BurlingtonCareers,
-Las Vegas Sands,US,workday,sands|wd1|sands_careers,
-Fox,US,workday,fox|wd1|Domestic,
-Jackson Lewis,US,workday,jacksonlewis|wd1|JacksonLewisBusinessandLegalProfessionalsCareers,
-Sidley Austin,US,workday,sidley|wd501|INTL,
-Union Pacific,US,successfactors,up.jobs,
-NRG Energy,US,successfactors,careers.nrgenergy.com,
-DTE Energy,US,successfactors,careers.dteenergy.com,
-AGCO,US,successfactors,careers.agcocorp.com,
-MSC Industrial,US,successfactors,jobs.mscdirect.com,
-Altria,US,successfactors,careers.altria.com,
-TE Connectivity,CH,successfactors,careers.te.com,
-Under Armour,US,successfactors,careers.underarmour.com,
-WEC Energy,US,successfactors,careers.wecenergygroup.com,
-Paramount,US,successfactors,careers.paramount.com,
-Paul Weiss,US,taleo,paulweiss|ex,
-Victoria's Secret,US,taleo,vsco|vss_in,
-Hitachi,JP,workday,hitachi|wd1|hitachi,
-NTT DATA,JP,workday,nttglobaldatacenters|wd501|External,
-Samsung Electronics,KR,workday,sec|wd3|Samsung_Careers,
-DBS Bank,SG,workday,dbs|wd3|DBS_Careers,
-Rio Tinto,GB,workday,riotinto|wd3|RioTinto_Careers,
-Commonwealth Bank,AU,workday,cba|wd3|CommBank_Careers,
-Westpac,AU,oracle,ebuu|ap1|CX,
-National Australia Bank,AU,eightfold,nab.eightfold.ai|nab.com.au,
-Telstra,AU,workday,telstra|wd3|Telstra_Careers,
-Allianz,DE,phenom,careers.allianz.com|AISAIPGB|en_global,
-Siemens Healthineers,DE,workday,onehealthineers|wd3|SHSJB,
-Bosch,DE,smartrecruiters,BoschGroup,
-SAP,DE,successfactors,careers.sap.com,
-E.ON,DE,oracle,fa-eylc-saasfaeuraprod1|ocs|CX_1,
-thyssenkrupp,DE,workday,steeleurope|wd3|Job_Board,
-Merck KGaA,DE,phenom,careers.emdgroup.com|MQAEGZUS|en_us,
-Infineon,DE,eightfold,infineon.eightfold.ai|infineon.com,
-Heidelberg Materials,DE,workday,heidelbergmaterials|wd3|Global_HM_Career_Site,
-AXA,FR,jibe,careers.axa.com,
-Airbus,FR,workday,ag|wd3|Airbus,
-Thales,FR,phenom,careers.thalesgroup.com|TGPTGWGLOBAL|en_global,
-Air Liquide,FR,workday,airliquidehr|wd3|AirLiquideExternalCareer,
-Publicis Groupe,FR,jibe,careers.publicisgroupe.com,
-Lloyds Banking Group,GB,workday,lbg|wd3|lbg_Careers,
-BAE Systems,GB,phenom,jobs.baesystems.com|BAE1US|en_global,
-Roche,CH,phenom,careers.roche.com|ROCHGLOBAL|en_global,
-Trafigura,CH,workday,trafigura|wd3|TrafiguraCareerSite,
-Vitol,CH,smartrecruiters,Vitol,
-Kuehne+Nagel,CH,phenom,jobs.kuehne-nagel.com|KUNAGLOBAL|en_global,
-Equinor,NO,workday,equinor|wd3|EQNR,
-Santander,ES,workday,santander|wd3|SantanderCareers,
-ADNOC,AE,phenom,jobs.adnoc.ae|AGLAGPAE|en_us,
-Vale,BR,eightfold,vale.eightfold.ai|vale.com,
-FEMSA,MX,greenhouse,spin,
-Royal Bank of Canada,CA,phenom,jobs.rbc.com|RBCAA0088|en_ca,
-TD Bank,CA,workday,td|wd3|TD_Bank_Careers,
-Bank of Montreal,CA,phenom,jobs.bmo.com|BOMOGLOBAL|en_us,
-CIBC,CA,workday,cibc|wd3|search,
-Magna International,CA,workday,magna|wd3|Magna,
-Enbridge,CA,workday,enbridge|wd3|enbridge_careers,
-Thomson Reuters,CA,workday,thomsonreuters|wd5|External_Career_Site,
-Berkshire Hathaway Energy,US,oracle,fa-essf-saasfaprod1|ocs|CX_1,
-Costco,US,jibe,careers.costco.com,
-Plains All American,US,workday,plains|wd1|plains,
-Tyson Foods,US,workday,tysonfoods|wd5|TSN,
-TD Synnex,US,phenom,careers.tdsynnex.com|TSQTSBUS|en_us,
-Nationwide,US,workday,nationwide|wd1|Nationwide_Career,
-TIAA,US,workday,tiaa|wd1|Search,
-PulteGroup,US,workday,pultegroup|wd1|PGI,
-Cummins,US,oracle,fa-espx-saasfaprod1|ocs|CX_1,
-GE Vernova,US,workday,gevernova|wd5|Vernova_ExternalSite,
-GE HealthCare,US,phenom,careers.gehealthcare.com|GEVGHLGLOBAL|en_global,
-World Kinect,US,workday,wfscorp|wd5|wfscareers,
-ANZ,AU,successfactors,careers.anz.com,
-ZF Friedrichshafen,DE,successfactors,jobs.zf.com,
-Diageo,GB,workday,diageo|wd3|Diageo_Careers,
-Prosus,NL,ashby,prosus,
-Deere & Company,US,successfactors,jobs.deere.com,
-Tencent,CN,workday,tencent|wd1|Tencent_Careers,
-JD.com,CN,workday,jd|wd103|Careers_at_JD,
-Haier,CN,workday,haier|wd3|GE_Appliances,
-Bridgestone,JP,workday,bridgestone|wd5|External,
-Mizuho Financial,JP,workday,mizuho|wd1|mizuhoamericas,
-Daikin,JP,workday,daikin|wd12|DaikinManufacturing_External,
-Fast Retailing (Uniqlo),JP,workday,fastretailing|wd3|retail_us_Uniqlo,
-Deutsche Bank,DE,workday,db|wd3|DBWebsite,
-Barclays,GB,workday,barclays|wd3|External_Career_Site_Barclays,
-Aviva,GB,workday,aviva|wd1|External,
-Rolls-Royce,GB,workday,rollsroyce|wd3|professional,
-Centrica,GB,workday,centrica|wd3|Centrica,
-RELX,GB,workday,relx|wd3|relx,
-Stellantis,NL,workday,stellantis|wd3|External_Career_Site_ID01,
-ING,NL,workday,ing|wd3|ICSGBLCOR,
-ASML,NL,workday,asml|wd3|ASMLBERLIN,
-Glencore,CH,workday,glencore|wd3|astronenergy,
-Maersk,DK,workday,maersk|wd3|Maersk_Careers,
-BBVA,ES,workday,bbva|wd3|BBVA,
-Iberdrola,ES,workday,iberdrola|wd3|Iberdrola,
-Repsol,ES,workday,repsol|wd3|Repsol,
-ACS,ES,workday,acs|wd5|ACSCareers,
-Manulife,CA,workday,manulife|wd3|MFCJH_Jobs,
-Sun Life,CA,workday,sunlife|wd3|Experienced-Jobs,
-Brookfield,CA,workday,brookfield|wd5|brookfieldproperties,
-Suncor,CA,workday,suncor|wd1|Suncor_External,
-MassMutual,US,workday,massmutual|wd1|MMINDCareersite,
-Northwestern Mutual,US,workday,northwesternmutual|wd5|CORPORATE-CAREERS,
-Lennar,US,workday,lennar|wd1|Lennar_Jobs,
-Marathon Petroleum,US,workday,mpc|wd1|MPCCareers,
-Lenovo,CN,avature,jobs.lenovo.com|en_US/careers,
-Sumitomo Corporation,JP,successfactors,careers.sumitomocorp.com,
-SoftBank Group,JP,sitemap,jobs.softbank.jp,
-Astellas Pharma,JP,successfactors,careers.astellas.com,
-Tata Motors,IN,successfactors,careers.tatamotors.com,
-Singapore Airlines,SG,successfactors,careers.singaporeair.com,
-BHP,AU,successfactors,careers.bhp.com,
-Volkswagen,DE,successfactors,jobs.volkswagen-group.com,
-Adidas,DE,successfactors,jobs.adidas-group.com,
-Bayer,DE,successfactors,jobs.bayer.com,
-L'Oreal,FR,sitemap,careers.loreal.com,
-Vinci,FR,sitemap,jobs.vinci.com,
-Capgemini,FR,successfactors,careers.capgemini.com,
-Legal & General,GB,sitemap,careers.legalandgeneral.com,
-Reckitt,GB,successfactors,careers.reckitt.com,
-British American Tobacco,GB,sitemap,careers.bat.com,
-ArcelorMittal,LU,oracle,emfg|em4|CX_4001,
-Nordea,FI,successfactors,careers.nordea.com,
-Novo Nordisk,DK,successfactors,careers.novonordisk.com,
-OMV,AT,successfactors,careers.omv.com,
-Loblaw (George Weston),CA,sitemap,careers.loblaw.ca,
-CHS,US,sitemap,jobs.chsinc.com,
-D.R. Horton,US,taleo,drhorton|2|101430233,
-New York Life,US,sitemap,careers.newyorklife.com,
-Stanford University,US,oracle,careersearch.stanford.edu||stanford,
-Yale University,US,phenom,careers.yale.edu|YUCYUHUS|en_us,
-Brown University,US,workday,brown|wd5|staff-careers-brown,
-University of Chicago,US,workday,uchicago|wd5|External,
-Rice University,US,oracle,emdz|us2|CX_2001,
-Washington University in St. Louis,US,workday,wustl|wd1|External,
-Emory University,US,jibe,careers.emory.edu,
-Georgetown University,US,workday,georgetown|wd1|Georgetown_Admin_Careers,
-Tufts University,US,jibe,jobs.tufts.edu,
-Tulane University,US,oracle,tulane-ibqejb|ocs|CX_1,
-American University,US,workday,american|wd1|AU,
-University of Miami,US,phenom,careers.miami.edu|UOMUOMUS|en_us,
-Baylor University,US,oracle,ejof|us2|CX,
-Worcester Polytechnic Institute,US,workday,wpi|wd5|WPI_External_Career_Site,
-DePaul University,US,oracle,ekze|us2|CX_1001,
-Creighton University,US,oracle,hcps|us2|CX_1,
-Santa Clara University,US,workday,scu|wd1|scu,
-Liberty University,US,workday,liberty|wd5|lu_job_board_faculty,
-University of California Los Angeles,US,jibe,jobs.ucla.edu,
-University of California San Francisco,US,oracle,iazuqy|ocs|CX_1,
-University of California Irvine,US,jibe,jobs.uci.edu,
-University of Virginia,US,phenom,jobs.virginia.edu|UOVUOVUS|en_us,
-University of Central Florida,US,workday,ucf|wd1|athletics,
-Ohio State University,US,workday,osu|wd1|OSUCareers,
-Pennsylvania State University,US,workday,psu|wd1|PSU_Academic,
-Iowa State University,US,workday,isu|wd1|IowaStateJobs,
-University of Nevada Las Vegas,US,workday,nshe|wd1|UNLV-External,
-University of Nevada Reno,US,workday,nshe|wd1|UNR-external,
-Oregon State University,US,workday,oregonstate|wd501|OSU_Careers_Site,
-Oregon Health & Science University,US,jibe,jobs.ohsu.edu,
-Washington State University,US,workday,wsu|wd5|WSU_Jobs,
-University of Texas System,US,workday,utaustin|wd1|UTstaff,
-University of Arkansas,US,workday,uasys|wd5|UAF_External_Career_Site,
-Auburn University,US,jibe,jobs.auburn.edu,
-University of Mississippi,US,workday,olemiss|wd12|External__Staff,
-University of Tennessee,US,oracle,fa-ewlq-saasfaprod1|ocs|CX_1,
-University of Louisville,US,workday,uofl|wd1|UofLCareerSite,
-Clemson University,US,workday,clemson|wd12|Clemson_Careers,
-University of Maine,US,oracle,fa-ewca-saasfaprod1|ocs|CX_1,
-University of Wyoming,US,oracle,eeik|us2|CX_1001,
-South Dakota State University,US,workday,rembrandtfoods|wd12|Rembrandt_Foods,
-University of South Florida,US,oracle,fa-ewkd-saasfaprod1|ocs|USF,
-Colorado State University,US,workday,csusystem|wd12|fortcollins_careers,
-Arizona State University,US,workday,asu|wd1|ASUStaffCareers,
-Cornell University,US,workday,cornell|wd1|CCECareerPage,
-University of Southern California,US,workday,usc|wd5|ExternalUSCCareers,
-Northeastern University,US,workday,northeastern|wd1|careers,
-University of Rochester,US,workday,rochester|wd5|UR_Staff,
-Brandeis University,US,workday,brandeis|wd5|Jobs,
-Wake Forest University,US,workday,wfu|wd1|Staff_Career_Website_live,
-Brigham Young University,US,workday,byu|wd1|faculty-careers,
-Stevens Institute of Technology,US,workday,stevens|wd5|External,
-Saint Louis University,US,workday,slu|wd5|Careers,
-Loyola University Chicago,US,workday,loyola|wd5|External,
-Howard University,US,workday,howard|wd1|HU,
-State of Georgia,US,workday,georgia|wd5|TGC,
-University of Maryland,US,workday,umd|wd1|UMCP,
-Louisiana State University,US,workday,lsu|wd1|LSU,
-Princeton University,US,icims,hub-princeton,
-Harvard University,US,sitemap,careers.harvard.edu,
-Johns Hopkins University,US,eightfold,jhu.eightfold.ai|jhu.edu,
-Drexel University,US,sitemap,careers.drexel.edu,
-Utah State University,US,icims,careers-usu,
-University of Alabama at Birmingham,US,taleo,uab|ext|8100108034,
-Texas A&M University,US,workday,tamus|wd1|TAMU_External,
+name,country,ats,token,careers_url,domain
+Careem,AE,greenhouse,careem,,careem.com
+Accor,AU,smartrecruiters,accor,,accor.com
+Airwallex,AU,ashby,airwallex,,airwallex.com
+Canva,AU,smartrecruiters,canva,,canva.com
+Culture Amp,AU,greenhouse,cultureamp,,cultureamp.com
+EBANX,BR,greenhouse,ebanx,,ebanx.com
+Nubank,BR,ashby,nubank,,nubank.com.br
+QuintoAndar,BR,greenhouse,quintoandar,,quintoandar.com.br
+1Password,CA,ashby,1password,,1password.com
+Carta,CA,greenhouse,carta,,carta.com
+Cohere,CA,ashby,cohere,,cohere.com
+Lightspeed,CA,ashby,lightspeedhq,,lightspeedhq.com
+Wealthsimple,CA,ashby,wealthsimple,,wealthsimple.com
+Novartis,CH,workday,novartis|wd3|Novartis_Careers,,novartis.com
+Proton,CH,greenhouse,proton,,proton.me
+Scandit,CH,greenhouse,scandit,,scandit.com
+Celonis,DE,greenhouse,celonis,,celonis.com
+Contentful,DE,greenhouse,contentful,,contentful.com
+Delivery Hero,DE,smartrecruiters,deliveryhero,,deliveryhero.com
+GetYourGuide,DE,greenhouse,getyourguide,,getyourguide.com
+Helsing,DE,greenhouse,helsing,,helsing.ai
+N26,DE,greenhouse,n26,,n26.com
+Trade Republic,DE,greenhouse,traderepublicbank,,traderepublic.com
+Cabify,ES,greenhouse,cabify,,cabify.com
+Typeform,ES,greenhouse,typeform,,typeform.com
+Wallapop,ES,greenhouse,wallapop,,wallapop.com
+Wolt,FI,greenhouse,wolt,,wolt.com
+Alan,FR,ashby,alan,,alan.com
+BlaBlaCar,FR,lever,blablacar,,blablacar.com
+Doctolib,FR,greenhouse,doctolib,,doctolib.fr
+Qonto,FR,lever,qonto,,qonto.com
+Sanofi,FR,workday,sanofi|wd3|SanofiCareers,,sanofi.com
+AstraZeneca,GB,workday,astrazeneca|wd3|Careers,,astrazeneca.com
+BP,GB,workday,bpinternational|wd3|bpCareers,,bp.com
+Deliveroo,GB,greenhouse,deliveroo,,deliveroo.co.uk
+Entain,GB,smartrecruiters,entain,,entaingroup.com
+Forvis Mazars,GB,greenhouse,forvismazars,,forvismazars.com
+GoCardless,GB,greenhouse,gocardless,,gocardless.com
+GSK,GB,workday,gsk|wd5|GSKCareers,,gsk.com
+Monzo,GB,greenhouse,monzo,,monzo.com
+Randstad Construction and Property,GB,personio,randstad,,randstad.com
+Shell,GB,workday,shell|wd3|ShellCareers,,shell.com
+Synthesia,GB,ashby,synthesia,,synthesia.io
+Xendit,ID,greenhouse,xendit,,xendit.co
+Accenture,IE,workday,accenture|wd103|AccentureCareers,,accenture.com
+Intercom,IE,greenhouse,intercom,,intercom.com
+Lemonade,IL,ashby,lemonade,,lemonade.com
+Wiz,IL,greenhouse,wizinc,,wiz.io
+Acme Services Private Limited,IN,personio,acme,,
+Alembic,IN,ashby,alembic,,alembic.com
+Atlan,IN,ashby,atlan,,atlan.com
+CRED,IN,lever,cred,,cred.club
+Fresh Prints,IN,greenhouse,freshprints,,freshprints.com
+Freshworks,IN,smartrecruiters,freshworks,,freshworks.com
+Groww,IN,greenhouse,groww,,groww.in
+Meesho,IN,lever,meesho,,meesho.com
+Sarvam AI,IN,ashby,sarvam,,sarvam.ai
+Swiggy,IN,smartrecruiters,swiggy,,swiggy.com
+Syndigo,IN,greenhouse,syndigo,,syndigo.com
+Zeta,IN,lever,zeta,,zeta.tech
+Satispay,IT,ashby,satispay,,satispay.com
+Mercari,JP,workable,mercari,,mercari.com
+SmartNews,JP,workable,smartnews,,smartnews.com
+M-KOPA,KE,ashby,m-kopa,,m-kopa.com
+Kavak,MX,lever,kavak,,kavak.com
+Andela,NG,ashby,andela,,andela.com
+Moniepoint,NG,greenhouse,moniepoint,,moniepoint.com
+Adyen,NL,greenhouse,adyen,,adyen.com
+bunq,NL,recruitee,bunq,,bunq.com
+Mollie,NL,ashby,mollie,,mollie.com
+Philips,NL,workday,philips|wd3|jobs-and-careers,,philips.com
+Picnic,NL,smartrecruiters,picnic,,picnic.app
+Xero,NZ,ashby,xero,,xero.com
+DocPlanner,PL,ashby,docplanner,,docplanner.com
+Farfetch,PT,lever,farfetch,,farfetch.com
+Feedzai,PT,greenhouse,feedzai,,feedzai.com
+UiPath,RO,ashby,uipath,,uipath.com
+Spotify,SE,lever,spotify,,spotify.com
+Grab,SG,smartrecruiters,grab,,grab.com
+Ninja Van,SG,lever,ninjavan,,ninjavan.co
+3M,US,workday,3m|wd1|Search,,3m.com
+Adobe,US,workday,adobe|wd5|external_experienced,,adobe.com
+Airbnb,US,greenhouse,airbnb,,airbnb.com
+Airtable,US,greenhouse,airtable,,airtable.com
+Amgen,US,workday,amgen|wd1|Careers,,amgen.com
+Analog Devices,US,workday,analogdevices|wd1|External,,analog.com
+Anthropic,US,greenhouse,anthropic,,anthropic.com
+Applied Materials,US,workday,amat|wd1|External,,appliedmaterials.com
+Asana,US,greenhouse,asana,,asana.com
+AT&T,US,workday,att|wd1|ATTGeneral,,att.com
+Bank of America,US,workday,ghr|wd1|lateral-us,,bankofamerica.com
+BlackRock,US,workday,blackrock|wd1|BlackRock_Professional,,blackrock.com
+Boeing,US,workday,boeing|wd1|EXTERNAL_CAREERS,,boeing.com
+Booz Allen,US,workday,bah|wd1|BAH_Jobs,,boozallen.com
+Brex,US,greenhouse,brex,,brex.com
+Bristol Myers Squibb,US,workday,bristolmyerssquibb|wd5|BMS,,bms.com
+Broadcom,US,workday,broadcom|wd1|External_Career,,broadcom.com
+Capital One,US,workday,capitalone|wd12|Capital_One,,capitalone.com
+Cardinal Health,US,workday,cardinalhealth|wd1|EXT,,cardinalhealth.com
+Caterpillar,US,workday,cat|wd5|CaterpillarCareers,,caterpillar.com
+Centene,US,workday,centene|wd5|Centene_External,,centene.com
+Chevron,US,workday,chevron|wd5|jobs,,chevron.com
+Cigna,US,workday,cigna|wd5|cignacareers,,cigna.com
+Cisco,US,workday,cisco|wd5|Cisco_Careers,,cisco.com
+Citi,US,workday,citi|wd5|2,,citigroup.com
+Cloudflare,US,greenhouse,cloudflare,,cloudflare.com
+Coca-Cola,US,workday,coke|wd1|coca-cola-careers,,coca-colacompany.com
+Coinbase,US,greenhouse,coinbase,,coinbase.com
+CrowdStrike,US,workday,crowdstrike|wd5|crowdstrikecareers,,crowdstrike.com
+Danaher,US,workday,danaher|wd1|DanaherJobs,,danaher.com
+Databricks,US,greenhouse,databricks,,databricks.com
+Datadog,US,greenhouse,datadog,,datadoghq.com
+David Hersch - State Farm Agent,US,greenhouse,david,,
+Discord,US,greenhouse,discord,,discord.com
+Disney,US,workday,disney|wd5|disneycareer,,disney.com
+Dropbox,US,greenhouse,dropbox,,dropbox.com
+Elastic,US,greenhouse,elastic,,elastic.co
+Elevance Health,US,workday,elevancehealth|wd1|ANT,,elevancehealth.com
+Equinix,US,workday,equinix|wd1|External,,equinix.com
+Faire,US,greenhouse,faire,,faire.com
+Figma,US,greenhouse,figma,,figma.com
+Fivetran,US,greenhouse,fivetran,,fivetran.com
+Gap Inc.,US,workday,gapinc|wd1|GAPINC,,gap.com
+GE Aerospace,US,workday,geaerospace|wd5|GE_ExternalSite,,geaerospace.com
+General Dynamics IT,US,workday,gdit|wd5|External_Career_Site,,gdit.com
+General Motors,US,workday,generalmotors|wd5|Careers_GM,,gm.com
+Gilead,US,workday,gilead|wd1|gileadcareers,,gilead.com
+GitLab,US,greenhouse,gitlab,,gitlab.com
+Gusto,US,greenhouse,gusto,,gusto.com
+Hex,US,ashby,hex,,hex.tech
+HP,US,workday,hp|wd5|ExternalCareerSite,,hp.com
+Hugging Face,US,workable,huggingface,,huggingface.co
+Instacart,US,greenhouse,instacart,,instacart.com
+Intel,US,workday,intel|wd1|External,,intel.com
+Johnson & Johnson,US,workday,jj|wd5|JJ,,jnj.com
+Koch Trucking,US,smartrecruiters,kochtrucking,,
+Leidos,US,workday,leidos|wd5|External,,leidos.com
+Linear,US,ashby,linear,,linear.app
+Lyft,US,greenhouse,lyft,,lyft.com
+Mastercard,US,workday,mastercard|wd1|CorporateCareers,,mastercard.com
+McKesson,US,workday,mckesson|wd3|External_Careers,,mckesson.com
+Medtronic,US,workday,medtronic|wd1|MedtronicCareers,,medtronic.com
+Merck,US,workday,msd|wd5|SearchJobs,,merck.com
+Moderna,US,workday,modernatx|wd1|M_tx,,modernatx.com
+MongoDB,US,greenhouse,mongodb,,mongodb.com
+Morgan Stanley,US,workday,ms|wd5|External,,morganstanley.com
+Motorola Solutions,US,workday,motorolasolutions|wd5|Careers,,motorolasolutions.com
+Nike,US,workday,nike|wd1|nke,,nike.com
+Nordstrom,US,workday,nordstrom|wd501|nordstrom_careers,,nordstrom.com
+Notion,US,ashby,notion,,notion.so
+NVIDIA,US,workday,nvidia|wd5|NVIDIAExternalCareerSite,,nvidia.com
+Okta,US,greenhouse,okta,,okta.com
+OpenAI,US,ashby,openai,,openai.com
+Palantir,US,lever,palantir,,palantir.com
+PayPal,US,workday,paypal|wd1|jobs,,paypal.com
+Perplexity,US,ashby,perplexity,,perplexity.ai
+Pfizer,US,workday,pfizer|wd1|PfizerCareers,,pfizer.com
+Pinterest,US,greenhouse,pinterest,,pinterest.com
+Plaid,US,ashby,plaid,,plaid.com
+PostHog,US,ashby,posthog,,posthog.com
+Procter & Gamble,US,workday,pg|wd5|1000,,pg.com
+Ramp,US,ashby,ramp,,ramp.com
+Reddit,US,greenhouse,reddit,,reddit.com
+Robinhood,US,greenhouse,robinhood,,robinhood.com
+Samsara,US,greenhouse,samsara,,samsara.com
+Scale AI,US,greenhouse,scaleai,,scale.com
+Securitas,US,smartrecruiters,securitas,,securitas.com
+Snowflake,US,ashby,snowflake,,snowflake.com
+Southwest Airlines,US,workday,swa|wd1|external,,southwestair.com
+State Street,US,workday,statestreet|wd1|Global,,statestreet.com
+Stripe,US,greenhouse,stripe,,stripe.com
+Stryker,US,workday,stryker|wd1|StrykerCareers,,stryker.com
+Supabase,US,ashby,supabase,,supabase.com
+Sysco,US,workday,sysco|wd5|syscocareers,,sysco.com
+Target,US,workday,target|wd5|targetcareers,,target.com
+The Home Depot,US,workday,homedepot|wd5|CareerDepot,,homedepot.com
+Twilio,US,greenhouse,twilio,,twilio.com
+USAJOBS,US,usajobs,all,https://www.usajobs.gov,usajobs.gov
+Vercel,US,greenhouse,vercel,,vercel.com
+Veterans Health Administration,US,greenhouse,veterans,,va.gov
+Visa,US,workday,visa|wd5|Visa,,visa.com
+Wells Fargo,US,workday,wf|wd1|WellsFargoJobs,,wellsfargo.com
+Workday,US,workday,workday|wd5|Workday,,workday.com
+Zillow,US,workday,zillow|wd5|Zillow_Group_External,,zillow.com
+NXP Semiconductors,NL,workday,nxp|wd3|careers,,nxp.com
+Comcast,US,workday,comcast|wd115|Comcast_Careers,,comcast.com
+Allstate,US,workday,allstate|wd5|allstate_careers,,allstate.com
+Abbott Laboratories,US,workday,abbott|wd5|abbottcareers,,abbott.com
+J.B. Hunt,US,workday,jbhunt|wd501|Careers,,jbhunt.com
+Kohl's,US,workday,kohls|wd504|kohlscareers,,kohls.com
+Expedia Group,US,workday,expedia|wd108|search,,expediagroup.com
+Travelers,US,workday,travelers|wd5|External,,travelers.com
+Biogen,US,workday,biibhr|wd3|external,,biogen.com
+Carrier,US,workday,carrier|wd5|jobs,,carrier.com
+Otis,US,workday,otis|wd504|REC_Ext_Gateway,,otis.com
+Johnson Controls,US,workday,jci|wd5|JCI,,johnsoncontrols.com
+Constellation Brands,US,workday,cbrands|wd5|CBI_External_Careers,,cbrands.com
+Verizon,US,workday,verizon|wd12|verizon-careers,,verizon.com
+Unilever,GB,workday,unilever|wd3|Unilever_Experienced_Professionals,,unilever.com
+Toyota North America,US,workday,toyota|wd503|TMNA,,toyota.com
+KLA,US,workday,kla|wd1|Search,,kla.com
+Cadence Design Systems,US,workday,cadence|wd1|External_Careers,,cadence.com
+Fannie Mae,US,workday,fanniemae|wd1|FannieMaeCareers,,fanniemae.com
+Fidelity Investments,US,workday,fmr|wd1|FidelityCareers,,fidelity.com
+U.S. Bank,US,workday,usbank|wd1|US_Bank_Careers,,usbank.com
+Ally Financial,US,workday,ally|wd1|Ally,,ally.com
+USAA,US,workday,usaa|wd1|USAAJOBSWD,,usaajobs.com
+Cleveland Clinic,US,workday,ccf|wd1|ClevelandClinicCareers,,clevelandclinic.org
+Becton Dickinson,US,workday,bdx|wd1|EXTERNAL_CAREER_SITE_USA,,bd.com
+Baxter,US,workday,baxter|wd1|baxter,,baxter.com
+Illumina,US,workday,illumina|wd1|illumina-careers,,illumina.com
+Dow,US,workday,dow|wd1|ExternalCareers,,dow.com
+General Mills,US,workday,genmills|wd1|GMI_External_Careers,,generalmills.com
+ConocoPhillips,US,workday,conocophillips|wd1|External,,conocophillips.com
+onsemi,US,oracle,hctz|us2|CX_1001,,onsemi.com
+Coherent,US,oracle,hcwp|us2|CX_1,,coherent.com
+Albertsons,US,oracle,eofd|us6|CX_1001,,albertsonscompanies.com
+Honeywell,US,oracle,ibqbjb|ocs|Honeywell,,honeywell.com
+Dollar General,US,oracle,ibxwjb|ocs|CX_1,,dollargeneral.com
+Marriott International,US,oracle,ejwl|us2|CX,,marriott.com
+Hilton,US,oracle,efet|us2|CX_1,,hilton.com
+Waste Management,US,oracle,emcm|us2|WMCareers,,wm.com
+Macy's,US,oracle,ebwh|us2|CX_1,,macys.com
+Uber,US,oracle,iaziqy|ocs|UberCareers,,uber.com
+Citizens Financial,US,oracle,hcgn|us2|CX_1,,citizensbank.com
+Chubb,US,oracle,fa-ewgu-saasfaprod1|ocs|CX_2001,,chubb.com
+Tenet Healthcare,US,oracle,eodr|us2|CX_1001,,tenethealth.com
+Ascension,US,oracle,ibpcjb|ocs|CX_1004,,ascension.org
+Providence,US,oracle,evac|us2|CX_1,,providence.org
+Mayo Clinic,US,oracle,fa-euwp-saasfaprod1|ocs|Mayo,,mayoclinic.org
+Quest Diagnostics,US,oracle,hdox|us6|CX_1,,questdiagnostics.com
+Molina Healthcare,US,oracle,hckd|us2|CX_1,,molinahealthcare.com
+Emerson,US,oracle,hdjq|us2|CX_1,,emerson.com
+International Paper,US,oracle,iazbqy|ocs|CX_1,,internationalpaper.com
+Sherwin-Williams,US,oracle,ejhp|us6|CX_2,,sherwin-williams.com
+Hormel Foods,US,oracle,ekkh|us2|CX_2002,,hormelfoods.com
+Micron Technology,US,eightfold,micron.eightfold.ai|micron.com,,micron.com
+Qualcomm,US,eightfold,app.eightfold.ai|qualcomm.com,,qualcomm.com
+Lam Research,US,eightfold,app.eightfold.ai|lamresearch.com,,lamresearch.com
+Starbucks,US,eightfold,starbucks.eightfold.ai|starbucks.com,,starbucks.com
+Northrop Grumman,US,eightfold,ngc.eightfold.ai|ngc.com,,northropgrumman.com
+Whirlpool,US,eightfold,whirlpool.eightfold.ai|whirlpool.com,,whirlpoolcareers.com
+Estee Lauder Companies,US,eightfold,elcompanies.eightfold.ai|elcompanies.com,,elcompanies.com
+CACI,US,eightfold,app.eightfold.ai|caci.com,,caci.com
+Fluor,US,eightfold,fluor.eightfold.ai|fluor.com,,fluor.com
+Netflix,US,eightfold,netflix.eightfold.ai|netflix.com,,netflix.com
+Microsoft,US,eightfold,apply.careers.microsoft.com|microsoft.com,,microsoft.com
+Aflac,US,successfactors,careers.aflac.com,,aflac.com
+Dominion Energy,US,successfactors,careers.dominionenergy.com,,dominionenergy.com
+ExxonMobil,US,successfactors,jobs.exxonmobil.com,,exxonmobil.com
+LyondellBasell,US,successfactors,careers.lyondellbasell.com,,lyondellbasell.com
+McDonald's,US,successfactors,jobs.mcdonalds.com,,mcdonalds.com
+NextEra Energy,US,successfactors,jobs.nexteraenergy.com,,nexteraenergy.com
+XPO,US,successfactors,jobs.xpo.com,,xpo.com
+Nucor,US,successfactors,jobs.nucor.com,,nucor.com
+Skyworks Solutions,US,successfactors,careers.skyworksinc.com,,skyworksinc.com
+Halliburton,US,successfactors,jobs.halliburton.com,,halliburton.com
+Teradyne,US,successfactors,jobs.teradyne.com,,teradyne.com
+AMD,US,jibe,careers.amd.com,,amd.com
+State Farm,US,jibe,jobs.statefarm.com,,statefarm.com
+Keysight Technologies,US,jibe,jobs.keysight.com,,keysight.com
+PepsiCo,US,jibe,www.pepsicojobs.com,,pepsicojobs.com
+Universal Health Services,US,jibe,jobs.uhsinc.com,,uhs.com
+Rivian,US,jibe,careers.rivian.com,,rivian.com
+Ulta Beauty,US,jibe,careers.ulta.com,,ulta.com
+Rambus,US,icims,careers-rambus,,rambus.com
+Steel Dynamics,US,icims,careers-steeldynamics,,steeldynamics.com
+Cencora,US,phenom,careers.cencora.com|CHKCENUS|en_us,,cencora.com
+Lowe's,US,phenom,talent.lowes.com|LOWEUS|en_us,,lowes.com
+Freddie Mac,US,phenom,careers.freddiemac.com|FRMAUS|en_us,,freddiemac.com
+UPS,US,phenom,www.jobs-ups.com|UPBUPSGLOBAL|en_us,,jobs-ups.com
+Raytheon (RTX),US,phenom,careers.rtx.com|RAYTGLOBAL|en_global,,rtx.com
+TJX Companies,US,workday,tjx|wd1|TJX_EXTERNAL,,tjx.com
+Dollar Tree,US,phenom,careers.dollartree.com|DTYDTJUS|en_us,,dollartree.com
+United Airlines,US,phenom,careers.united.com|UAIUADUS|en_us,,united.com
+Republic Services,US,phenom,jobs.republicservices.com|ROURSAUS|en_us,,republicservices.com
+O'Reilly Auto Parts,US,phenom,careers.oreillyauto.com|OAPOAPUS|en_us,,oreillyauto.com
+Chewy,US,phenom,careers.chewy.com|CHINUS|en_us,,chewy.com
+Truist,US,phenom,careers.truist.com|TBJTBFUS|en_us,,truist.com
+PNC,US,phenom,careers.pnc.com|PNC1GLOBAL|en_global,,pnc.com
+LabCorp,US,phenom,careers.labcorp.com|COVAGLOBAL|en_global,,labcorp.com
+DaVita,US,phenom,careers.davita.com|DAVIUS|en_us,,davita.com
+CVS Health,US,phenom,jobs.cvshealth.com|CVSCHLUS|en_us,,cvshealth.com
+Zimmer Biomet,US,phenom,careers.zimmerbiomet.com|ZBUZBRUS|en_us,,zimmerbiomet.com
+Bechtel,US,phenom,jobs.bechtel.com|BCFBCKUS|en_us,,bechtel.com
+Illinois Tool Works,US,phenom,careers.itw.com|ITWITWUS|en_us,,itw.com
+Trane Technologies,US,phenom,careers.tranetechnologies.com|TRTEGLOBAL|en_global,,tranetechnologies.com
+DuPont,US,phenom,careers.dupont.com|DUPOUS|en_us,,dupont.com
+PPG Industries,US,phenom,careers.ppg.com|PIIPIIUS|en_us,,ppg.com
+Conagra Brands,US,phenom,careers.conagrabrands.com|CXGCONUS|en_us,,conagrabrands.com
+Honda America,US,phenom,careers.honda.com|AHMAHMUS|en_us,,honda.com
+Humana,US,phenom,careers.humana.com|HUMHUMUS|en_us,,humana.com
+UnitedHealth Group,US,sitemap,careers.unitedhealthgroup.com,,unitedhealthgroup.com
+Kaiser Permanente,US,sitemap,www.kaiserpermanentejobs.org,,kaiserpermanentejobs.org
+Walgreens,US,sitemap,jobs.walgreens.com,,walgreens.com
+FedEx,US,sitemap,careers.fedex.com,,fedex.com
+AbbVie,US,sitemap,careers.abbvie.com,,abbvie.com
+Synopsys,US,sitemap,careers.synopsys.com,,synopsys.com
+Qorvo,US,successfactors,careers.qorvo.com,,qorvo.com
+Eli Lilly,US,phenom,careers.lilly.com|LILLUS|en_us,,lilly.com
+JPMorgan Chase,US,oracle,jpmc||CX_1001,,jpmorgan.com
+Ford Motor,US,oracle,efds|em5|CX_1,,ford.com
+Marvell Technology,US,workday,marvell|wd1|MarvellCareers,,marvell.com
+Amazon,US,amazon,all,https://www.amazon.jobs,amazon.com
+Kroger,US,oracle,eluq|us2|CX_2001,,thekrogerco.com
+Texas Instruments,US,oracle,edbz|us2|CX,,ti.com
+Dell Technologies,US,oracle,enterpriseplatform.dell.com||CX_1,,dell.com
+Tractor Supply,US,successfactors,www.tractorsupply.careers,,tractorsupply.com
+Norfolk Southern,US,successfactors,jobs.nscorp.com,,nscorp.com
+Cargill,US,sitemap,careers.cargill.com,,cargill.com
+Valero Energy,US,taleo,valero|2|101430233,,valero.com
+Textron,US,taleo,textron|textron|8140753014,,textron.com
+IBM,US,ibm,all,https://www.ibm.com/careers,ibm.com
+Best Buy,US,bestbuy,all,https://jobs.bestbuy.com,bestbuy.com
+Google,US,google,all,https://www.google.com/about/careers,google.com
+Apple,US,apple,all,https://jobs.apple.com,apple.com
+TSMC,TW,sitemap,https://careers.tsmc.com/en_US/careers/sitemap.xml,,tsmc.com
+Morgan Lewis,US,workday,morganlewis|wd5|morganlewis,,morganlewis.com
+Goodwin Procter,US,workday,goodwinprocter|wd5|External_Careers,,goodwinlaw.com
+Greenberg Traurig,US,workday,gtlaw|wd1|GTLAW,,gtlaw.com
+McDermott Will & Emery,US,workday,mwe|wd5|mwe_careers,,mwe.com
+Holland & Knight,US,workday,hklaw|wd1|Holland_Knight,,hklaw.com
+Seyfarth Shaw,US,jibe,careers.seyfarth.com,,seyfarth.com
+Ogletree Deakins,US,jibe,careers.ogletree.com,,ogletree.com
+Perkins Coie,US,workday,perkinscoie|wd115|perkinscoieexternal,,perkinscoie.com
+Alston & Bird,US,workday,alston|wd1|ExternalCareer,,alston.com
+Linklaters,GB,workday,linklaters|wd3|Linklaters,,linklaters.com
+Herbert Smith Freehills,GB,phenom,careers.hsfkramer.com|HSFHSFUK|en_global,,hsfkramer.com
+Faegre Drinker,US,workday,esswd|wd501|External,,faegredrinker.com
+Boston Consulting Group,US,eightfold,bcg.eightfold.ai|bcg.com,,bcg.com
+Grant Thornton,US,oracle,ehzq|us2|CX_1,,grantthornton.com
+RSM,US,workday,rsm|wd1|RSMCareers,,rsmus.com
+BDO,US,oracle,ebqb|us2|BDOExperiencedCareers,,bdo.com
+Crowe,US,phenom,careers.crowe.com|CROCROUS|en_us,,crowe.com
+Marsh McLennan,US,phenom,careers.marsh.com|MAMCGLOBAL|en_global,,marshmclennan.com
+Aon,US,jibe,jobs.aon.com,,aon.com
+JLL,US,workday,jll|wd1|jllcareers,,jll.com
+Cushman & Wakefield,US,workday,cw|wd1|External,,cushmanwakefield.com
+Robert Half,US,phenom,careers.roberthalf.com|ROHAGLOBAL|en_global,,roberthalf.com
+Insight Enterprises,US,eightfold,insight.eightfold.ai|insight.com,,insight.com
+Gen Digital,US,ashby,gen-digital,,gendigital.com
+Western Digital,US,smartrecruiters,WesternDigital,,westerndigital.com
+Jabil,US,workday,jabil|wd5|Jabil_Careers,,jabil.com
+Flex,US,workday,flextronics|wd1|Careers,,flex.com
+Arrow Electronics,US,workday,arrow|wd1|AC,,arrow.com
+Zebra Technologies,US,workday,zebra|wd501|Zebra_careers,,zebra.com
+Hewlett Packard Enterprise,US,phenom,careers.hpe.com|HPE1US|en_us,,hpe.com
+NetApp,US,eightfold,netapp.eightfold.ai|netapp.com,,netapp.com
+F5,US,workday,ffive|wd5|f5jobs,,f5.com
+Autodesk,US,eightfold,app.eightfold.ai|autodesk.com,,autodesk.com
+Palo Alto Networks,US,workday,paloaltonetworks|wd5|panwexternalcareers,,paloaltonetworks.com
+Fortinet,US,oracle,edel|us2|CX_2001,,fortinet.com
+Activision Blizzard,US,phenom,careers.activisionblizzard.com|ACCOUS|en_us,,activisionblizzard.com
+Fiserv,US,phenom,careers.fiserv.com|FFFYJUS|en_us,,fiserv.com
+FIS,US,workday,fis|wd5|SearchJobs,,fisglobal.com
+Broadridge,US,workday,broadridge|wd5|Careers,,broadridge.com
+Paychex,US,jibe,careers.paychex.com,,paychex.com
+DXC Technology,US,workday,dxctechnology|wd1|DXCJobs,,dxc.com
+Kyndryl,US,workday,kyndryl|wd5|KyndrylEarlyCareers,,kyndryl.com
+Unisys,US,workday,unisys|wd5|External,,unisys.com
+Northern Trust,US,workday,ntrs|wd1|northerntrust,,northerntrust.com
+BNY,US,oracle,eofe|us2|BNY,,bny.com
+KeyCorp,US,workday,keybank|wd5|External_Career_Site,,key.com
+Regions Financial,US,phenom,careers.regions.com|RFCOUS|en_us,,regions.com
+M&T Bank,US,workday,mtb|wd5|MTB,,mtb.com
+First Citizens,US,jibe,jobs.firstcitizens.com,,firstcitizens.com
+Ameriprise,US,workday,ameriprise|wd5|Ameriprise,,ameriprise.com
+LPL Financial,US,phenom,career.lpl.com|LFMLFFUS|en_us,,lpl.com
+Franklin Templeton,US,phenom,careers.franklintempleton.com|FTGFTMUS|en_us,,franklintempleton.com
+T. Rowe Price,US,workday,troweprice|wd5|TRowePrice,,troweprice.com
+Invesco,US,workday,invesco|wd1|IVZ,,invesco.com
+Principal Financial,US,jibe,careers.principal.com,,principal.com
+Unum,US,workday,unum|wd1|External,,unum.com
+AIG,US,workday,aig|wd1|aig,,aig.com
+Markel,US,workday,markelcorp|wd5|GlobalCareers,,markel.com
+Assurant,US,workday,assurant|wd1|Assurant_Careers,,assurant.com
+Genworth,US,workday,gnw|wd1|GNW,,genworth.com
+CNO Financial,US,workday,cnoinc|wd5|Careers,,cnoinc.com
+Arthur J. Gallagher,US,jibe,jobs.ajg.com,,ajg.com
+Brown & Brown,US,workday,bbinsurance|wd1|Careers_Europe,,bbinsurance.com
+S&P Global,US,workday,spgi|wd5|SPGI_Careers,,spglobal.com
+Intercontinental Exchange,US,jibe,careers.ice.com,,ice.com
+Thermo Fisher,US,phenom,jobs.thermofisher.com|TFSCGLOBAL|en_global,,thermofisher.com
+Agilent,US,workday,agilent|wd5|Agilent_Student_Careers,,agilent.com
+Dexcom,US,eightfold,app.eightfold.ai|dexcom.com,,dexcom.com
+Owens & Minor,US,workday,owensminor|wd1|OMCareers,,owens-minor.com
+Zoetis,US,workday,zoetis|wd5|zoetis,,zoetis.com
+Viatris,US,workday,viatris|wd5|External,,viatris.com
+Organon,US,phenom,jobs.organon.com|MECEUS|en_us,,organon.com
+Lockheed Martin,US,eightfold,lockheedmartin.eightfold.ai|lockheedmartin.com,,lockheedmartin.com
+Howmet Aerospace,US,oracle,fa-exty-saasfaprod1|ocs|CX_1,,howmet.com
+Spirit AeroSystems,US,jibe,careers.spiritaero.com,,spiritaero.com
+Rockwell Automation,US,workday,rockwellautomation|wd1|External_Rockwell_Automation,,rockwellautomation.com
+Dover,US,workday,dover|wd103|Dover,,dovercorporation.com
+Fortive,US,eightfold,fortive.eightfold.ai|fortive.com,,fortive.com
+United Rentals,US,workday,ur|wd1|URcareers,,unitedrentals.com
+Oshkosh,US,phenom,careers.oshkoshcorp.com|OCNOCKUS|en_us,,oshkoshcorp.com
+Goodyear,US,workday,goodyear|wd1|GoodyearCareers,,goodyear.com
+C.H. Robinson,US,workday,chrobinson|wd5|CHRobinson,,chrobinson.com
+Old Dominion,US,workday,odfl|wd1|ODFL_Careers,,odfl.com
+CSX,US,oracle,fa-eowa-saasfaprod1|ocs|CSXCareers,,csx.com
+Exelon,US,jibe,careers.exeloncorp.com,,exeloncorp.com
+American Electric Power,US,workday,aep|wd1|AEPCareerSite,,aep.com
+Xcel Energy,US,workday,xcelenergy|wd1|External,,xcelenergy.com
+Consolidated Edison,US,oracle,ejcu|us6|CX_1033,,coned.com
+Ameren,US,workday,ameren|wd1|External,,ameren.com
+PPL,US,jibe,careers.pplweb.com,,pplweb.com
+Occidental,US,workday,oxy|wd5|Corporate,,oxy.com
+Devon Energy,US,workday,devonenergy|wd5|Careers,,devonenergy.com
+Williams Companies,US,workday,williams|wd5|External,,williams.com
+Kinder Morgan,US,jibe,careers.kindermorgan.com,,kindermorgan.com
+ONEOK,US,workday,oneok|wd1|ONEOK,,oneok.com
+Vistra,US,workday,vst|wd5|vistra_careers,,vistracorp.com
+Clorox,US,workday,clorox|wd1|Clorox,,thecloroxcompany.com
+Church & Dwight,US,workday,churchdwight|wd1|chdcareers,,churchdwight.com
+J.M. Smucker,US,workday,smucker|wd5|US_External_Careers,,jmsmucker.com
+Molson Coors,US,phenom,careers.molsoncoors.com|MQXMOLUS|en_us,,molsoncoors.com
+Brown-Forman,US,workday,bf|wd5|USA_Canada,,brown-forman.com
+Hasbro,US,greenhouse,hasbro,,hasbro.com
+VF Corporation,US,workday,vfc|wd5|vfc_careers,,vfc.com
+PVH,US,phenom,careers.pvh.com|PCAPCAUS|en_us,,pvh.com
+Tapestry,US,workday,tapestry|wd108|Tapestry_Careers,,tapestry.com
+Foot Locker,US,jibe,careers.footlocker.com,,footlocker.com
+Advance Auto Parts,US,phenom,jobs.advanceautoparts.com|ADVAAPUS|en_us,,advanceautoparts.com
+CarMax,US,workday,carmax|wd1|External,,carmax.com
+AutoNation,US,phenom,careers.autonation.com|AUMAIHUS|en_us,,autonation.com
+Sally Beauty,US,oracle,eigx|us6|CX_13,,sallybeauty.com
+Sprouts Farmers Market,US,jibe,jobs.sprouts.com,,sprouts.com
+BJ's Wholesale,US,workday,bjswholesaleclub|wd1|BJsCareers,,bjs.com
+US Foods,US,phenom,careers.usfoods.com|UFSUFAUS|en_us,,usfoods.com
+Restaurant Brands,US,phenom,careers.rbi.com|RBINGLOBAL|en_global,,rbi.com
+Texas Roadhouse,US,phenom,careers.becomearoadie.com|TTYTRSUS|en_us,,texasroadhouse.com
+Warner Bros. Discovery,US,phenom,careers.wbd.com|WAMEGLOBAL|en_global,,wbd.com
+Lumen Technologies,US,eightfold,app.eightfold.ai|lumen.com,,lumen.com
+DLA Piper,US,workday,dlapiper|wd1|dlapiper,,dlapiper.com
+Global Payments,US,workday,worldpay|wd5|Worldpay_External_Careers_Site,,globalpayments.com
+Huntington Bancshares,US,workday,huntington|wd12|HNBcareers,,huntington.com
+IQVIA,US,workday,iqvia|wd1|IQVIA,,iqvia.com
+Xylem,US,workday,xylem|wd5|xylem-careers,,xylem.com
+Duke Energy,US,workday,dukeenergy|wd1|search,,duke-energy.com
+FirstEnergy,US,oracle,fa-etjd-saasfaprod1|ocs|FirstEnergyCareers,,firstenergycorp.com
+Kellanova,US,successfactors,jobs.kellanova.com,,kellanova.com
+T-Mobile,US,workday,tmobile|wd1|External,,t-mobile.com
+Baker McKenzie,US,avature,careers.bakermckenzie.com|en_US/opportunities,,bakermckenzie.com
+Gibson Dunn,US,virecruit,selfapplygibsondunn.viglobalcloud.com,,gibsondunn.com
+Foley & Lardner,US,icims,careers-foley,,foley.com
+Foley & Lardner,US,virecruit,foleytalent.viglobalcloud.com,,foley.com
+Allen & Overy Shearman,GB,sitemap,careers.aoshearman.com,,aoshearman.com
+Dentons,US,successfactors,careers.dentons.com,,dentons.com
+Nelson Mullins,US,icims,careers-nelsonmullins,,nelsonmullins.com
+Willis Towers Watson,US,sitemap,careers.wtwco.com,,wtwco.com
+Gartner,US,sitemap,jobs.gartner.com,,gartner.com
+Ciena,US,workday,ciena|wd5|Careers,,ciena.com
+Xerox,US,avature,xerox.avature.net|en_US/careers,,xerox.com
+Oracle,US,oracle,eeho|us2|CX_45001,,oracle.com
+Electronic Arts,US,avature,jobs.ea.com|en_US/careers,,ea.com
+Jack Henry,US,sitemap,careers.jackhenry.com,,jackhenry.com
+MetLife,US,avature,www.metlifecareers.com|en_US/ml,,metlife.com
+W. R. Berkley,US,icims,careers-berkley,,berkley.com
+Moody's,US,sitemap,careers.moodys.com,,moodys.com
+Equifax,US,sitemap,careers.equifax.com,,equifax.com
+MSCI,US,icims,uscareers-msci,,msci.com
+MSCI,US,icims,globalcareers-msci,,msci.com
+Bio-Rad,US,sitemap,careers.bio-rad.com,,bio-rad.com
+Intuitive Surgical,US,smartrecruiters,Intuitive,,intuitive.com
+Experian,US,smartrecruiters,Experian,,experian.com
+Teleflex,US,successfactors,careers.teleflex.com,,teleflex.com
+Encompass Health,US,sitemap,careers.encompasshealth.com,,encompasshealth.com
+L3Harris,US,sitemap,careers.l3harris.com,,l3harris.com
+Ingersoll Rand,US,successfactors,careers.irco.com,,irco.com
+TransUnion,US,workday,transunion|wd5|TransUnion,,transunion.com
+Lennox,US,icims,globalcareers-lennox,,lennox.com
+Hubbell,US,successfactors,careers.hubbell.com,,hubbell.com
+JetBlue,US,successfactors,careers.jetblue.com,,jetblue.com
+PG&E,US,sitemap,jobs.pge.com,,pge.com
+CenterPoint Energy,US,successfactors,careers.centerpointenergy.com,,centerpointenergy.com
+Phillips 66,US,successfactors,careers.phillips66.com,,phillips66.com
+Entergy,US,successfactors,jobs.entergy.com,,entergy.com
+McCormick,US,successfactors,careers.mccormick.com,,mccormickcorporation.com
+Hershey,US,successfactors,careers.thehersheycompany.com,,thehersheycompany.com
+Mattel,US,smartrecruiters,MattelInc,,mattel.com
+Gap,US,sitemap,www.gapinc.com,,gapinc.com
+Bath & Body Works,US,sitemap,careers.bathandbodyworks.com,,bathandbodyworks.com
+Compass Group USA,US,sitemap,careers.compass-usa.com,,compass-usa.com
+Wyndham,US,successfactors,careers.wyndhamhotels.com,,wyndhamhotels.com
+Chipotle,US,sitemap,jobs.chipotle.com,,chipotle.com
+Charter,US,sitemap,jobs.spectrum.com,,spectrum.com
+Frontier Communications,US,sitemap,careers.frontier.com,,frontier.com
+Latham & Watkins,US,icims,careers-lw,,lw.com
+Latham & Watkins,US,icims,ukcareers-lw,,lw.com
+Simpson Thacher,US,workday,stblaw|wd1|careers,,stblaw.com
+Norton Rose Fulbright,GB,workday,nrf|wd3|External,,nortonrosefulbright.com
+Gibson Dunn,US,greenhouse,gibsondunn,,gibsondunn.com
+Skadden,US,workday,skadden|wd5|Skadden_Careers,,skadden.com
+Sidley Austin,US,workday,sidley|wd501|US,,sidley.com
+Hogan Lovells,US,workday,hoganlovells|wd3|Search,,hoganlovells.com
+Cooley,US,workday,cooley|wd1|Cooley_US_LLP,,cooley.com
+Wilson Sonsini,US,workday,wsgr|wd503|WSGR,,wsgr.com
+King & Spalding,US,workday,kslaw|wd1|careers,,kslaw.com
+Paul Hastings,US,workday,paulhastings|wd1|PH-Staff,,paulhastings.com
+Jackson Lewis,US,workday,jacksonlewis|wd1|JacksonLewisLawyerCareers,,jacksonlewis.com
+Freshfields,GB,workday,freshfields|wd3|FBD_101,,freshfields.com
+Troutman Pepper,US,workday,troutman|wd5|TPRecruit1,,troutman.com
+Haynes Boone,US,workday,haynesboone|wd503|HaynesandBoone,,haynesboone.com
+CDW,US,workday,cdw|wd5|Careers,,cdw.com
+Trimble,US,workday,trimble|wd1|TrimbleCareers,,trimble.com
+Salesforce,US,workday,salesforce|wd12|External_Career_Site,,salesforce.com
+Fifth Third,US,workday,fifththird|wd5|53careers,,53.com
+Raymond James,US,workday,raymondjames|wd1|RaymondJamesCareers,,raymondjames.com
+Vanguard,US,workday,vanguard|wd5|vanguard_external,,vanguard.com
+Prudential,US,workday,prudential|wd3|prudential,,prudential.com
+Hartford,US,workday,thehartford|wd5|Careers_External,,thehartford.com
+Globe Life,US,workday,globelife|wd5|Globe-Life-Careers,,globelifeinsurance.com
+Nasdaq,US,workday,nasdaq|wd1|Global_External_Site,,nasdaq.com
+CME Group,US,workday,cmegroup|wd1|cme_careers,,cmegroup.com
+ResMed,US,workday,resmed|wd3|ResMed_External_Careers,,resmed.com
+Henry Schein,US,workday,henryschein|wd1|External_Careers,,henryschein.com
+Generac,US,workday,generac|wd5|External,,generac.com
+BorgWarner,US,workday,borgwarner|wd5|BorgWarner_Careers,,borgwarner.com
+Aptiv,US,workday,aptiv|wd5|APTIV_CAREERS,,aptiv.com
+Polaris,US,workday,polaris|wd5|PolarisJobs,,polaris.com
+Kimberly-Clark,US,workday,kimberlyclark|wd1|GLOBAL,,kimberly-clark.com
+Dick's Sporting Goods,US,workday,dickssportinggoods|wd1|DSG,,dickssportinggoods.com
+Burlington,US,workday,burlington|wd5|BurlingtonCareers,,burlington.com
+Las Vegas Sands,US,workday,sands|wd1|sands_careers,,sands.com
+Fox,US,workday,fox|wd1|Domestic,,foxcorporation.com
+Jackson Lewis,US,workday,jacksonlewis|wd1|JacksonLewisBusinessandLegalProfessionalsCareers,,jacksonlewis.com
+Sidley Austin,US,workday,sidley|wd501|INTL,,sidley.com
+Union Pacific,US,successfactors,up.jobs,,up.com
+NRG Energy,US,successfactors,careers.nrgenergy.com,,nrg.com
+DTE Energy,US,successfactors,careers.dteenergy.com,,dteenergy.com
+AGCO,US,successfactors,careers.agcocorp.com,,agcocorp.com
+MSC Industrial,US,successfactors,jobs.mscdirect.com,,mscdirect.com
+Altria,US,successfactors,careers.altria.com,,altria.com
+TE Connectivity,CH,successfactors,careers.te.com,,te.com
+Under Armour,US,successfactors,careers.underarmour.com,,underarmour.com
+WEC Energy,US,successfactors,careers.wecenergygroup.com,,wecenergygroup.com
+Paramount,US,successfactors,careers.paramount.com,,paramount.com
+Paul Weiss,US,taleo,paulweiss|ex,,paulweiss.com
+Victoria's Secret,US,taleo,vsco|vss_in,,victoriassecret.com
+Hitachi,JP,workday,hitachi|wd1|hitachi,,hitachi.com
+NTT DATA,JP,workday,nttglobaldatacenters|wd501|External,,nttdata.com
+Samsung Electronics,KR,workday,sec|wd3|Samsung_Careers,,samsung.com
+DBS Bank,SG,workday,dbs|wd3|DBS_Careers,,dbs.com
+Rio Tinto,GB,workday,riotinto|wd3|RioTinto_Careers,,riotinto.com
+Commonwealth Bank,AU,workday,cba|wd3|CommBank_Careers,,commbank.com.au
+Westpac,AU,oracle,ebuu|ap1|CX,,westpac.com.au
+National Australia Bank,AU,eightfold,nab.eightfold.ai|nab.com.au,,nab.com.au
+Telstra,AU,workday,telstra|wd3|Telstra_Careers,,telstra.com.au
+Allianz,DE,phenom,careers.allianz.com|AISAIPGB|en_global,,allianz.com
+Siemens Healthineers,DE,workday,onehealthineers|wd3|SHSJB,,siemens-healthineers.com
+Bosch,DE,smartrecruiters,BoschGroup,,bosch.com
+SAP,DE,successfactors,careers.sap.com,,sap.com
+E.ON,DE,oracle,fa-eylc-saasfaeuraprod1|ocs|CX_1,,eon.com
+thyssenkrupp,DE,workday,steeleurope|wd3|Job_Board,,thyssenkrupp.com
+Merck KGaA,DE,phenom,careers.emdgroup.com|MQAEGZUS|en_us,,merckgroup.com
+Infineon,DE,eightfold,infineon.eightfold.ai|infineon.com,,infineon.com
+Heidelberg Materials,DE,workday,heidelbergmaterials|wd3|Global_HM_Career_Site,,heidelbergmaterials.com
+AXA,FR,jibe,careers.axa.com,,axa.com
+Airbus,FR,workday,ag|wd3|Airbus,,airbus.com
+Thales,FR,phenom,careers.thalesgroup.com|TGPTGWGLOBAL|en_global,,thalesgroup.com
+Air Liquide,FR,workday,airliquidehr|wd3|AirLiquideExternalCareer,,airliquide.com
+Publicis Groupe,FR,jibe,careers.publicisgroupe.com,,publicisgroupe.com
+Lloyds Banking Group,GB,workday,lbg|wd3|lbg_Careers,,lloydsbankinggroup.com
+BAE Systems,GB,phenom,jobs.baesystems.com|BAE1US|en_global,,baesystems.com
+Roche,CH,phenom,careers.roche.com|ROCHGLOBAL|en_global,,roche.com
+Trafigura,CH,workday,trafigura|wd3|TrafiguraCareerSite,,trafigura.com
+Vitol,CH,smartrecruiters,Vitol,,vitol.com
+Kuehne+Nagel,CH,phenom,jobs.kuehne-nagel.com|KUNAGLOBAL|en_global,,kuehne-nagel.com
+Equinor,NO,workday,equinor|wd3|EQNR,,equinor.com
+Santander,ES,workday,santander|wd3|SantanderCareers,,santander.com
+ADNOC,AE,phenom,jobs.adnoc.ae|AGLAGPAE|en_us,,adnoc.ae
+Vale,BR,eightfold,vale.eightfold.ai|vale.com,,vale.com
+FEMSA,MX,greenhouse,spin,,femsa.com
+Royal Bank of Canada,CA,phenom,jobs.rbc.com|RBCAA0088|en_ca,,rbc.com
+TD Bank,CA,workday,td|wd3|TD_Bank_Careers,,td.com
+Bank of Montreal,CA,phenom,jobs.bmo.com|BOMOGLOBAL|en_us,,bmo.com
+CIBC,CA,workday,cibc|wd3|search,,cibc.com
+Magna International,CA,workday,magna|wd3|Magna,,magna.com
+Enbridge,CA,workday,enbridge|wd3|enbridge_careers,,enbridge.com
+Thomson Reuters,CA,workday,thomsonreuters|wd5|External_Career_Site,,thomsonreuters.com
+Berkshire Hathaway Energy,US,oracle,fa-essf-saasfaprod1|ocs|CX_1,,brkenergy.com
+Costco,US,jibe,careers.costco.com,,costco.com
+Plains All American,US,workday,plains|wd1|plains,,plains.com
+Tyson Foods,US,workday,tysonfoods|wd5|TSN,,tysonfoods.com
+TD Synnex,US,phenom,careers.tdsynnex.com|TSQTSBUS|en_us,,tdsynnex.com
+Nationwide,US,workday,nationwide|wd1|Nationwide_Career,,nationwide.com
+TIAA,US,workday,tiaa|wd1|Search,,tiaa.org
+PulteGroup,US,workday,pultegroup|wd1|PGI,,pultegroup.com
+Cummins,US,oracle,fa-espx-saasfaprod1|ocs|CX_1,,cummins.com
+GE Vernova,US,workday,gevernova|wd5|Vernova_ExternalSite,,gevernova.com
+GE HealthCare,US,phenom,careers.gehealthcare.com|GEVGHLGLOBAL|en_global,,gehealthcare.com
+World Kinect,US,workday,wfscorp|wd5|wfscareers,,world-kinect.com
+ANZ,AU,successfactors,careers.anz.com,,anz.com
+ZF Friedrichshafen,DE,successfactors,jobs.zf.com,,zf.com
+Diageo,GB,workday,diageo|wd3|Diageo_Careers,,diageo.com
+Prosus,NL,ashby,prosus,,prosus.com
+Deere & Company,US,successfactors,jobs.deere.com,,deere.com
+Tencent,CN,workday,tencent|wd1|Tencent_Careers,,tencent.com
+JD.com,CN,workday,jd|wd103|Careers_at_JD,,jd.com
+Haier,CN,workday,haier|wd3|GE_Appliances,,haier.com
+Bridgestone,JP,workday,bridgestone|wd5|External,,bridgestone.com
+Mizuho Financial,JP,workday,mizuho|wd1|mizuhoamericas,,mizuhogroup.com
+Daikin,JP,workday,daikin|wd12|DaikinManufacturing_External,,daikin.com
+Fast Retailing (Uniqlo),JP,workday,fastretailing|wd3|retail_us_Uniqlo,,fastretailing.com
+Deutsche Bank,DE,workday,db|wd3|DBWebsite,,db.com
+Barclays,GB,workday,barclays|wd3|External_Career_Site_Barclays,,barclays.com
+Aviva,GB,workday,aviva|wd1|External,,aviva.com
+Rolls-Royce,GB,workday,rollsroyce|wd3|professional,,rolls-royce.com
+Centrica,GB,workday,centrica|wd3|Centrica,,centrica.com
+RELX,GB,workday,relx|wd3|relx,,relx.com
+Stellantis,NL,workday,stellantis|wd3|External_Career_Site_ID01,,stellantis.com
+ING,NL,workday,ing|wd3|ICSGBLCOR,,ing.com
+ASML,NL,workday,asml|wd3|ASMLBERLIN,,asml.com
+Glencore,CH,workday,glencore|wd3|astronenergy,,glencore.com
+Maersk,DK,workday,maersk|wd3|Maersk_Careers,,maersk.com
+BBVA,ES,workday,bbva|wd3|BBVA,,bbva.com
+Iberdrola,ES,workday,iberdrola|wd3|Iberdrola,,iberdrola.com
+Repsol,ES,workday,repsol|wd3|Repsol,,repsol.com
+ACS,ES,workday,acs|wd5|ACSCareers,,grupoacs.com
+Manulife,CA,workday,manulife|wd3|MFCJH_Jobs,,manulife.com
+Sun Life,CA,workday,sunlife|wd3|Experienced-Jobs,,sunlife.com
+Brookfield,CA,workday,brookfield|wd5|brookfieldproperties,,brookfield.com
+Suncor,CA,workday,suncor|wd1|Suncor_External,,suncor.com
+MassMutual,US,workday,massmutual|wd1|MMINDCareersite,,massmutual.com
+Northwestern Mutual,US,workday,northwesternmutual|wd5|CORPORATE-CAREERS,,northwesternmutual.com
+Lennar,US,workday,lennar|wd1|Lennar_Jobs,,lennar.com
+Marathon Petroleum,US,workday,mpc|wd1|MPCCareers,,mpc.com
+Lenovo,CN,avature,jobs.lenovo.com|en_US/careers,,lenovo.com
+Sumitomo Corporation,JP,successfactors,careers.sumitomocorp.com,,sumitomocorp.com
+SoftBank Group,JP,sitemap,jobs.softbank.jp,,softbank.jp
+Astellas Pharma,JP,successfactors,careers.astellas.com,,astellas.com
+Tata Motors,IN,successfactors,careers.tatamotors.com,,tatamotors.com
+Singapore Airlines,SG,successfactors,careers.singaporeair.com,,singaporeair.com
+BHP,AU,successfactors,careers.bhp.com,,bhp.com
+Volkswagen,DE,successfactors,jobs.volkswagen-group.com,,volkswagen-group.com
+Adidas,DE,successfactors,jobs.adidas-group.com,,adidas-group.com
+Bayer,DE,successfactors,jobs.bayer.com,,bayer.com
+L'Oreal,FR,sitemap,careers.loreal.com,,loreal.com
+Vinci,FR,sitemap,jobs.vinci.com,,vinci.com
+Capgemini,FR,successfactors,careers.capgemini.com,,capgemini.com
+Legal & General,GB,sitemap,careers.legalandgeneral.com,,legalandgeneral.com
+Reckitt,GB,successfactors,careers.reckitt.com,,reckitt.com
+British American Tobacco,GB,sitemap,careers.bat.com,,bat.com
+ArcelorMittal,LU,oracle,emfg|em4|CX_4001,,arcelormittal.com
+Nordea,FI,successfactors,careers.nordea.com,,nordea.com
+Novo Nordisk,DK,successfactors,careers.novonordisk.com,,novonordisk.com
+OMV,AT,successfactors,careers.omv.com,,omv.com
+Loblaw (George Weston),CA,sitemap,careers.loblaw.ca,,loblaw.ca
+CHS,US,sitemap,jobs.chsinc.com,,chsinc.com
+D.R. Horton,US,taleo,drhorton|2|101430233,,drhorton.com
+New York Life,US,sitemap,careers.newyorklife.com,,newyorklife.com
+Stanford University,US,oracle,careersearch.stanford.edu||stanford,,stanford.edu
+Yale University,US,phenom,careers.yale.edu|YUCYUHUS|en_us,,yale.edu
+Brown University,US,workday,brown|wd5|staff-careers-brown,,brown.edu
+University of Chicago,US,workday,uchicago|wd5|External,,uchicago.edu
+Rice University,US,oracle,emdz|us2|CX_2001,,rice.edu
+Washington University in St. Louis,US,workday,wustl|wd1|External,,wustl.edu
+Emory University,US,jibe,careers.emory.edu,,emory.edu
+Georgetown University,US,workday,georgetown|wd1|Georgetown_Admin_Careers,,georgetown.edu
+Tufts University,US,jibe,jobs.tufts.edu,,tufts.edu
+Tulane University,US,oracle,tulane-ibqejb|ocs|CX_1,,tulane.edu
+American University,US,workday,american|wd1|AU,,american.edu
+University of Miami,US,phenom,careers.miami.edu|UOMUOMUS|en_us,,miami.edu
+Baylor University,US,oracle,ejof|us2|CX,,baylor.edu
+Worcester Polytechnic Institute,US,workday,wpi|wd5|WPI_External_Career_Site,,wpi.edu
+DePaul University,US,oracle,ekze|us2|CX_1001,,depaul.edu
+Creighton University,US,oracle,hcps|us2|CX_1,,creighton.edu
+Santa Clara University,US,workday,scu|wd1|scu,,scu.edu
+Liberty University,US,workday,liberty|wd5|lu_job_board_faculty,,liberty.edu
+University of California Los Angeles,US,jibe,jobs.ucla.edu,,ucla.edu
+University of California San Francisco,US,oracle,iazuqy|ocs|CX_1,,ucsf.edu
+University of California Irvine,US,jibe,jobs.uci.edu,,uci.edu
+University of Virginia,US,phenom,jobs.virginia.edu|UOVUOVUS|en_us,,virginia.edu
+University of Central Florida,US,workday,ucf|wd1|athletics,,ucf.edu
+Ohio State University,US,workday,osu|wd1|OSUCareers,,osu.edu
+Pennsylvania State University,US,workday,psu|wd1|PSU_Academic,,psu.edu
+Iowa State University,US,workday,isu|wd1|IowaStateJobs,,iastate.edu
+University of Nevada Las Vegas,US,workday,nshe|wd1|UNLV-External,,unlv.edu
+University of Nevada Reno,US,workday,nshe|wd1|UNR-external,,unr.edu
+Oregon State University,US,workday,oregonstate|wd501|OSU_Careers_Site,,oregonstate.edu
+Oregon Health & Science University,US,jibe,jobs.ohsu.edu,,ohsu.edu
+Washington State University,US,workday,wsu|wd5|WSU_Jobs,,wsu.edu
+University of Texas System,US,workday,utaustin|wd1|UTstaff,,utsystem.edu
+University of Arkansas,US,workday,uasys|wd5|UAF_External_Career_Site,,uark.edu
+Auburn University,US,jibe,jobs.auburn.edu,,auburn.edu
+University of Mississippi,US,workday,olemiss|wd12|External__Staff,,olemiss.edu
+University of Tennessee,US,oracle,fa-ewlq-saasfaprod1|ocs|CX_1,,tennessee.edu
+University of Louisville,US,workday,uofl|wd1|UofLCareerSite,,louisville.edu
+Clemson University,US,workday,clemson|wd12|Clemson_Careers,,clemson.edu
+University of Maine,US,oracle,fa-ewca-saasfaprod1|ocs|CX_1,,maine.edu
+University of Wyoming,US,oracle,eeik|us2|CX_1001,,uwyo.edu
+South Dakota State University,US,workday,rembrandtfoods|wd12|Rembrandt_Foods,,sdstate.edu
+University of South Florida,US,oracle,fa-ewkd-saasfaprod1|ocs|USF,,usf.edu
+Colorado State University,US,workday,csusystem|wd12|fortcollins_careers,,colostate.edu
+Arizona State University,US,workday,asu|wd1|ASUStaffCareers,,asu.edu
+Cornell University,US,workday,cornell|wd1|CCECareerPage,,cornell.edu
+University of Southern California,US,workday,usc|wd5|ExternalUSCCareers,,usc.edu
+Northeastern University,US,workday,northeastern|wd1|careers,,northeastern.edu
+University of Rochester,US,workday,rochester|wd5|UR_Staff,,rochester.edu
+Brandeis University,US,workday,brandeis|wd5|Jobs,,brandeis.edu
+Wake Forest University,US,workday,wfu|wd1|Staff_Career_Website_live,,wfu.edu
+Brigham Young University,US,workday,byu|wd1|faculty-careers,,byu.edu
+Stevens Institute of Technology,US,workday,stevens|wd5|External,,stevens.edu
+Saint Louis University,US,workday,slu|wd5|Careers,,slu.edu
+Loyola University Chicago,US,workday,loyola|wd5|External,,luc.edu
+Howard University,US,workday,howard|wd1|HU,,howard.edu
+State of Georgia,US,workday,georgia|wd5|TGC,,georgia.gov
+University of Maryland,US,workday,umd|wd1|UMCP,,umd.edu
+Louisiana State University,US,workday,lsu|wd1|LSU,,lsu.edu
+Princeton University,US,icims,hub-princeton,,princeton.edu
+Harvard University,US,sitemap,careers.harvard.edu,,harvard.edu
+Johns Hopkins University,US,eightfold,jhu.eightfold.ai|jhu.edu,,jhu.edu
+Drexel University,US,sitemap,careers.drexel.edu,,drexel.edu
+Utah State University,US,icims,careers-usu,,usu.edu
+University of Alabama at Birmingham,US,taleo,uab|ext|8100108034,,uab.edu
+Texas A&M University,US,workday,tamus|wd1|TAMU_External,,tamu.edu

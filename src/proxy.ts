@@ -36,5 +36,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Skip static files, images and metadata routes.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|opengraph-image|brand/|pwa-|robots.txt|sitemap.xml|manifest.webmanifest).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|opengraph-image|brand/|logo/|pwa-|robots.txt|sitemap.xml|manifest.webmanifest).*)"],
 };

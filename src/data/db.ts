@@ -40,11 +40,12 @@ type Row = {
   last_seen_at: string;
   category: string;
   verified: boolean;
+  company_domain: string | null;
 };
 
 const COLUMNS =
   "id,title,company,city,country,country_code,region,workplace,visa,salary_min,salary_max,salary_currency,salary_period," +
-  "level,years,skills,summary,source,job_url,apply_url,lat,lon,posted_at,last_seen_at,category,verified";
+  "level,years,skills,summary,source,job_url,apply_url,lat,lon,posted_at,last_seen_at,category,verified,company_domain";
 // The home page map, similar jobs and the sitemap use the newest jobs; search runs in the database.
 const FEED_LIMIT = 2000;
 
@@ -81,6 +82,7 @@ function toJob(r: Row, now: number): Job {
     lon: r.lon,
     category: r.category,
     verified: r.verified,
+    companyDomain: r.company_domain,
   };
 }
 
@@ -190,7 +192,7 @@ export type JobQuery = {
   sort: "match" | "newest";
 };
 
-type SearchRow = Pick<Row, "id" | "title" | "company" | "city" | "country" | "region" | "workplace" | "visa" | "salary_min" | "salary_max" | "salary_currency" | "salary_period" | "level" | "years" | "skills" | "posted_at" | "category" | "verified" | "source"> & { total: number };
+type SearchRow = Pick<Row, "id" | "title" | "company" | "city" | "country" | "region" | "workplace" | "visa" | "salary_min" | "salary_max" | "salary_currency" | "salary_period" | "level" | "years" | "skills" | "posted_at" | "category" | "verified" | "source" | "company_domain"> & { total: number };
 
 /** Searches every open job in the database. Cached briefly per query so popular searches are instant. */
 export async function searchJobs(f: JobQuery, page = 1, perPage = 40): Promise<{ jobs: JobLite[]; total: number }> {
@@ -239,6 +241,7 @@ export async function searchJobs(f: JobQuery, page = 1, perPage = 40): Promise<{
         postedDaysAgo: Math.max(0, Math.floor((now - posted) / DAY)),
         category: r.category,
         verified: r.verified,
+        companyDomain: r.company_domain,
         source: r.source,
       };
     }),

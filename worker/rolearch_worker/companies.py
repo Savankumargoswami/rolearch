@@ -7,13 +7,13 @@ from pathlib import Path
 
 from .models import Company
 
-FIELDS = ["name", "country", "ats", "token", "careers_url"]
+FIELDS = ["name", "country", "ats", "token", "careers_url", "domain"]
 
 
 def load(path: Path) -> list[Company]:
     with path.open(encoding="utf-8", newline="") as f:
         rows = [r for r in csv.DictReader(f) if r.get("name") and not r["name"].startswith("#")]
-    return [Company(r["name"].strip(), r["country"].strip().upper(), r["ats"].strip().lower(), r["token"].strip(), (r.get("careers_url") or "").strip()) for r in rows]
+    return [Company(r["name"].strip(), r["country"].strip().upper(), r["ats"].strip().lower(), r["token"].strip(), (r.get("careers_url") or "").strip(), (r.get("domain") or "").strip().lower()) for r in rows]
 
 
 def save(path: Path, companies: list[Company]) -> None:
@@ -22,7 +22,7 @@ def save(path: Path, companies: list[Company]) -> None:
         w = csv.DictWriter(f, fieldnames=FIELDS)
         w.writeheader()
         for c in sorted(companies, key=lambda c: (c.country, c.name.lower())):
-            w.writerow({"name": c.name, "country": c.country, "ats": c.ats, "token": c.token, "careers_url": c.careers_url})
+            w.writerow({"name": c.name, "country": c.country, "ats": c.ats, "token": c.token, "careers_url": c.careers_url, "domain": c.domain})
 
 
 def load_candidates(path: Path) -> list[tuple[str, str, list[str], str]]:

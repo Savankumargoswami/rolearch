@@ -53,6 +53,7 @@ const sections: LegalSection[] = [
           decision is always the employer&rsquo;s; Rolearch isn&rsquo;t a party to it and doesn&rsquo;t guarantee any outcome.
         </p>
         <p>Rolearch never charges job seekers to apply for a job.</p>
+        <p>Company names and logos belong to their owners. We show them only to identify the employer behind a job; it doesn&rsquo;t mean the company endorses Rolearch.</p>
       </>
     ),
   },

@@ -11,6 +11,7 @@ class Company:
     ats: str  # greenhouse | lever | lever-eu | ashby | workable | smartrecruiters | recruitee | personio | jsonld
     token: str  # board token / site name / account id; for jsonld, unused
     careers_url: str = ""
+    domain: str = ""  # the employer's website, for its logo on the site
     described: set[str] | None = field(default=None, compare=False, repr=False)  # ids with a stored description
     known_urls: dict[str, str] | None = field(default=None, compare=False, repr=False)  # job URL -> stored title
 

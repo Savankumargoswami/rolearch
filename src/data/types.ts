@@ -31,6 +31,8 @@ export type JobLite = {
   /** True when the job comes straight from the employer's own careers page; false for aggregators. */
   verified?: boolean;
   source?: string;
+  /** The employer's website domain, for its logo. */
+  companyDomain?: string | null;
 };
 
 /** The full record, read on the server for job pages. */

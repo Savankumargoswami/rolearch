@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { cache, Suspense, ViewTransition } from "react";
 import { ApplyButton } from "@/components/apply-button";
+import { CompanyLogo } from "@/components/company-logo";
 import { JobDescription } from "@/components/job-description";
 import { AtsPanel } from "@/components/ats-panel";
 import { JobRow } from "@/components/job-row";
@@ -145,7 +146,10 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
 
         <div className="mt-4 grid gap-10 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-12">
           <div className="min-w-0">
-            <p className="text-muted">{job.company}</p>
+            <p className="flex items-center gap-3 text-muted">
+              <CompanyLogo domain={job.companyDomain} name={job.company} size={44} />
+              {job.company}
+            </p>
             <ViewTransition name={`job-title-${job.id}`} share="morph" default="none">
               <h1 className="mt-1 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-balance sm:text-5xl">{job.title}</h1>
             </ViewTransition>

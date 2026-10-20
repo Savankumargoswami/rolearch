@@ -191,6 +191,12 @@ class PostgresStore:
                         "update jobs set last_seen_at = now(), status = 'open', closed_at = null where company_key = %s and id = any(%s)",
                         (company.key, touch),
                     )
+                if company.domain:
+                    # The employer's website, for its logo; one cheap update per company covers touched jobs too.
+                    cur.execute(
+                        "update jobs set company_domain = %s where company_key = %s and company_domain is distinct from %s",
+                        (company.domain, company.key, company.domain),
+                    )
                 if company.ats in AGGREGATORS:
                     # Each run fetches a different slice: close by age, not by absence.
                     cur.execute(

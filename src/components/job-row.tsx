@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 import type { JobLite } from "@/data/types";
+import { CompanyLogo } from "./company-logo";
 import { t } from "@/i18n";
 import { place, postedAgo, salaryRange } from "@/lib/format";
 import type { MessageKey } from "@/i18n";
@@ -13,13 +14,16 @@ export function JobRow({ job }: { job: JobLite }) {
       transitionTypes={["nav-forward"]}
       className="group grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 rounded-xl px-3 py-4 transition-colors duration-200 hover:bg-surface sm:px-4 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,0.9fr)_auto]"
     >
-      <span className="min-w-0 md:[grid-area:1/1]">
+      <span className="flex min-w-0 items-center gap-3 md:[grid-area:1/1]">
+        <CompanyLogo domain={job.companyDomain} name={job.company} size={40} />
+        <span className="min-w-0">
         <ViewTransition name={`job-title-${job.id}`} share="morph" default="none">
           <span className="block truncate font-display text-[1.08rem] font-semibold tracking-[-0.01em] group-hover:underline group-hover:decoration-line group-hover:underline-offset-4">
             {job.title}
           </span>
         </ViewTransition>
         <span className="block truncate text-[0.95rem] text-muted">{job.company}</span>
+        </span>
       </span>
 
       <span className="col-start-2 row-span-2 row-start-1 flex flex-col items-end gap-1 text-end md:[grid-area:1/4]">
