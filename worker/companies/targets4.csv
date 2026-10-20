@@ -1,0 +1,178 @@
+name,country,domain
+# US universities: R1 research universities, large public systems and major private universities
+Harvard University,US,harvard.edu
+Stanford University,US,stanford.edu
+Massachusetts Institute of Technology,US,mit.edu
+Yale University,US,yale.edu
+Princeton University,US,princeton.edu
+Columbia University,US,columbia.edu
+University of Pennsylvania,US,upenn.edu
+Cornell University,US,cornell.edu
+Brown University,US,brown.edu
+Dartmouth College,US,dartmouth.edu
+University of Chicago,US,uchicago.edu
+Northwestern University,US,northwestern.edu
+Duke University,US,duke.edu
+Johns Hopkins University,US,jhu.edu
+California Institute of Technology,US,caltech.edu
+Vanderbilt University,US,vanderbilt.edu
+Rice University,US,rice.edu
+Washington University in St. Louis,US,wustl.edu
+Emory University,US,emory.edu
+Georgetown University,US,georgetown.edu
+University of Notre Dame,US,nd.edu
+Carnegie Mellon University,US,cmu.edu
+New York University,US,nyu.edu
+University of Southern California,US,usc.edu
+Boston University,US,bu.edu
+Boston College,US,bc.edu
+Northeastern University,US,northeastern.edu
+Tufts University,US,tufts.edu
+Case Western Reserve University,US,case.edu
+University of Rochester,US,rochester.edu
+Tulane University,US,tulane.edu
+Brandeis University,US,brandeis.edu
+Syracuse University,US,syr.edu
+George Washington University,US,gwu.edu
+American University,US,american.edu
+University of Miami,US,miami.edu
+Wake Forest University,US,wfu.edu
+Baylor University,US,baylor.edu
+Southern Methodist University,US,smu.edu
+Texas Christian University,US,tcu.edu
+Brigham Young University,US,byu.edu
+Drexel University,US,drexel.edu
+Temple University,US,temple.edu
+Villanova University,US,villanova.edu
+Fordham University,US,fordham.edu
+Rensselaer Polytechnic Institute,US,rpi.edu
+Stevens Institute of Technology,US,stevens.edu
+Worcester Polytechnic Institute,US,wpi.edu
+Yeshiva University,US,yu.edu
+Saint Louis University,US,slu.edu
+Loyola University Chicago,US,luc.edu
+DePaul University,US,depaul.edu
+Marquette University,US,marquette.edu
+Creighton University,US,creighton.edu
+Gonzaga University,US,gonzaga.edu
+Santa Clara University,US,scu.edu
+Pepperdine University,US,pepperdine.edu
+Howard University,US,howard.edu
+Liberty University,US,liberty.edu
+# University of California and California State systems
+University of California Berkeley,US,berkeley.edu
+University of California Los Angeles,US,ucla.edu
+University of California San Diego,US,ucsd.edu
+University of California San Francisco,US,ucsf.edu
+University of California Davis,US,ucdavis.edu
+University of California Irvine,US,uci.edu
+University of California Santa Barbara,US,ucsb.edu
+University of California Santa Cruz,US,ucsc.edu
+University of California Riverside,US,ucr.edu
+University of California Merced,US,ucmerced.edu
+University of California Office of the President,US,ucop.edu
+California State University,US,calstate.edu
+San Diego State University,US,sdsu.edu
+San Jose State University,US,sjsu.edu
+# Large public universities
+University of Michigan,US,umich.edu
+University of Washington,US,washington.edu
+University of Texas at Austin,US,utexas.edu
+University of Wisconsin-Madison,US,wisc.edu
+University of Illinois Urbana-Champaign,US,illinois.edu
+University of Illinois Chicago,US,uic.edu
+University of North Carolina at Chapel Hill,US,unc.edu
+University of Virginia,US,virginia.edu
+University of Florida,US,ufl.edu
+Florida State University,US,fsu.edu
+University of Central Florida,US,ucf.edu
+University of South Florida,US,usf.edu
+Florida International University,US,fiu.edu
+Georgia Institute of Technology,US,gatech.edu
+University of Georgia,US,uga.edu
+Georgia State University,US,gsu.edu
+Ohio State University,US,osu.edu
+Pennsylvania State University,US,psu.edu
+University of Pittsburgh,US,pitt.edu
+Purdue University,US,purdue.edu
+Indiana University,US,iu.edu
+University of Minnesota,US,umn.edu
+University of Maryland,US,umd.edu
+Rutgers University,US,rutgers.edu
+University of Massachusetts Amherst,US,umass.edu
+University of Connecticut,US,uconn.edu
+Stony Brook University,US,stonybrook.edu
+University at Buffalo,US,buffalo.edu
+State University of New York,US,suny.edu
+City University of New York,US,cuny.edu
+Michigan State University,US,msu.edu
+Wayne State University,US,wayne.edu
+University of Iowa,US,uiowa.edu
+Iowa State University,US,iastate.edu
+University of Kansas,US,ku.edu
+Kansas State University,US,k-state.edu
+University of Missouri,US,missouri.edu
+University of Nebraska,US,nebraska.edu
+University of Colorado Boulder,US,colorado.edu
+University of Colorado Anschutz,US,cuanschutz.edu
+Colorado State University,US,colostate.edu
+University of Utah,US,utah.edu
+Utah State University,US,usu.edu
+University of Arizona,US,arizona.edu
+Arizona State University,US,asu.edu
+Northern Arizona University,US,nau.edu
+University of New Mexico,US,unm.edu
+University of Nevada Las Vegas,US,unlv.edu
+University of Nevada Reno,US,unr.edu
+University of Oregon,US,uoregon.edu
+Oregon State University,US,oregonstate.edu
+Oregon Health & Science University,US,ohsu.edu
+Washington State University,US,wsu.edu
+Texas A&M University,US,tamu.edu
+University of Houston,US,uh.edu
+Texas Tech University,US,ttu.edu
+University of North Texas,US,unt.edu
+University of Texas at Dallas,US,utdallas.edu
+University of Texas at San Antonio,US,utsa.edu
+University of Texas at Arlington,US,uta.edu
+University of Texas System,US,utsystem.edu
+UT Southwestern Medical Center,US,utsouthwestern.edu
+UT MD Anderson Cancer Center,US,mdanderson.org
+University of Oklahoma,US,ou.edu
+Oklahoma State University,US,okstate.edu
+University of Arkansas,US,uark.edu
+Louisiana State University,US,lsu.edu
+University of Alabama,US,ua.edu
+University of Alabama at Birmingham,US,uab.edu
+Auburn University,US,auburn.edu
+University of Mississippi,US,olemiss.edu
+Mississippi State University,US,msstate.edu
+University of Tennessee,US,tennessee.edu
+University of Kentucky,US,uky.edu
+University of Louisville,US,louisville.edu
+University of South Carolina,US,sc.edu
+Clemson University,US,clemson.edu
+North Carolina State University,US,ncsu.edu
+Virginia Tech,US,vt.edu
+Virginia Commonwealth University,US,vcu.edu
+George Mason University,US,gmu.edu
+Old Dominion University,US,odu.edu
+West Virginia University,US,wvu.edu
+University of Delaware,US,udel.edu
+University of Cincinnati,US,uc.edu
+Kent State University,US,kent.edu
+Ohio University,US,ohio.edu
+University of Toledo,US,utoledo.edu
+Northern Illinois University,US,niu.edu
+University of Vermont,US,uvm.edu
+University of New Hampshire,US,unh.edu
+University of Maine,US,maine.edu
+University of Rhode Island,US,uri.edu
+University of Hawaii,US,hawaii.edu
+University of Alaska,US,alaska.edu
+University of Idaho,US,uidaho.edu
+Montana State University,US,montana.edu
+University of Wyoming,US,uwyo.edu
+North Dakota State University,US,ndsu.edu
+South Dakota State University,US,sdstate.edu
+Temple University Health,US,templehealth.org
