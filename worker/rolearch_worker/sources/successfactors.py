@@ -110,6 +110,25 @@ _PROP = lambda name: re.compile(rf'itemprop="{name}"[^>]*?(?:content="([^"]*)"[^
 _TITLE, _DESC, _CITY, _REGION, _COUNTRY, _DATE = (_PROP(n) for n in ("title", "description", "addressLocality", "addressRegion", "addressCountry", "datePosted"))
 
 
+_DESC_START = re.compile(r'<(span|div)[^>]*itemprop="description"')
+_TAG = re.compile(r"<(/?)(span|div)[^>]*?(/?)>", re.I)
+
+
+def _element(page: str, start: int) -> str:
+    """Inner HTML of the span/div opening at `start`, matching nested span/div tags."""
+    depth, body_start = 0, None
+    for m in _TAG.finditer(page, start):
+        if m.group(3):
+            continue
+        if body_start is None:
+            body_start = m.end()
+        depth += -1 if m.group(1) else 1
+        if depth == 0:
+            return page[body_start:m.start()]
+    return page[body_start or start:]
+_LABEL = re.compile(r'class="joblayouttoken-label"[^>]*>(.*?)</span>\s*<span[^>]*>(.*?)</span>', re.S)
+
+
 def _prop(rx: re.Pattern[str], page: str) -> str:
     m = rx.search(page)
     return html.unescape((m.group(1) or m.group(2) or "").strip()) if m else ""
@@ -120,19 +139,30 @@ def _from_job_page(page: str, url: str) -> RawJob | None:
     title = re.sub(r"<[^>]+>", "", _prop(_TITLE, page)).strip()
     if not title:
         return None
-    desc_m = re.search(r'itemprop="description"[^>]*>(.*?)</(?:span|div)>\s*</(?:span|div)>', page, re.S) or _DESC.search(page)
+    # Career Site Builder pages can carry several description blocks (intro, body, footer): keep the fullest.
+    blocks = [html_to_text(_element(page, m.start())) for m in _DESC_START.finditer(page)]
+    description = max(blocks, key=len, default="")
     city, region, country = _prop(_CITY, page), _prop(_REGION, page), _prop(_COUNTRY, page)
+    if not (city or region or country):
+        # Builder pages label fields instead ("Posting City:", "Job Country:", "Location:").
+        fields = {re.sub(r"\s+", " ", k).strip(" :").lower(): html.unescape(re.sub(r"<[^>]+>", "", v)).strip() for k, v in _LABEL.findall(page)}
+        city = next((fields[k] for k in fields if "city" in k), "") or fields.get("location", "")
+        region = next((fields[k] for k in fields if "state" in k or "province" in k), "")
+        country = next((fields[k] for k in fields if "country" in k), "")
+        if not (city or country):
+            m = re.search(r"\s[-–]\s([A-Za-z .'-]+,\s?[A-Z]{2})$", title)
+            city = m.group(1) if m else ""
     jid = re.search(r"/(\d+)/?$", url)
     return RawJob(
         external_id=jid.group(1) if jid else url,
         title=title,
         job_url=url,
         apply_url=url,
-        location_text=", ".join(x for x in (city, region, country) if x),
-        city_hint=city or None,
+        location_text=", ".join(dict.fromkeys(x for x in (city, region, country) if x)),
+        city_hint=city.split(",")[0].strip().title() or None,
         country_hint=country.upper() if re.fullmatch(r"[A-Za-z]{2}", country) else None,
         posted_at=_date(_prop(_DATE, page)),
-        description=html_to_text(desc_m.group(1) if desc_m else "")[:20000],
+        description=description[:20000],
     )
 
 

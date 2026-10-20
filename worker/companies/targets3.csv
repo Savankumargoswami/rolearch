@@ -1,0 +1,317 @@
+name,country,domain
+# Fortune Global 500 employers not already covered (by HQ region)
+# China
+Huawei,CN,huawei.com
+Lenovo,CN,lenovo.com
+Alibaba Group,CN,alibabagroup.com
+Tencent,CN,tencent.com
+JD.com,CN,jd.com
+BYD,CN,byd.com
+Xiaomi,CN,mi.com
+Haier,CN,haier.com
+Midea Group,CN,midea.com
+Ping An Insurance,CN,pingan.com
+China Mobile,CN,chinamobileltd.com
+Bank of China,CN,boc.cn
+ICBC,CN,icbc.com.cn
+Sinopec,CN,sinopec.com
+PetroChina,CN,petrochina.com.cn
+CATL,CN,catl.com
+# Hong Kong / Taiwan
+Foxconn (Hon Hai),TW,foxconn.com
+Pegatron,TW,pegatroncorp.com
+Quanta Computer,TW,quantatw.com
+Wistron,TW,wistron.com
+Compal Electronics,TW,compal.com
+ASE Technology,TW,aseglobal.com
+Jardine Matheson,HK,jardines.com
+# Japan
+Toyota Motor,JP,toyota-global.com
+Honda Motor,JP,global.honda
+Nissan,JP,nissan-global.com
+Mitsubishi Corporation,JP,mitsubishicorp.com
+Mitsui & Co.,JP,mitsui.com
+Itochu,JP,itochu.co.jp
+Marubeni,JP,marubeni.com
+Sumitomo Corporation,JP,sumitomocorp.com
+Toyota Tsusho,JP,toyota-tsusho.com
+Sony,JP,sony.com
+Hitachi,JP,hitachi.com
+Panasonic,JP,panasonic.com
+NTT,JP,group.ntt
+NTT DATA,JP,nttdata.com
+SoftBank Group,JP,softbank.jp
+Fujitsu,JP,fujitsu.com
+NEC,JP,nec.com
+Canon,JP,canon.com
+Toshiba,JP,toshiba.co.jp
+Denso,JP,denso.com
+Bridgestone,JP,bridgestone.com
+Nippon Steel,JP,nipponsteel.com
+Takeda Pharmaceutical,JP,takeda.com
+Mitsubishi UFJ Financial,JP,mufg.jp
+Sumitomo Mitsui Financial,JP,smfg.co.jp
+Mizuho Financial,JP,mizuhogroup.com
+Tokio Marine,JP,tokiomarinehd.com
+Seven & i Holdings,JP,7andi.com
+Aeon,JP,aeon.info
+KDDI,JP,kddi.com
+Mitsubishi Electric,JP,mitsubishielectric.com
+Mitsubishi Heavy Industries,JP,mhi.com
+Daikin,JP,daikin.com
+Suzuki Motor,JP,globalsuzuki.com
+Mazda,JP,mazda.com
+Subaru,JP,subaru.co.jp
+Fast Retailing (Uniqlo),JP,fastretailing.com
+Astellas Pharma,JP,astellas.com
+# South Korea
+Samsung Electronics,KR,samsung.com
+SK Hynix,KR,skhynix.com
+Hyundai Motor,KR,hyundai.com
+Kia,KR,kia.com
+LG Electronics,KR,lg.com
+LG Chem,KR,lgchem.com
+LG Energy Solution,KR,lgensol.com
+POSCO,KR,posco.com
+Hanwha,KR,hanwha.com
+Samsung Biologics,KR,samsungbiologics.com
+Coupang,KR,coupang.com
+# India
+Reliance Industries,IN,ril.com
+Tata Consultancy Services,IN,tcs.com
+Tata Motors,IN,tatamotors.com
+Tata Steel,IN,tatasteel.com
+Infosys,IN,infosys.com
+Wipro,IN,wipro.com
+HCLTech,IN,hcltech.com
+HDFC Bank,IN,hdfcbank.com
+ICICI Bank,IN,icicibank.com
+State Bank of India,IN,sbi.co.in
+Indian Oil,IN,iocl.com
+Larsen & Toubro,IN,larsentoubro.com
+Mahindra,IN,mahindra.com
+Adani Group,IN,adani.com
+# Southeast Asia / Oceania
+Wilmar International,SG,wilmar-international.com
+DBS Bank,SG,dbs.com
+Singapore Airlines,SG,singaporeair.com
+Petronas,MY,petronas.com
+PTT,TH,pttplc.com
+BHP,AU,bhp.com
+Rio Tinto,GB,riotinto.com
+Woolworths Group,AU,woolworthsgroup.com.au
+Wesfarmers,AU,wesfarmers.com.au
+Commonwealth Bank,AU,commbank.com.au
+Westpac,AU,westpac.com.au
+ANZ,AU,anz.com
+National Australia Bank,AU,nab.com.au
+Telstra,AU,telstra.com.au
+Macquarie Group,AU,macquarie.com
+# Germany
+Volkswagen,DE,volkswagen-group.com
+Mercedes-Benz,DE,mercedes-benz.com
+BMW Group,DE,bmwgroup.com
+Allianz,DE,allianz.com
+Deutsche Telekom,DE,telekom.com
+Siemens,DE,siemens.com
+Siemens Healthineers,DE,siemens-healthineers.com
+Siemens Energy,DE,siemens-energy.com
+Bosch,DE,bosch.com
+BASF,DE,basf.com
+DHL Group,DE,group.dhl.com
+Munich Re,DE,munichre.com
+Continental,DE,continental.com
+Bayer,DE,bayer.com
+SAP,DE,sap.com
+E.ON,DE,eon.com
+RWE,DE,rwe.com
+ZF Friedrichshafen,DE,zf.com
+thyssenkrupp,DE,thyssenkrupp.com
+Deutsche Bank,DE,db.com
+Fresenius,DE,fresenius.com
+Merck KGaA,DE,merckgroup.com
+Infineon,DE,infineon.com
+Lidl (Schwarz Group),DE,lidl.com
+Aldi,DE,aldi.com
+Adidas,DE,adidas-group.com
+Henkel,DE,henkel.com
+Lufthansa,DE,lufthansagroup.com
+Commerzbank,DE,commerzbank.com
+Hannover Re,DE,hannover-re.com
+Talanx,DE,talanx.com
+Heidelberg Materials,DE,heidelbergmaterials.com
+# France
+TotalEnergies,FR,totalenergies.com
+AXA,FR,axa.com
+BNP Paribas,FR,bnpparibas.com
+Carrefour,FR,carrefour.com
+Credit Agricole,FR,credit-agricole.com
+EDF,FR,edf.fr
+Engie,FR,engie.com
+Societe Generale,FR,societegenerale.com
+Renault Group,FR,renaultgroup.com
+Saint-Gobain,FR,saint-gobain.com
+Orange,FR,orange.com
+LVMH,FR,lvmh.com
+Vinci,FR,vinci.com
+Bouygues,FR,bouygues.com
+CMA CGM,FR,cmacgm-group.com
+Airbus,FR,airbus.com
+Danone,FR,danone.com
+L'Oreal,FR,loreal.com
+Schneider Electric,FR,se.com
+Veolia,FR,veolia.com
+Michelin,FR,michelin.com
+Capgemini,FR,capgemini.com
+Safran,FR,safran-group.com
+Thales,FR,thalesgroup.com
+Kering,FR,kering.com
+Hermes,FR,hermes.com
+Air France-KLM,FR,airfranceklm.com
+Alstom,FR,alstom.com
+Air Liquide,FR,airliquide.com
+Sodexo,FR,sodexo.com
+Publicis Groupe,FR,publicisgroupe.com
+# United Kingdom / Ireland
+HSBC,GB,hsbc.com
+Tesco,GB,tescoplc.com
+Barclays,GB,barclays.com
+Lloyds Banking Group,GB,lloydsbankinggroup.com
+NatWest Group,GB,natwestgroup.com
+Standard Chartered,GB,sc.com
+Legal & General,GB,legalandgeneral.com
+Aviva,GB,aviva.com
+Vodafone,GB,vodafone.com
+BT Group,GB,bt.com
+BAE Systems,GB,baesystems.com
+Rolls-Royce,GB,rolls-royce.com
+Sainsbury's,GB,sainsburys.co.uk
+Diageo,GB,diageo.com
+Reckitt,GB,reckitt.com
+British American Tobacco,GB,bat.com
+National Grid,GB,nationalgrid.com
+Centrica,GB,centrica.com
+Compass Group,GB,compass-group.com
+RELX,GB,relx.com
+Prudential plc,GB,prudentialplc.com
+Haleon,GB,haleon.com
+CRH,IE,crh.com
+Medtronic Ireland,IE,medtronic.com
+Experian plc,IE,experianplc.com
+# Netherlands / Belgium / Luxembourg
+Stellantis,NL,stellantis.com
+ING,NL,ing.com
+Ahold Delhaize,NL,aholddelhaize.com
+Heineken,NL,theheinekencompany.com
+Aegon,NL,aegon.com
+ASML,NL,asml.com
+Randstad,NL,randstad.com
+Prosus,NL,prosus.com
+ABN AMRO,NL,abnamro.com
+Anheuser-Busch InBev,BE,ab-inbev.com
+KBC Group,BE,kbc.com
+ArcelorMittal,LU,arcelormittal.com
+# Switzerland / Nordics / Austria
+Glencore,CH,glencore.com
+Nestle,CH,nestle.com
+Roche,CH,roche.com
+Zurich Insurance,CH,zurich.com
+UBS,CH,ubs.com
+ABB,CH,abb.com
+Swiss Re,CH,swissre.com
+Holcim,CH,holcim.com
+Trafigura,CH,trafigura.com
+Vitol,CH,vitol.com
+Mercuria,CH,mercuria.com
+Kuehne+Nagel,CH,kuehne-nagel.com
+Equinor,NO,equinor.com
+DNB,NO,dnb.no
+Volvo Group,SE,volvogroup.com
+Ericsson,SE,ericsson.com
+H&M,SE,hmgroup.com
+Nordea,FI,nordea.com
+Nokia,FI,nokia.com
+Maersk,DK,maersk.com
+Novo Nordisk,DK,novonordisk.com
+OMV,AT,omv.com
+# Southern Europe
+Enel,IT,enel.com
+Eni,IT,eni.com
+Generali,IT,generali.com
+Intesa Sanpaolo,IT,intesasanpaolo.com
+UniCredit,IT,unicreditgroup.eu
+Poste Italiane,IT,posteitaliane.it
+Leonardo,IT,leonardo.com
+Santander,ES,santander.com
+BBVA,ES,bbva.com
+Telefonica,ES,telefonica.com
+Iberdrola,ES,iberdrola.com
+Repsol,ES,repsol.com
+Inditex,ES,inditex.com
+ACS,ES,grupoacs.com
+Mapfre,ES,mapfre.com
+# Middle East / Africa
+Saudi Aramco,SA,aramco.com
+SABIC,SA,sabic.com
+ADNOC,AE,adnoc.ae
+QatarEnergy,QA,qatarenergy.qa
+Emirates Group,AE,emiratesgroupcareers.com
+# Americas (non-US)
+Petrobras,BR,petrobras.com.br
+Vale,BR,vale.com
+JBS,BR,jbs.com.br
+Itau Unibanco,BR,itau.com.br
+America Movil,MX,americamovil.com
+FEMSA,MX,femsa.com
+Royal Bank of Canada,CA,rbc.com
+TD Bank,CA,td.com
+Bank of Montreal,CA,bmo.com
+Scotiabank,CA,scotiabank.com
+CIBC,CA,cibc.com
+Manulife,CA,manulife.com
+Sun Life,CA,sunlife.com
+Brookfield,CA,brookfield.com
+Magna International,CA,magna.com
+Alimentation Couche-Tard,CA,couche-tard.com
+Enbridge,CA,enbridge.com
+Suncor,CA,suncor.com
+Loblaw (George Weston),CA,loblaw.ca
+Power Corporation,CA,powercorporation.com
+Thomson Reuters,CA,thomsonreuters.com
+Shopify,CA,shopify.com
+# United States Global 500 not yet covered
+Berkshire Hathaway Energy,US,brkenergy.com
+Costco,US,costco.com
+Meta,US,meta.com
+Enterprise Products,US,enterpriseproducts.com
+Energy Transfer,US,energytransfer.com
+Plains All American,US,plains.com
+Publix,US,publix.com
+Deere & Company,US,deere.com
+Archer Daniels Midland,US,adm.com
+Bunge,US,bunge.com
+Kraft Heinz,US,kraftheinzcompany.com
+Mondelez,US,mondelezinternational.com
+Tyson Foods,US,tysonfoods.com
+CHS,US,chsinc.com
+TD Synnex,US,tdsynnex.com
+Liberty Mutual,US,libertymutual.com
+Nationwide,US,nationwide.com
+New York Life,US,newyorklife.com
+MassMutual,US,massmutual.com
+Northwestern Mutual,US,northwesternmutual.com
+TIAA,US,tiaa.org
+Lennar,US,lennar.com
+D.R. Horton,US,drhorton.com
+PulteGroup,US,pultegroup.com
+Freeport-McMoRan,US,fcx.com
+Paccar,US,paccar.com
+Cummins,US,cummins.com
+GE Vernova,US,gevernova.com
+GE HealthCare,US,gehealthcare.com
+Marathon Petroleum,US,mpc.com
+World Kinect,US,world-kinect.com
+Penske Automotive,US,penskeautomotive.com
+Lithia Motors,US,lithiadriveway.com
+StoneX,US,stonex.com
+Performance Food Group,US,pfgc.com
