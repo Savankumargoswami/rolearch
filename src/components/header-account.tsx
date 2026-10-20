@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { t } from "@/i18n";
 import { authConfigured, createClient } from "@/lib/supabase/server";
+import { NavLink } from "./nav-link";
 
 const buttonClass =
   "inline-flex min-h-11 items-center whitespace-nowrap rounded-full bg-ink px-4 text-[0.95rem] font-medium text-paper transition-colors duration-200 hover:bg-ink-hover";
@@ -14,7 +15,8 @@ export function GuestLinks() {
         {t("nav.signIn")}
       </Link>
       <Link href="/signup" className={buttonClass}>
-        {t("nav.signUp")}
+        <span className="min-[420px]:hidden">{t("nav.join")}</span>
+        <span className="hidden min-[420px]:inline">{t("nav.signUp")}</span>
       </Link>
     </>
   );
@@ -31,9 +33,9 @@ export async function HeaderAccount() {
   if (!user) return <GuestLinks />;
   return (
     <>
-      <Link href="/feed" className="whitespace-nowrap rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft">
+      <NavLink href="/feed" className="hidden whitespace-nowrap rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft min-[420px]:inline-block">
         {t("nav.posts")}
-      </Link>
+      </NavLink>
       <Link href="/account" className={buttonClass}>
         {t("auth.account")}
       </Link>

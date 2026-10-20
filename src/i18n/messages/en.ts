@@ -15,6 +15,7 @@ const en = {
     companies: "For companies",
     signIn: "Sign in",
     signUp: "Create account",
+    join: "Join",
     skip: "Skip to content",
     home: "Rolearch home",
     posts: "Posts",

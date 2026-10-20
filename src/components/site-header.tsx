@@ -1,10 +1,11 @@
-import { Search } from "lucide-react";
+import { BriefcaseBusiness, Search } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { t } from "@/i18n";
 import { GuestLinks, HeaderAccount } from "./header-account";
 import { HeaderSearch } from "./header-search";
 import { Logo } from "./logo";
+import { NavLink } from "./nav-link";
 
 export function SiteHeader() {
   return (
@@ -15,18 +16,22 @@ export function SiteHeader() {
       >
         {t("nav.skip")}
       </a>
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link href="/" aria-label={t("nav.home")} className="rounded-md text-ink">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6">
+        <Link href="/" aria-label={t("nav.home")} className="shrink-0 rounded-md text-ink">
           <Logo height={26} />
         </Link>
         <HeaderSearch />
-        <nav aria-label="Main" className="flex items-center gap-1 sm:gap-2">
+        <nav aria-label="Main" className="flex min-w-0 items-center gap-0.5 sm:gap-2">
           <Link href="/search" aria-label={t("search.label")} className="grid size-11 place-items-center rounded-full text-ink hover:bg-ink-soft md:hidden">
             <Search aria-hidden="true" className="size-5" />
           </Link>
-          <Link href="/jobs" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft sm:inline-block">
+          <NavLink
+            href="/jobs"
+            className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 text-[0.95rem] text-ink hover:bg-ink-soft sm:px-3"
+          >
+            <BriefcaseBusiness aria-hidden="true" className="size-[1.1rem]" />
             {t("nav.jobs")}
-          </Link>
+          </NavLink>
           <Link href="/#companies" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
             {t("nav.companies")}
           </Link>
