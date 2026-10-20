@@ -28,7 +28,10 @@ export function SiteFooter() {
           </ul>
         </div>
       </div>
-      <div className="mx-auto max-w-6xl px-4 pb-8 text-sm text-muted sm:px-6">{t("footer.rights", { y: 2026 })}</div>
+      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 pb-8 text-sm text-muted sm:px-6">
+        <p className="max-w-[80ch]">{t("footer.emailNotice")}</p>
+        <p>{t("footer.rights", { y: 2026 })}</p>
+      </div>
     </footer>
   );
 }

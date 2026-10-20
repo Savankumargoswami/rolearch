@@ -1,10 +1,10 @@
 "use client";
 
-import { MailCheck } from "lucide-react";
+import { MailCheck, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useActionState, useId, useState } from "react";
-import { oauthSignIn, signIn, signUp, type AuthState } from "@/app/auth/actions";
+import { useActionState, useEffect, useId, useState, useTransition } from "react";
+import { oauthSignIn, resendConfirmation, signIn, signUp, type AuthState } from "@/app/auth/actions";
 import { t } from "@/i18n";
 import type { Providers } from "@/lib/auth-providers";
 
@@ -52,6 +52,11 @@ export function AuthFormInner({
         <h1 className="mt-4 font-display text-4xl font-semibold tracking-[-0.03em]">{t("auth.checkTitle")}</h1>
         <p className="mt-3 text-lg text-pretty">{t("auth.checkBody", { email: state.sent })}</p>
         <p className="mt-3 text-muted">{t("auth.checkHint")}</p>
+        <ResendConfirmation email={state.sent} next={next} />
+        <p className="mt-6 flex items-start gap-2 rounded-xl border border-line bg-surface p-3 text-sm text-muted">
+          <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-signal-ink" />
+          {t("auth.checkSafety")}
+        </p>
         <Link href="/signin" className="mt-8 inline-flex min-h-12 items-center rounded-full border border-ink px-6 font-medium transition-colors duration-200 hover:bg-ink hover:text-paper">
           {t("auth.goSignIn")}
         </Link>
@@ -119,7 +124,7 @@ export function AuthFormInner({
           inputMode="email"
           autoComplete="email"
           defaultValue={v.email}
-          hint={signup && kind === "company" ? t("auth.workEmailHint") : undefined}
+          hint={signup ? (kind === "company" ? t("auth.workEmailHint") : t("auth.emailHint")) : undefined}
           error={errors.email}
         />
         <Field
@@ -233,5 +238,41 @@ function GitHubMark() {
     <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="currentColor">
       <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12C23.5 5.7 18.3.5 12 .5z" />
     </svg>
+  );
+}
+
+/** "Resend the email", with a 60-second wait between sends. */
+function ResendConfirmation({ email, next }: { email: string; next: string }) {
+  const [wait, setWait] = useState(60);
+  const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
+  const [pending, start] = useTransition();
+  useEffect(() => {
+    if (wait <= 0) return;
+    const timer = setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [wait]);
+  return (
+    <div className="mt-4">
+      <button
+        type="button"
+        disabled={pending || wait > 0}
+        onClick={() =>
+          start(async () => {
+            const res = await resendConfirmation(email, next);
+            setStatus(res.ok ? { ok: true, text: t("auth.resent") } : { ok: false, text: res.message ?? t("auth.errGeneric") });
+            setWait(60);
+          })
+        }
+        className="inline-flex min-h-11 cursor-pointer items-center font-medium underline decoration-line underline-offset-4 hover:decoration-ink disabled:cursor-not-allowed disabled:text-muted disabled:no-underline"
+      >
+        {pending ? t("auth.resending") : t("auth.resend")}
+      </button>
+      {wait > 0 && !pending && <span className="ms-2 text-sm text-muted tabular-nums">{t("auth.resendWait", { s: wait })}</span>}
+      {status && (
+        <p role="status" className={`mt-1 text-sm ${status.ok ? "text-muted" : "text-[#b4532a]"}`}>
+          {status.text}
+        </p>
+      )}
+    </div>
   );
 }

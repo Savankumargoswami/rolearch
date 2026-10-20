@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { LegalPage, Mail, Points, type LegalSection } from "@/components/legal-page";
+import { LegalPage, Mail, NOREPLY_EMAIL, Points, type LegalSection } from "@/components/legal-page";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -45,8 +45,12 @@ const sections: LegalSection[] = [
       <>
         <p>
           Most jobs on Rolearch come from employers&rsquo; own public careers pages. We check them regularly and link straight to the employer&rsquo;s posting,
-          but we don&rsquo;t employ anyone, and we can&rsquo;t guarantee that a listing is complete, current or still open. Applications happen on the
-          employer&rsquo;s website, under their terms.
+          but we don&rsquo;t employ anyone, and we can&rsquo;t guarantee that a listing is complete, current or still open. Applications for those jobs happen
+          on the employer&rsquo;s website, under their terms.
+        </p>
+        <p>
+          Jobs marked &ldquo;Posted on Rolearch&rdquo; are posted by verified company accounts, and you apply to them with your Rolearch profile. The hiring
+          decision is always the employer&rsquo;s; Rolearch isn&rsquo;t a party to it and doesn&rsquo;t guarantee any outcome.
         </p>
         <p>Rolearch never charges job seekers to apply for a job.</p>
       </>
@@ -71,6 +75,29 @@ const sections: LegalSection[] = [
         <p>
           Every post is reviewed automatically before it&rsquo;s published, and we may remove content or limit accounts that break these rules. If you think
           something was removed by mistake, email <Mail />.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: "hiring",
+    title: "Posting jobs and hiring (company accounts)",
+    body: (
+      <>
+        <p>Company accounts that post jobs on Rolearch agree that each job:</p>
+        <Points
+          items={[
+            "is a real, open position at the company that posts it, with an honest description and pay if shown;",
+            "never charges applicants anything, and never asks for bank details, payment or ID before an offer;",
+            "doesn't discriminate on age, sex, race, religion, nationality, marital status, pregnancy, disability or any other protected ground, and follows the employment law where the job is;",
+            "is closed once it's filled or no longer open.",
+          ]}
+        />
+        <p>
+          Every job is reviewed automatically before it&rsquo;s published, and we may refuse or remove jobs and suspend accounts that break these rules. Applicant
+          information you receive through Rolearch may only be used to consider that person for that job and must be handled under data protection law; don&rsquo;t
+          export it for other purposes, share it, or contact applicants about anything else. Messages you send applicants through Rolearch must be genuine and
+          professional.
         </p>
       </>
     ),
@@ -119,6 +146,23 @@ const sections: LegalSection[] = [
     ),
   },
   {
+    id: "emails",
+    title: "Emails we send",
+    body: (
+      <>
+        <p>
+          By creating an account you agree to receive account emails that the service needs, such as the link to confirm your email address. They come only from{" "}
+          <strong>{NOREPLY_EMAIL}</strong>, a send-only address: replies aren&rsquo;t read, so write to <Mail /> for help.
+        </p>
+        <p>
+          Rolearch will never ask you by email for your password, payment details or ID, and our links only go to rolearch.com. Treat any message that does
+          as fraudulent and forward it to <Mail />. Email delivery can be delayed or filtered as spam by your provider; we aren&rsquo;t responsible for messages
+          your provider blocks.
+        </p>
+      </>
+    ),
+  },
+  {
     id: "links",
     title: "Other websites",
     body: <p>Rolearch links to employers&rsquo; sites, courses and other resources we don&rsquo;t control. Their own terms and privacy policies apply there.</p>,
@@ -163,13 +207,15 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Terms of Service"
-      updated="October 17, 2026"
+      updated="October 20, 2026"
       summary={[
         "Be 16 or older, give accurate details, and keep your account secure.",
         "Jobs link to employers' own pages; we check them but can't guarantee them.",
         "Posts are for projects, outputs and resources only, and are reviewed first.",
         "You own your content; you let us host and show it to run the service.",
         "Match and ATS scores are estimates; only claim skills you really have.",
+        "Companies post only real jobs: no fees, no discrimination, and applicant data used only for that hiring.",
+        "Account emails come only from noreply@rolearch.com; we never ask for passwords or payment by email.",
         "No scraping, spam, fake accounts or abuse.",
       ]}
       sections={sections}

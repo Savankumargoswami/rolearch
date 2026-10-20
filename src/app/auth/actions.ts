@@ -84,6 +84,18 @@ export async function signUp(_: AuthState, form: FormData): Promise<AuthState> {
   return { sent: email };
 }
 
+/** Sends the sign-up confirmation email again (Supabase limits how often). */
+export async function resendConfirmation(email: string, next: string): Promise<{ ok: boolean; message?: string }> {
+  if (!authConfigured || !emailOk(email)) return { ok: false, message: t("auth.errGeneric") };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: email.trim().toLowerCase(),
+    options: { emailRedirectTo: `${await siteOrigin()}/auth/confirm?next=${encodeURIComponent(safeNext(next))}` },
+  });
+  return error ? { ok: false, message: friendly(error.message) } : { ok: true };
+}
+
 export async function signIn(_: AuthState, form: FormData): Promise<AuthState> {
   if (!authConfigured) return { message: t("auth.errNotConfigured") };
   const email = String(form.get("email") ?? "").trim().toLowerCase();

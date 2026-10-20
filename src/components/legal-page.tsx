@@ -86,6 +86,8 @@ export function Points({ items }: { items: React.ReactNode[] }) {
 }
 
 export const CONTACT_EMAIL = "admin@rolearch.com";
+/** The only address Rolearch sends account email from. It isn't read; replies go nowhere. */
+export const NOREPLY_EMAIL = "noreply@rolearch.com";
 
 export function Mail() {
   return (
