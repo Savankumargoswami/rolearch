@@ -75,6 +75,24 @@ class Fetcher:
             await asyncio.sleep(2**attempt + random.random())
         raise RuntimeError("unreachable")
 
+    async def post_form(self, url: str, data: dict, attempts: int = 3) -> httpx.Response:
+        """POST a form (ASP.NET postbacks on viRecruit portals). Same per-host limit and retries as get()."""
+        host = urlsplit(url).netloc
+        for attempt in range(1, attempts + 1):
+            async with self._hosts[host]:
+                try:
+                    r = await self.client.post(url, data=data)
+                except (httpx.TimeoutException, httpx.TransportError):
+                    if attempt == attempts:
+                        raise
+                else:
+                    if r.status_code != 429 and r.status_code < 500:
+                        return r
+                    if attempt == attempts:
+                        r.raise_for_status()
+            await asyncio.sleep(2**attempt + random.random())
+        raise RuntimeError("unreachable")
+
     async def json(self, url: str, **kw):
         r = await self.get(url, **kw)
         r.raise_for_status()
