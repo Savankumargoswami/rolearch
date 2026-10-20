@@ -7,6 +7,7 @@ import { events, myApplications } from "@/lib/hiring";
 import { requireMember } from "@/lib/require-member";
 import { createClient } from "@/lib/supabase/server";
 import { TRACKER_STATUSES, type TrackedJob, type TrackerStatus } from "@/lib/tracker";
+import { FeedbackPrompt } from "@/components/feedback-prompt";
 import { TrackerItem } from "./tracker-item";
 
 export const metadata: Metadata = { title: "Job tracker", robots: { index: false } };
@@ -16,6 +17,9 @@ export default function TrackerPage() {
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
       <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
         <Tracker />
+      </Suspense>
+      <Suspense fallback={null}>
+        <FeedbackPrompt />
       </Suspense>
     </div>
   );

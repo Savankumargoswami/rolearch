@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { FeedbackPrompt } from "@/components/feedback-prompt";
 import { ProfileView } from "@/components/profile-view";
 import { t } from "@/i18n";
 import { postReviewEnabled } from "@/lib/post-review";
@@ -14,6 +15,9 @@ export default function AccountPage() {
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
         <Account />
+      </Suspense>
+      <Suspense fallback={null}>
+        <FeedbackPrompt />
       </Suspense>
     </div>
   );
