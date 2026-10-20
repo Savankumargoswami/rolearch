@@ -7,7 +7,7 @@ import { JobsControls } from "@/components/jobs-explorer";
 import { getJobFeed, jobCategories, searchJobs, type JobQuery } from "@/data/db";
 import { locale, t } from "@/i18n";
 import { isCategory } from "@/lib/categories";
-import { toQueryString } from "@/lib/job-query";
+import { formatJobCount, toQueryString } from "@/lib/job-query";
 import { requireMember } from "@/lib/require-member";
 import { whereOptions, type Where } from "@/lib/regions";
 
@@ -63,7 +63,7 @@ async function Results({ searchParams }: { searchParams: Search }) {
       <JobsControls filters={filters} counts={counts} />
       <div className="mt-5 flex flex-wrap items-baseline justify-between gap-2">
         <p aria-live="polite" className="font-display text-xl font-semibold tabular-nums">
-          {total === 1 ? t("jobs.countOne") : t("jobs.count", { n: nf.format(total) })}
+          {total === 1 ? t("jobs.countOne") : t("jobs.count", { n: formatJobCount(total) })}
         </p>
         <p className="text-sm text-muted">{updatedNote(feed.updatedAt, feed.companies)}</p>
       </div>

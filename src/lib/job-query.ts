@@ -15,3 +15,12 @@ export function toQueryString(f: JobQuery, page = 1): string {
   const s = sp.toString();
   return s ? `?${s}` : "";
 }
+
+/** search_jobs stops counting filtered matches at this many (db/013_fast_search.sql). */
+export const COUNT_CAP = 10000;
+
+/** "1,234", or "10,000+" when the count reached the cap. */
+export function formatJobCount(n: number): string {
+  const s = new Intl.NumberFormat("en").format(n);
+  return n === COUNT_CAP ? `${s}+` : s;
+}

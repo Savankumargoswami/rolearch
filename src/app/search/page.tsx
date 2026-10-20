@@ -7,6 +7,7 @@ import { Avatar } from "@/components/avatar";
 import { JobRow } from "@/components/job-row";
 import { searchJobs } from "@/data/db";
 import { t } from "@/i18n";
+import { formatJobCount } from "@/lib/job-query";
 import { searchPeople, viewerId, type Person } from "@/lib/social";
 import { createClient } from "@/lib/supabase/server";
 
@@ -106,7 +107,7 @@ async function Results({ searchParams }: { searchParams: Search }) {
         </Link>
         <Link href={href("jobs")} aria-current={tab === "jobs" ? "page" : undefined} className={tabClass(tab === "jobs")}>
           {t("search.tabJobs")}
-          {tab !== "people" && me && <span className="rounded-full bg-signal/25 px-2 text-xs tabular-nums">{jobs.length}</span>}
+          {tab !== "people" && me && <span className="rounded-full bg-signal/25 px-2 text-xs tabular-nums">{formatJobCount(jobs.length)}</span>}
         </Link>
       </nav>
 
@@ -152,7 +153,7 @@ async function Results({ searchParams }: { searchParams: Search }) {
             </h2>
             {jobs.length > shownJobs.length && (
               <Link href={`/jobs?q=${encodeURIComponent(q)}`} className="inline-flex items-center gap-1 font-medium underline decoration-line underline-offset-4 hover:decoration-ink">
-                {t("search.seeAllJobs", { n: jobs.length })}
+                {t("search.seeAllJobs", { n: formatJobCount(jobs.length) })}
                 <ArrowRight aria-hidden="true" className="size-4 rtl:rotate-180" />
               </Link>
             )}

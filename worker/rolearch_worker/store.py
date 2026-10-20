@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -10,6 +11,8 @@ from typing import Protocol
 
 from .sources import AGGREGATORS
 from .models import Company
+
+log = logging.getLogger(__name__)
 
 DROP_GUARD = 20  # a board that had this many open jobs and suddenly returns 0 is treated as a feed failure
 
@@ -235,6 +238,16 @@ class PostgresStore:
 
     def open_jobs(self, launch_only: bool, limit: int) -> list[dict]:
         raise NotImplementedError("With a database, the website reads jobs from Supabase directly.")
+
+    def refresh_summary(self) -> None:
+        """Recompute the site's totals, category counts and map pins (db/013_fast_search.sql)."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute("select public.refresh_job_summary()")
+            self.conn.commit()
+        except Exception as e:  # an older database without the summary: the site still works, just slower
+            self.conn.rollback()
+            log.warning("job summary not refreshed: %s", e)
 
     def close(self) -> None:
         self.conn.close()

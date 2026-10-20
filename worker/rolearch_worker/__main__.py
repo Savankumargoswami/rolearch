@@ -95,6 +95,8 @@ def main(argv: list[str] | None = None) -> int:
         full_run = not args.only and args.companies == DEFAULTS["companies"]
         # Companies whose jobs another run stored after this one began (e.g. a list updated mid-run) stay open.
         retired = store.retire_companies({c.key for c in companies}, run_start) if full_run else 0
+        if hasattr(store, "refresh_summary"):
+            store.refresh_summary()
         feed_count = None
         if str(args.feed) != "-" and isinstance(store, JsonStore):
             feed_count = export_feed(store, args.feed, args.feed_limit)
