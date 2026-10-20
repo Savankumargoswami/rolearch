@@ -26,7 +26,7 @@ class Store(Protocol):
     def known_ids(self, company: Company) -> set[str]: ...
     def save(self, company: Company, jobs: list[dict]) -> tuple[int, int, int]: ...
     def record_error(self, company: Company, error: str) -> None: ...
-    def retire_companies(self, keep: set[str]) -> int: ...
+    def retire_companies(self, keep: set[str], since: datetime | None = None) -> int: ...
     def open_jobs(self, launch_only: bool, limit: int) -> list[dict]: ...
     def close(self) -> None: ...
 
@@ -83,7 +83,7 @@ class JsonStore:
         entry = self.data["companies"].setdefault(company.key, {"name": company.name})
         entry.update({"lastRunAt": _now(), "lastError": error[:500]})
 
-    def retire_companies(self, keep: set[str]) -> int:
+    def retire_companies(self, keep: set[str], since: datetime | None = None) -> int:
         """Close open jobs of companies no longer in companies.csv."""
         now, n = _now(), 0
         for job in self.data["jobs"].values():
@@ -218,8 +218,12 @@ class PostgresStore:
             self.conn.rollback()
             raise
 
-    def retire_companies(self, keep: set[str]) -> int:
+    def retire_companies(self, keep: set[str], since: datetime | None = None) -> int:
         with self.conn.cursor() as cur:
+            if since:
+                # A company another run refreshed after `since` is on a newer list than ours: leave it alone.
+                cur.execute("select distinct company_key from jobs where last_seen_at >= %s", (since,))
+                keep = keep | {r[0] for r in cur.fetchall()}
             cur.execute(
                 "update jobs set status = 'closed', closed_at = now() where status = 'open' and not (company_key = any(%s))",
                 (list(keep),),

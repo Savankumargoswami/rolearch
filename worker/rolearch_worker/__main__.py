@@ -13,6 +13,7 @@ import logging
 import os
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 from . import companies as company_file
@@ -87,11 +88,13 @@ def main(argv: list[str] | None = None) -> int:
 
     store = open_store(args.state)
     started = time.monotonic()
+    run_start = datetime.now(timezone.utc)
     try:
         results = asyncio.run(pull_all(companies, store, args.concurrency))
         # Only the full, default list is authoritative; a subset run must not close other companies' jobs.
         full_run = not args.only and args.companies == DEFAULTS["companies"]
-        retired = store.retire_companies({c.key for c in companies}) if full_run else 0
+        # Companies whose jobs another run stored after this one began (e.g. a list updated mid-run) stay open.
+        retired = store.retire_companies({c.key for c in companies}, run_start) if full_run else 0
         feed_count = None
         if str(args.feed) != "-" and isinstance(store, JsonStore):
             feed_count = export_feed(store, args.feed, args.feed_limit)
