@@ -2,13 +2,14 @@ import { ArrowLeft, ArrowUpRight, BookOpen, Check, CircleDashed, GraduationCap, 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
 import { cache, Suspense, ViewTransition } from "react";
 import { ApplyButton } from "@/components/apply-button";
 import { JobDescription } from "@/components/job-description";
 import { AtsPanel } from "@/components/ats-panel";
 import { JobRow } from "@/components/job-row";
 import { MatchRing } from "@/components/match-ring";
-import { SaveButton } from "@/components/save-button";
+import { ExternalApply, TrackButton } from "@/components/track-button";
 import { getJob, getJobFeed, getJobText, searchJobs } from "@/data/db";
 import { freeResources } from "@/data/learning";
 import type { Job } from "@/data/types";
@@ -19,6 +20,7 @@ import type { Match, ReqStatus, Requirement } from "@/lib/match";
 import { loadViewer } from "@/lib/profile";
 import { requireMember } from "@/lib/require-member";
 import { matchProfile } from "@/lib/role-match";
+import { createClient } from "@/lib/supabase/server";
 
 // Pages for current jobs are built ahead; a job added later is rendered on its first visit.
 // The personal parts (match, missing skills, ATS check) stream in per visitor.
@@ -108,6 +110,13 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
   await requireMember(`/jobs/${id}`);
   const job = await getJob(id);
   if (!job) notFound();
+  if (job.source === "Rolearch") {
+    // Count the view for the company's analytics once the page has been sent.
+    const db = await createClient();
+    after(async () => {
+      await db.rpc("record_job_view", { p_job: job.id });
+    });
+  }
   const similar = await similarTo(job);
   const where = place(job);
 
@@ -169,7 +178,7 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
                   </ul>
                 </>
               )}
-              {job.jobUrl && (
+              {job.jobUrl && job.source !== "Rolearch" && (
                 <a
                   href={job.jobUrl}
                   target="_blank"
@@ -193,21 +202,9 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
                 <PersonalMatch job={job} />
               </Suspense>
               <div className="mt-6 flex flex-col gap-3">
-                {job.applyUrl ? (
-                  <a
-                    href={job.applyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
-                  >
-                    {t("job.apply")}
-                    <ArrowUpRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
-                    <span className="sr-only">{t("job.opensNewTab")}</span>
-                  </a>
-                ) : (
-                  <ApplyButton company={job.company} />
-                )}
-                <SaveButton id={job.id} />
+                <Suspense fallback={<div className="h-28 animate-pulse rounded-2xl bg-ink-soft" aria-hidden="true" />}>
+                  <ApplyArea job={job} />
+                </Suspense>
               </div>
             </div>
             <Suspense fallback={<AtsPanel jobId={job.id} jobTitle={job.title} company={job.company} signedIn={false} hasProfile={false} />}>
@@ -230,6 +227,43 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
         </section>
       </article>
     </ViewTransition>
+  );
+}
+
+/** Apply and save controls: Rolearch jobs apply with the profile; other jobs go to the company and can be tracked. */
+async function ApplyArea({ job }: { job: Job }) {
+  const viewer = await loadViewer();
+  const db = await createClient();
+  const [{ data: tracked }, { data: app }] = viewer
+    ? await Promise.all([
+        db.from("tracked_jobs").select("status").eq("user_id", viewer.id).eq("job_id", job.id).maybeSingle(),
+        job.source === "Rolearch" ? db.from("applications").select("id").eq("job_id", job.id).eq("applicant_id", viewer.id).maybeSingle() : Promise.resolve({ data: null }),
+      ])
+    : [{ data: null }, { data: null }];
+  const status = (tracked?.status as string | undefined) ?? null;
+  return (
+    <>
+      {job.source === "Rolearch" ? (
+        app ? (
+          <Link href="/tracker" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-ink px-5 font-medium hover:bg-ink-soft">
+            <Check aria-hidden="true" className="size-4" />
+            {t("apply.appliedCta")}
+          </Link>
+        ) : viewer?.accountType === "company" ? null : (
+          <Link
+            href={`/jobs/${job.id}/apply`}
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
+          >
+            {t("apply.cta")}
+          </Link>
+        )
+      ) : job.applyUrl ? (
+        <ExternalApply id={job.id} url={job.applyUrl} company={job.company} applied={status !== null && status !== "saved"} />
+      ) : (
+        <ApplyButton company={job.company} />
+      )}
+      {!app && <TrackButton id={job.id} status={status} />}
+    </>
   );
 }
 

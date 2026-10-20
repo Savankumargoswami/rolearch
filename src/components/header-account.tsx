@@ -31,8 +31,15 @@ export async function HeaderAccount() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return <GuestLinks />;
+  const company = user.user_metadata?.account_type === "company";
   return (
     <>
+      <NavLink
+        href={company ? "/hire" : "/tracker"}
+        className="hidden whitespace-nowrap rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft min-[480px]:inline-block"
+      >
+        {company ? t("nav.hiring") : t("nav.tracker")}
+      </NavLink>
       <NavLink href="/feed" className="hidden whitespace-nowrap rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft min-[420px]:inline-block">
         {t("nav.posts")}
       </NavLink>

@@ -227,12 +227,14 @@ class PostgresStore:
                 # A company another run refreshed after `since` is on a newer list than ours: leave it alone.
                 cur.execute("select distinct company_key from jobs where last_seen_at >= %s", (since,))
                 keep = keep | {r[0] for r in cur.fetchall()}
+            # Jobs companies post on Rolearch itself ("rolearch:<account>") aren't on the list; their posters close them.
             cur.execute(
-                "update jobs set status = 'closed', closed_at = now() where status = 'open' and not (company_key = any(%s))",
+                "update jobs set status = 'closed', closed_at = now() "
+                "where status = 'open' and not (company_key = any(%s)) and company_key not like 'rolearch:%%'",
                 (list(keep),),
             )
             n = cur.rowcount
-            cur.execute("update companies set active = (key = any(%s))", (list(keep),))
+            cur.execute("update companies set active = (key = any(%s)) where key not like 'rolearch:%%'", (list(keep),))
         self.conn.commit()
         return n
 
