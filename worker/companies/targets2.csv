@@ -1,0 +1,403 @@
+name,country,domain
+# Law firms (AmLaw 100 and other large firms)
+Kirkland & Ellis,US,kirkland.com
+Latham & Watkins,US,lw.com
+DLA Piper,US,dlapiper.com
+Baker McKenzie,US,bakermckenzie.com
+Skadden,US,skadden.com
+Sidley Austin,US,sidley.com
+White & Case,US,whitecase.com
+Gibson Dunn,US,gibsondunn.com
+Morgan Lewis,US,morganlewis.com
+Hogan Lovells,US,hoganlovells.com
+Jones Day,US,jonesday.com
+Ropes & Gray,US,ropesgray.com
+Sullivan & Cromwell,US,sullcrom.com
+Davis Polk,US,davispolk.com
+Paul Weiss,US,paulweiss.com
+Simpson Thacher,US,stblaw.com
+Cravath,US,cravath.com
+Weil Gotshal,US,weil.com
+Cleary Gottlieb,US,clearygottlieb.com
+Debevoise & Plimpton,US,debevoise.com
+Wachtell Lipton,US,wlrk.com
+Covington & Burling,US,cov.com
+WilmerHale,US,wilmerhale.com
+Quinn Emanuel,US,quinnemanuel.com
+Goodwin Procter,US,goodwinlaw.com
+Cooley,US,cooley.com
+Wilson Sonsini,US,wsgr.com
+Milbank,US,milbank.com
+Willkie Farr,US,willkie.com
+Akin Gump,US,akingump.com
+Greenberg Traurig,US,gtlaw.com
+Norton Rose Fulbright,US,nortonrosefulbright.com
+King & Spalding,US,kslaw.com
+Mayer Brown,US,mayerbrown.com
+McDermott Will & Emery,US,mwe.com
+Orrick,US,orrick.com
+Paul Hastings,US,paulhastings.com
+Proskauer,US,proskauer.com
+Morrison Foerster,US,mofo.com
+Fried Frank,US,friedfrank.com
+Dechert,US,dechert.com
+Arnold & Porter,US,arnoldporter.com
+Vinson & Elkins,US,velaw.com
+Baker Botts,US,bakerbotts.com
+Holland & Knight,US,hklaw.com
+Seyfarth Shaw,US,seyfarth.com
+Littler Mendelson,US,littler.com
+Jackson Lewis,US,jacksonlewis.com
+Ogletree Deakins,US,ogletree.com
+Perkins Coie,US,perkinscoie.com
+Foley & Lardner,US,foley.com
+Alston & Bird,US,alston.com
+Squire Patton Boggs,US,squirepattonboggs.com
+Reed Smith,US,reedsmith.com
+Clifford Chance,GB,cliffordchance.com
+Allen & Overy Shearman,GB,aoshearman.com
+Linklaters,GB,linklaters.com
+Freshfields,GB,freshfields.com
+Herbert Smith Freehills,GB,hsfkramer.com
+Ashurst,GB,ashurst.com
+Eversheds Sutherland,GB,eversheds-sutherland.com
+CMS,GB,cms.law
+Dentons,US,dentons.com
+Faegre Drinker,US,faegredrinker.com
+Winston & Strawn,US,winston.com
+Katten,US,katten.com
+Polsinelli,US,polsinelli.com
+Troutman Pepper,US,troutman.com
+Nelson Mullins,US,nelsonmullins.com
+Bracewell,US,bracewell.com
+Haynes Boone,US,haynesboone.com
+Fish & Richardson,US,fr.com
+Finnegan,US,finnegan.com
+# Accounting, consulting and professional services
+Booz Allen Hamilton,US,boozallen.com
+McKinsey,US,mckinsey.com
+Boston Consulting Group,US,bcg.com
+Bain & Company,US,bain.com
+Grant Thornton,US,grantthornton.com
+RSM,US,rsmus.com
+BDO,US,bdo.com
+Crowe,US,crowe.com
+Marsh McLennan,US,marshmclennan.com
+Aon,US,aon.com
+Willis Towers Watson,US,wtwco.com
+Gartner,US,gartner.com
+CBRE,US,cbre.com
+JLL,US,jll.com
+Cushman & Wakefield,US,cushmanwakefield.com
+ManpowerGroup,US,manpowergroup.com
+Robert Half,US,roberthalf.com
+Insight Enterprises,US,insight.com
+CDW,US,cdw.com
+Leidos,US,leidos.com
+Gen Digital,US,gendigital.com
+# Semiconductors and hardware (more)
+Applied Materials,US,appliedmaterials.com
+ON Semiconductor,US,onsemi.com
+Analog Devices,US,analog.com
+Microchip Technology,US,microchip.com
+Marvell Technology,US,marvell.com
+Western Digital,US,westerndigital.com
+Seagate Technology,US,seagate.com
+Corning,US,corning.com
+Jabil,US,jabil.com
+Flex,US,flex.com
+Sanmina,US,sanmina.com
+TE Connectivity,US,te.com
+Amphenol,US,amphenol.com
+Arrow Electronics,US,arrow.com
+Avnet,US,avnet.com
+Zebra Technologies,US,zebra.com
+Trimble,US,trimble.com
+Garmin,US,garmin.com
+Hewlett Packard Enterprise,US,hpe.com
+NetApp,US,netapp.com
+Juniper Networks,US,juniper.net
+Arista Networks,US,arista.com
+Super Micro Computer,US,supermicro.com
+Pure Storage,US,purestorage.com
+Ciena,US,ciena.com
+F5,US,f5.com
+Motorola Solutions,US,motorolasolutions.com
+Xerox,US,xerox.com
+# Software and internet
+Oracle,US,oracle.com
+Salesforce,US,salesforce.com
+Adobe,US,adobe.com
+Intuit,US,intuit.com
+ServiceNow,US,servicenow.com
+Workday,US,workday.com
+Autodesk,US,autodesk.com
+Palo Alto Networks,US,paloaltonetworks.com
+Fortinet,US,fortinet.com
+VMware,US,vmware.com
+Uber,US,uber.com
+Lyft,US,lyft.com
+DoorDash,US,doordash.com
+Airbnb,US,airbnb.com
+eBay,US,ebay.com
+PayPal,US,paypal.com
+Block,US,block.xyz
+Electronic Arts,US,ea.com
+Activision Blizzard,US,activisionblizzard.com
+Take-Two Interactive,US,take2games.com
+Roper Technologies,US,ropertech.com
+Fiserv,US,fiserv.com
+FIS,US,fisglobal.com
+Global Payments,US,globalpayments.com
+Jack Henry,US,jackhenry.com
+Broadridge,US,broadridge.com
+Paychex,US,paychex.com
+ADP,US,adp.com
+Cognizant,US,cognizant.com
+DXC Technology,US,dxc.com
+Kyndryl,US,kyndryl.com
+Unisys,US,unisys.com
+EPAM,US,epam.com
+# Banks, insurers and asset managers
+Goldman Sachs,US,goldmansachs.com
+Charles Schwab,US,schwab.com
+Northern Trust,US,northerntrust.com
+BNY,US,bny.com
+Fifth Third,US,53.com
+KeyCorp,US,key.com
+Regions Financial,US,regions.com
+M&T Bank,US,mtb.com
+Huntington Bancshares,US,huntington.com
+Citizens Financial,US,citizensbank.com
+First Citizens,US,firstcitizens.com
+Comerica,US,comerica.com
+Zions,US,zionsbancorporation.com
+Synchrony,US,synchrony.com
+Discover,US,discover.com
+American Express,US,americanexpress.com
+Raymond James,US,raymondjames.com
+Ameriprise,US,ameriprise.com
+LPL Financial,US,lpl.com
+Franklin Templeton,US,franklintempleton.com
+T. Rowe Price,US,troweprice.com
+Invesco,US,invesco.com
+Vanguard,US,vanguard.com
+Edward Jones,US,edwardjones.com
+Principal Financial,US,principal.com
+Lincoln Financial,US,lincolnfinancial.com
+Prudential,US,prudential.com
+MetLife,US,metlife.com
+Unum,US,unum.com
+Hartford,US,thehartford.com
+Travelers,US,travelers.com
+Allstate,US,allstate.com
+Progressive,US,progressive.com
+AIG,US,aig.com
+Chubb,US,chubb.com
+Markel,US,markel.com
+W. R. Berkley,US,berkley.com
+Erie Indemnity,US,erieinsurance.com
+Assurant,US,assurant.com
+Genworth,US,genworth.com
+Brighthouse Financial,US,brighthousefinancial.com
+CNO Financial,US,cnoinc.com
+Globe Life,US,globelifeinsurance.com
+Arthur J. Gallagher,US,ajg.com
+Brown & Brown,US,bbinsurance.com
+Moody's,US,moodys.com
+S&P Global,US,spglobal.com
+MSCI,US,msci.com
+Nasdaq,US,nasdaq.com
+Intercontinental Exchange,US,ice.com
+CME Group,US,cmegroup.com
+Equifax,US,equifax.com
+TransUnion,US,transunion.com
+Experian,US,experian.com
+# Healthcare and pharma
+UnitedHealth Group,US,unitedhealthgroup.com
+Centene,US,centene.com
+Molina Healthcare,US,molinahealthcare.com
+Labcorp,US,labcorp.com
+Quest Diagnostics,US,questdiagnostics.com
+IQVIA,US,iqvia.com
+Thermo Fisher,US,thermofisher.com
+Danaher,US,danaher.com
+Agilent,US,agilent.com
+Waters,US,waters.com
+Bio-Rad,US,bio-rad.com
+Hologic,US,hologic.com
+Intuitive Surgical,US,intuitive.com
+Dexcom,US,dexcom.com
+ResMed,US,resmed.com
+Henry Schein,US,henryschein.com
+Owens & Minor,US,owens-minor.com
+Teleflex,US,teleflex.com
+Zoetis,US,zoetis.com
+Viatris,US,viatris.com
+Organon,US,organon.com
+Jazz Pharmaceuticals,US,jazzpharma.com
+Elevance Health,US,elevancehealth.com
+CVS Health,US,cvshealth.com
+HCA Healthcare,US,hcahealthcare.com
+Community Health Systems,US,chs.net
+Encompass Health,US,encompasshealth.com
+Select Medical,US,selectmedical.com
+# Industrials, energy, transport
+Lockheed Martin,US,lockheedmartin.com
+General Dynamics,US,gd.com
+L3Harris,US,l3harris.com
+Huntington Ingalls,US,hii.com
+Textron,US,textron.com
+Howmet Aerospace,US,howmet.com
+TransDigm,US,transdigm.com
+Spirit AeroSystems,US,spiritaero.com
+Emerson,US,emerson.com
+Rockwell Automation,US,rockwellautomation.com
+Dover,US,dovercorporation.com
+Xylem,US,xylem.com
+Ingersoll Rand,US,irco.com
+Fortive,US,fortive.com
+AMETEK,US,ametek.com
+Hubbell,US,hubbell.com
+Generac,US,generac.com
+Lennox,US,lennox.com
+Watsco,US,watsco.com
+W. W. Grainger,US,grainger.com
+Fastenal,US,fastenal.com
+MSC Industrial,US,mscdirect.com
+United Rentals,US,unitedrentals.com
+Oshkosh,US,oshkoshcorp.com
+AGCO,US,agcocorp.com
+CNH Industrial,US,cnh.com
+BorgWarner,US,borgwarner.com
+Aptiv,US,aptiv.com
+Lear,US,lear.com
+Goodyear,US,goodyear.com
+Tesla,US,tesla.com
+Ford,US,ford.com
+Harley-Davidson,US,harley-davidson.com
+Polaris,US,polaris.com
+Delta Air Lines,US,delta.com
+American Airlines,US,aa.com
+JetBlue,US,jetblue.com
+Alaska Air,US,alaskaair.com
+C.H. Robinson,US,chrobinson.com
+Expeditors,US,expeditors.com
+Old Dominion,US,odfl.com
+Knight-Swift,US,knight-swift.com
+Schneider National,US,schneider.com
+Landstar,US,landstar.com
+Union Pacific,US,up.com
+CSX,US,csx.com
+Exelon,US,exeloncorp.com
+Duke Energy,US,duke-energy.com
+Southern Company,US,southerncompany.com
+American Electric Power,US,aep.com
+Xcel Energy,US,xcelenergy.com
+Sempra,US,sempra.com
+PG&E,US,pge.com
+Edison International,US,edison.com
+Consolidated Edison,US,coned.com
+Entergy,US,entergy.com
+DTE Energy,US,dteenergy.com
+CenterPoint Energy,US,centerpointenergy.com
+WEC Energy,US,wecenergygroup.com
+Ameren,US,ameren.com
+PPL,US,pplweb.com
+FirstEnergy,US,firstenergycorp.com
+Occidental,US,oxy.com
+EOG Resources,US,eogresources.com
+Devon Energy,US,devonenergy.com
+Hess,US,hess.com
+Marathon Petroleum,US,marathonpetroleum.com
+Phillips 66,US,phillips66.com
+Williams Companies,US,williams.com
+Kinder Morgan,US,kindermorgan.com
+ONEOK,US,oneok.com
+NRG Energy,US,nrg.com
+Vistra,US,vistracorp.com
+# Consumer, retail and food
+Procter & Gamble,US,pg.com
+Colgate-Palmolive,US,colgatepalmolive.com
+Kimberly-Clark,US,kimberly-clark.com
+Clorox,US,thecloroxcompany.com
+Church & Dwight,US,churchdwight.com
+Hershey,US,thehersheycompany.com
+J.M. Smucker,US,jmsmucker.com
+Campbell's,US,campbellsoupcompany.com
+McCormick,US,mccormickcorporation.com
+Kellanova,US,kellanova.com
+Hormel,US,hormelfoods.com
+Molson Coors,US,molsoncoors.com
+Brown-Forman,US,brown-forman.com
+Altria,US,altria.com
+Philip Morris International,US,pmi.com
+Estee Lauder,US,elcompanies.com
+Mattel,US,mattel.com
+Hasbro,US,hasbro.com
+Nike,US,nike.com
+VF Corporation,US,vfc.com
+PVH,US,pvh.com
+Ralph Lauren,US,ralphlauren.com
+Tapestry,US,tapestry.com
+Levi Strauss,US,levistrauss.com
+Under Armour,US,underarmour.com
+Lululemon,US,lululemon.com
+Foot Locker,US,footlocker.com
+Dick's Sporting Goods,US,dickssportinggoods.com
+Burlington,US,burlington.com
+Gap,US,gapinc.com
+Bath & Body Works,US,bathandbodyworks.com
+Victoria's Secret,US,victoriassecret.com
+Kohl's,US,kohls.com
+Nordstrom,US,nordstrom.com
+Macy's,US,macys.com
+Dillard's,US,dillards.com
+Advance Auto Parts,US,advanceautoparts.com
+CarMax,US,carmax.com
+AutoNation,US,autonation.com
+Penske Automotive,US,penskeautomotive.com
+Lithia Motors,US,lithia.com
+Sherwin-Williams,US,sherwin-williams.com
+Home Depot,US,homedepot.com
+Lowe's,US,lowes.com
+Wayfair,US,wayfair.com
+Chewy,US,chewy.com
+Ulta Beauty,US,ulta.com
+Sally Beauty,US,sallybeauty.com
+Casey's,US,caseys.com
+Albertsons,US,albertsonscompanies.com
+Sprouts Farmers Market,US,sprouts.com
+BJ's Wholesale,US,bjs.com
+US Foods,US,usfoods.com
+Performance Food Group,US,pfgc.com
+Aramark,US,aramark.com
+Compass Group USA,US,compass-usa.com
+Sodexo,US,sodexo.com
+Marriott,US,marriott.com
+Hilton,US,hilton.com
+Hyatt,US,hyatt.com
+Wyndham,US,wyndhamhotels.com
+Las Vegas Sands,US,sands.com
+MGM Resorts,US,mgmresorts.com
+Caesars,US,caesars.com
+Royal Caribbean,US,royalcaribbean.com
+Carnival,US,carnivalcorp.com
+Yum! Brands,US,yum.com
+Chipotle,US,chipotle.com
+Darden,US,darden.com
+Domino's,US,dominos.com
+Starbucks,US,starbucks.com
+McDonald's,US,mcdonalds.com
+Wendy's,US,wendys.com
+Restaurant Brands,US,rbi.com
+Texas Roadhouse,US,texasroadhouse.com
+Netflix,US,netflix.com
+Warner Bros. Discovery,US,wbd.com
+Paramount,US,paramount.com
+Fox,US,foxcorporation.com
+Comcast,US,comcast.com
+Charter,US,spectrum.com
+T-Mobile,US,t-mobile.com
+Lumen Technologies,US,lumen.com
+Frontier Communications,US,frontier.com
