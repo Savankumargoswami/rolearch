@@ -92,6 +92,7 @@ export function AuthFormInner({
           {state.message ?? (oauthError ? t("auth.errOauth") : t("auth.errLink"))}
         </p>
       )}
+      {state.unconfirmed && <ResendConfirmation email={state.unconfirmed} next={next} initialWait={0} />}
 
       {(!signup || kind === "seeker") && (providers.google || providers.github) && (
         <>
@@ -242,8 +243,8 @@ function GitHubMark() {
 }
 
 /** "Resend the email", with a 60-second wait between sends. */
-function ResendConfirmation({ email, next }: { email: string; next: string }) {
-  const [wait, setWait] = useState(60);
+function ResendConfirmation({ email, next, initialWait = 60 }: { email: string; next: string; initialWait?: number }) {
+  const [wait, setWait] = useState(initialWait);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
   useEffect(() => {

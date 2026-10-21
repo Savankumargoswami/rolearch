@@ -39,8 +39,8 @@ Authentication → Emails → **Templates** → *Confirm signup*:
 - Subject: `Confirm your email for Rolearch`
 - Body: paste `confirm-signup.html`
 
-The link points at `{{ .SiteURL }}/auth/confirm` with a one-time `token_hash`, so it stays on rolearch.com
-(the site's `/auth/confirm` route verifies it). Authentication → URL Configuration → **Site URL** must be
+The link points at `https://www.rolearch.com/auth/confirm` with a one-time `token_hash` (written out in full, so a
+wrong Site URL can't send people to localhost); the site's `/auth/confirm` route verifies it. Authentication → URL Configuration → **Site URL** must be
 `https://www.rolearch.com`, and the Redirect URLs should include `https://www.rolearch.com/**`.
 
 ## 4. Check it

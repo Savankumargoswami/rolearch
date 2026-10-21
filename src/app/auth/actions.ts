@@ -8,7 +8,7 @@ import { authConfigured, createClient } from "@/lib/supabase/server";
 
 export type Field = "name" | "email" | "password" | "company" | "website";
 // `values` refills the form after an error (React resets forms on submit); passwords are never sent back.
-export type AuthState = { errors?: Partial<Record<Field, string>>; message?: string; sent?: string; values?: Record<string, string> };
+export type AuthState = { errors?: Partial<Record<Field, string>>; message?: string; sent?: string; unconfirmed?: string; values?: Record<string, string> };
 
 // Personal inboxes can't prove someone works at a company.
 const FREE_MAIL = new Set([
@@ -107,7 +107,8 @@ export async function signIn(_: AuthState, form: FormData): Promise<AuthState> {
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { message: friendly(error.message), values: { email } };
+  // Not confirmed yet: offer a fresh confirmation email right on the sign-in form.
+  if (error) return { message: friendly(error.message), values: { email }, ...(error.message.toLowerCase().includes("not confirmed") ? { unconfirmed: email } : {}) };
   redirect(safeNext(form.get("next")));
 }
 
