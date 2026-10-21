@@ -34,6 +34,19 @@ def dedupe_key(company: Company, title: str, place: str) -> str:
     return hashlib.sha1(f"{company.name.lower()}|{title.lower()}|{place.lower()}".encode()).hexdigest()
 
 
+# "Remote" / "Hybrid" as a way of working, not as part of the job itself (remote sensing, hybrid cloud).
+_REMOTE_TITLE = re.compile(r"\bremote\b(?!\s*(sensing|monitoring|pilot|patient|vehicle|systems?|operations? center|site))", re.I)
+_HYBRID_TITLE = re.compile(r"\bhybrid\b(?!\s*(cloud|vehicles?|electric|powertrain|it|infrastructure|integration|systems?))", re.I)
+
+
+def workplace_from_title(title: str) -> str | None:
+    if _HYBRID_TITLE.search(title or ""):
+        return "hybrid"
+    if _REMOTE_TITLE.search(title or ""):
+        return "remote"
+    return None
+
+
 def normalize(company: Company, raw: RawJob, now: datetime | None = None) -> dict | None:
     if not raw.title or not raw.job_url:
         return None
@@ -48,6 +61,9 @@ def normalize(company: Company, raw: RawJob, now: datetime | None = None) -> dic
         _, lat, lon = CITIES[city.lower()]
 
     workplace = raw.workplace_hint or ("remote" if place.remote else "onsite")
+    # Many boards leave the flag empty (or say on-site) while the title says "(Remote)" or "Hybrid".
+    if workplace == "onsite":
+        workplace = workplace_from_title(raw.title) or workplace
     remote = workplace == "remote"
     country_name = COUNTRIES[country][0] if country in COUNTRIES else None
     region = COUNTRIES[country][1] if country in COUNTRIES else "global"
