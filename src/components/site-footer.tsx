@@ -31,7 +31,10 @@ export function SiteFooter() {
       </div>
       <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 pb-8 text-sm text-muted sm:px-6">
         <p className="max-w-[80ch]">{t("footer.emailNotice")}</p>
-        <p>{t("footer.rights", { y: 2026 })}</p>
+        <p>
+          {t("footer.rights", { y: 2026 })} · {t("footer.places")}{" "}
+          <a className="underline underline-offset-4 hover:text-ink" href="https://www.geonames.org/" rel="noopener noreferrer">GeoNames</a> (CC BY 4.0)
+        </p>
       </div>
     </footer>
   );

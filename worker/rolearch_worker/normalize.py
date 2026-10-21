@@ -7,7 +7,7 @@ import re
 import unicodedata
 from datetime import datetime, timezone
 
-from .geo import COUNTRIES, CITIES, parse_location
+from .geo import COUNTRIES, CITIES, city_coords, parse_location
 from .categories import category_of
 from .models import Company, RawJob
 from .text import clean_title, extract_skills, in_launch_field, level_of, summarize, visa_offered, years_required
@@ -59,6 +59,10 @@ def normalize(company: Company, raw: RawJob, now: datetime | None = None) -> dic
     lat, lon = place.lat, place.lon
     if city and (lat is None) and city.lower() in CITIES and CITIES[city.lower()][0] == country:
         _, lat, lon = CITIES[city.lower()]
+    if city and lat is None:
+        found = city_coords(city, country, raw.location_text or "")
+        if found:
+            lat, lon = found
 
     workplace = raw.workplace_hint or ("remote" if place.remote else "onsite")
     # Many boards leave the flag empty (or say on-site) while the title says "(Remote)" or "Hybrid".

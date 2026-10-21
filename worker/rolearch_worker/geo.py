@@ -256,3 +256,48 @@ def parse_location(text: str | None, default_country: str | None = None) -> Plac
     if not country and not remote:
         country = default_country
     return Place(city, country, lat, lon, remote)
+
+
+# ---------- Every city with 15,000+ people (GeoNames, CC BY 4.0), for coordinates beyond CITIES ----------
+
+_WORLD: dict[str, list[tuple[str, str, str, float, float, int]]] | None = None
+
+
+def _world() -> dict[str, list[tuple[str, str, str, float, float, int]]]:
+    global _WORLD
+    if _WORLD is None:
+        from pathlib import Path
+
+        table: dict[str, list[tuple[str, str, str, float, float, int]]] = {}
+        path = Path(__file__).parent / "data" / "cities.tsv"
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line or line.startswith("#"):
+                continue
+            name, cc, a1, a1name, lat, lon, pop = line.split("\t")
+            table.setdefault(name, []).append((cc, a1.lower(), a1name, float(lat), float(lon), int(pop)))
+        _WORLD = table
+    return _WORLD
+
+
+def city_coords(city: str | None, country: str | None, context: str = "") -> tuple[float, float] | None:
+    """Coordinates for a city name, preferring the state/region named in `context` ("Portland, ME"),
+    then the most populous match in the country. None when unknown or ambiguous across countries."""
+    if not city:
+        return None
+    key = " ".join(_fold(city).replace("-", " ").replace("'", "").split())
+    if not key or (country and country in COUNTRIES and key == _fold(COUNTRIES[country][0])):
+        return None  # a country name, not a city
+    rows = _world().get(key)
+    if not rows:
+        return None
+    if country:
+        rows = [r for r in rows if r[0] == country]
+    elif len({r[0] for r in rows}) > 1:
+        return None
+    if not rows:
+        return None
+    ctx = {t for t in _fold(context).replace(",", " ").split() if t}
+    ctx_text = f" {_fold(context)} "
+    named = [r for r in rows if (r[1] and r[1] in ctx) or (r[2] and f" {r[2]} " in ctx_text)]
+    best = max(named or rows, key=lambda r: r[5])
+    return best[3], best[4]
