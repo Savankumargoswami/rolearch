@@ -1,7 +1,10 @@
 import { ArrowUpRight, Award, BriefcaseBusiness, FolderGit2, GraduationCap, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { t } from "@/i18n";
+import { companyDomains } from "@/data/db";
 import { formatMonths } from "@/lib/expertise";
+import { CompanyLogo } from "./company-logo";
+import { SkillChip, SkillGlyph } from "./skill-chip";
 import type { ProfileData } from "@/lib/profile-schema";
 
 const fmtMonth = (ym: string) => {
@@ -43,7 +46,10 @@ const initialsOf = (name: string) =>
     .toUpperCase() || "•";
 
 /** The one-page resume, laid out to be read: a role timeline on the left, quick facts on the right. */
-export function ResumeView({ resume: r }: { resume: ProfileData["resume"] }) {
+export async function ResumeView({ resume: r }: { resume: ProfileData["resume"] }) {
+  const known = await companyDomains(r.experience.map((e) => e.company));
+  const domainOf = (e: ProfileData["resume"]["experience"][number]) =>
+    (e.website ?? "").toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split(/[/?#]/)[0] || known[e.company.trim().toLowerCase()] || null;
   const nowDate = new Date();
   const nowMonth = nowDate.getUTCFullYear() * 12 + nowDate.getUTCMonth();
   const span = (start: string, end: string, current: boolean) => {
@@ -68,14 +74,20 @@ export function ResumeView({ resume: r }: { resume: ProfileData["resume"] }) {
                   return (
                     <li key={i} className={`relative ps-14 ${last ? "" : "pb-8"}`}>
                       {!last && <span aria-hidden="true" className="absolute start-[19px] top-12 bottom-1 w-0.5 rounded-full bg-gradient-to-b from-line to-transparent" />}
-                      <span
-                        aria-hidden="true"
-                        className={`absolute start-0 top-0 grid size-10 place-items-center rounded-xl font-display text-sm font-semibold ${
-                          e.current ? "bg-signal text-ink shadow-[0_0_0_4px_rgba(224,163,91,0.2)]" : "bg-ink text-paper"
-                        }`}
-                      >
-                        {initialsOf(e.company || e.title)}
-                      </span>
+                      {domainOf(e) ? (
+                        <span className={`absolute start-0 top-0 rounded-xl ${e.current ? "shadow-[0_0_0_4px_rgba(224,163,91,0.25)]" : ""}`}>
+                          <CompanyLogo domain={domainOf(e)} name={e.company || e.title} size={40} />
+                        </span>
+                      ) : (
+                        <span
+                          aria-hidden="true"
+                          className={`absolute start-0 top-0 grid size-10 place-items-center rounded-xl font-display text-sm font-semibold ${
+                            e.current ? "bg-signal text-ink shadow-[0_0_0_4px_rgba(224,163,91,0.2)]" : "bg-ink text-paper"
+                          }`}
+                        >
+                          {initialsOf(e.company || e.title)}
+                        </span>
+                      )}
                       <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
                         <div className="min-w-0">
                           <h4 className="font-display text-lg font-semibold leading-snug tracking-[-0.01em]">{e.title}</h4>
@@ -156,11 +168,8 @@ export function ResumeView({ resume: r }: { resume: ProfileData["resume"] }) {
               <Card icon={Sparkles} title={t("profile.skills")} compact>
                 <ul className="mt-4 flex flex-wrap gap-1.5">
                   {r.skills.map((s, i) => (
-                    <li
-                      key={s}
-                      className={`rounded-full px-3 py-1 text-sm ${i < 5 ? "bg-ink font-medium text-paper" : "border border-line bg-surface"}`}
-                    >
-                      {s}
+                    <li key={s}>
+                      <SkillChip skill={s} className={i < 5 ? "border-ink font-medium" : ""} />
                     </li>
                   ))}
                 </ul>
@@ -232,7 +241,8 @@ function Chips({ items, className = "" }: { items: string[]; className?: string 
   return (
     <ul className={`flex flex-wrap gap-1.5 ${className}`}>
       {items.map((s) => (
-        <li key={s} className="rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-medium text-ink/80">
+        <li key={s} className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-0.5 text-xs font-medium text-ink/80">
+          <SkillGlyph skill={s} size={13} />
           {s}
         </li>
       ))}

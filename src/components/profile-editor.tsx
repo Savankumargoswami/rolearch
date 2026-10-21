@@ -43,8 +43,11 @@ function fromForm(f: FormState): ProfileData {
   };
 }
 
+/** The portfolio is stored as the link labelled "Portfolio", edited in its own field. */
+const isPortfolio = (l: { label: string }) => l.label.trim().toLowerCase() === "portfolio";
+
 const blank = {
-  experience: (): ExperienceForm => ({ title: "", company: "", location: "", start: "", end: "", current: false, bullets: "", skills: "" }),
+  experience: (): ExperienceForm => ({ title: "", company: "", website: "", location: "", start: "", end: "", current: false, bullets: "", skills: "" }),
   education: () => ({ school: "", degree: "", field: "", start: "", end: "" }),
   project: (): ProjectForm => ({ name: "", url: "", summary: "", skills: "" }),
   certification: () => ({ name: "", issuer: "", issued: "", expires: "", credentialId: "", url: "" }),
@@ -195,10 +198,21 @@ export function ProfileEditor({ initial, initialPhoto, readerEnabled }: { initia
             ))}
           </div>
         </fieldset>
+        <Text
+          label={t("profile.portfolio")}
+          hint={t("profile.portfolioHint")}
+          type="url"
+          placeholder="https://"
+          value={form.links.find(isPortfolio)?.url ?? ""}
+          onChange={(v) => {
+            const others = form.links.filter((l) => !isPortfolio(l));
+            setForm({ ...form, links: v.trim() ? [{ label: "Portfolio", url: v }, ...others] : others });
+          }}
+        />
         <div>
           <p className="text-[0.95rem] font-medium">{t("profile.links")}</p>
           <div className="mt-2 flex flex-col gap-2">
-            {form.links.map((l, i) => (
+            {form.links.map((l, i) => isPortfolio(l) ? null : (
               <div key={i} className="grid grid-cols-[8rem_1fr_auto] gap-2">
                 <Text label={t("profile.linkLabel")} hideLabel value={l.label} placeholder="GitHub" onChange={(v) => setForm({ ...form, links: form.links.map((x, j) => (j === i ? { ...x, label: v } : x)) })} />
                 <Text label={t("profile.linkUrl")} hideLabel value={l.url} placeholder="https://" type="url" onChange={(v) => setForm({ ...form, links: form.links.map((x, j) => (j === i ? { ...x, url: v } : x)) })} />
@@ -216,6 +230,7 @@ export function ProfileEditor({ initial, initialPhoto, readerEnabled }: { initia
             <div className="grid gap-4 sm:grid-cols-2">
               <Text label={t("profile.jobTitle")} value={e.title} onChange={(v) => exp.update(i, { title: v })} />
               <Text label={t("profile.company")} value={e.company} onChange={(v) => exp.update(i, { company: v })} />
+              <Text label={t("profile.companyWebsite")} hint={t("profile.companyWebsiteHint")} value={e.website ?? ""} placeholder="stripe.com" onChange={(v) => exp.update(i, { website: v })} />
               <Text label={t("profile.location")} value={e.location} onChange={(v) => exp.update(i, { location: v })} />
               <div className="grid grid-cols-2 gap-2">
                 <Text label={t("profile.start")} type="month" value={e.start} onChange={(v) => exp.update(i, { start: v })} />

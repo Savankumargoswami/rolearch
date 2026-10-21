@@ -1,4 +1,5 @@
-import { ArrowUpRight, Camera, CircleAlert, CircleCheck, FileUp, MapPin, Pencil } from "lucide-react";
+import { ArrowUpRight, Camera, CircleAlert, CircleCheck, FileUp, Globe, MapPin, Pencil } from "lucide-react";
+import { SkillGlyph } from "@/components/skill-chip";
 import Link from "next/link";
 import { signOut } from "@/app/auth/actions";
 import { Avatar } from "@/components/avatar";
@@ -42,7 +43,8 @@ export function ProfileView({ account, mode, social, posts, viewerId, canPost = 
 
   const now = r.experience.find((e) => e.current) ?? r.experience[0];
   const name = p.full_name || (own ? t("auth.accountTitle") : t("social.member"));
-  const links = p.links.filter((l) => l.url);
+  const portfolio = p.links.find((l) => l.url && l.label.trim().toLowerCase() === "portfolio");
+  const links = p.links.filter((l) => l.url && l !== portfolio);
 
   const avatar = (
     <Avatar url={account.avatarUrl} name={name} size={152} priority fallbackClass="bg-ink-hover text-paper" className="ring-4 ring-signal ring-offset-4 ring-offset-ink" />
@@ -87,6 +89,18 @@ export function ProfileView({ account, mode, social, posts, viewerId, canPost = 
                 {p.location && p.status === "student" && <span aria-hidden="true">·</span>}
                 {p.status === "student" && <span>{t("profile.student")}</span>}
               </p>
+            )}
+            {portfolio && (
+              <a
+                href={portfolio.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-signal px-5 font-medium text-ink transition-colors duration-200 hover:bg-[#e8b977]"
+              >
+                <Globe aria-hidden="true" className="size-4" />
+                {t("profile.viewPortfolio")}
+                <ArrowUpRight aria-hidden="true" className="size-4" />
+              </a>
             )}
             {links.length > 0 && (
               <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
@@ -168,14 +182,18 @@ export function ProfileView({ account, mode, social, posts, viewerId, canPost = 
               <li key={e.skill} className="relative overflow-hidden rounded-2xl border border-line bg-surface p-5">
                 <span aria-hidden="true" className="absolute inset-y-0 start-0 w-1 bg-signal" />
                 <span className="block font-display text-2xl font-semibold whitespace-nowrap tabular-nums tracking-[-0.02em] md:text-3xl">{formatMonths(e.months)}</span>
-                <span className="mt-1 block font-medium">{e.skill}</span>
+                <span className="mt-1 flex items-center gap-2 font-medium">
+                  <SkillGlyph skill={e.skill} size={18} />
+                  {e.skill}
+                </span>
               </li>
             ))}
           </ul>
           {more.length > 0 && (
             <ul className="mt-3 flex flex-wrap gap-2">
               {more.map((e) => (
-                <li key={e.skill} className="rounded-full border border-line bg-surface px-3 py-1.5 text-sm">
+                <li key={e.skill} className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1.5 text-sm">
+                  <SkillGlyph skill={e.skill} />
                   <span className="font-medium">{e.skill}</span>
                   <span className="text-muted"> · {e.source === "projects" ? t("profile.fromProjects") : formatMonths(e.months)}</span>
                 </li>

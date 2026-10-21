@@ -13,6 +13,7 @@ function shapes<Status extends z.ZodType>(
   const experience = z.object({
     title: text(120).describe("Job title"),
     company: text(120),
+    website: text(200).describe('The company\'s website domain, e.g. "stripe.com", only if you are confident; otherwise ""'),
     location: text(120).describe('City and country, "Remote", or ""'),
     start: month("Start month"),
     end: month('End month ("" if current)'),
@@ -96,6 +97,11 @@ export function withDefaults(p: Partial<ProfileData> & { resume?: Partial<Profil
     ...emptyProfile,
     ...p,
     links: p.links ?? [],
-    resume: { ...emptyProfile.resume, ...(p.resume ?? {}) },
+    resume: {
+      ...emptyProfile.resume,
+      ...(p.resume ?? {}),
+      // Rows saved before a field existed get it filled in.
+      experience: (p.resume?.experience ?? []).map((e) => ({ ...e, website: e.website ?? "" })),
+    },
   };
 }

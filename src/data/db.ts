@@ -305,3 +305,13 @@ export async function correctQuery(q: string): Promise<string | null> {
   if (!q.trim()) return null;
   return rpc<string | null>("correct_query", { q: q.slice(0, 100) });
 }
+
+/** Website domains for company names Rolearch already reads ("deloitte" -> "deloitte.com"), for profile logos. */
+export async function companyDomains(names: string[]): Promise<Record<string, string>> {
+  "use cache";
+  cacheLife("days");
+  const list = [...new Set(names.map((n) => n.trim().toLowerCase()).filter(Boolean))].slice(0, 40);
+  if (!list.length) return {};
+  const rows = await rpc<{ name: string; domain: string }[]>("company_domains", { names: list });
+  return Object.fromEntries((rows ?? []).map((r) => [r.name, r.domain]));
+}
