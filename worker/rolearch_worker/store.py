@@ -251,7 +251,7 @@ class PostgresStore:
         """Recompute the site's totals, category counts and map pins (db/013_fast_search.sql)."""
         try:
             with self.conn.cursor() as cur:
-                cur.execute("select public.refresh_job_summary()")
+                cur.execute("select public.refresh_job_summary_and_vocab()")
             self.conn.commit()
         except Exception as e:  # an older database without the summary: the site still works, just slower
             self.conn.rollback()

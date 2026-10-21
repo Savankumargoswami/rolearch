@@ -34,7 +34,7 @@ export function JobsControls({ filters, counts }: { filters: JobQuery; counts: R
   function type(v: string) {
     setQuery(v);
     if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => go({ ...filters, q: v }), 300);
+    timer.current = setTimeout(() => go({ ...filters, q: v, exact: false }), 300);
   }
   useEffect(
     () => () => {
@@ -70,7 +70,7 @@ export function JobsControls({ filters, counts }: { filters: JobQuery; counts: R
           label={t("jobs.searchLabel")}
           value={query}
           onValueChange={type}
-          onCommit={(v) => go({ ...filters, q: v })}
+          onCommit={(v) => go({ ...filters, q: v, exact: false })}
           placeholder={t("jobs.searchPlaceholder")}
           className="flex-1"
           inputClassName="h-12"

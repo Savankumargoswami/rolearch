@@ -11,6 +11,8 @@ export function toQueryString(f: JobQuery, page = 1): string {
   if (f.pay) sp.set("pay", "1");
   if (f.level !== "any") sp.set("level", f.level);
   if (f.sort !== "match") sp.set("sort", f.sort);
+  if (f.near && f.near !== "auto") sp.set("near", f.near);
+  if (f.exact) sp.set("exact", "1");
   if (page > 1) sp.set("page", String(page));
   const s = sp.toString();
   return s ? `?${s}` : "";

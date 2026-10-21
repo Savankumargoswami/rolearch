@@ -190,12 +190,18 @@ export type JobQuery = {
   pay: boolean;
   level: string;
   sort: "match" | "newest";
+  /** Location: "auto" (nearby first, or nearby only when browsing), "only", or "off". */
+  near?: "auto" | "only" | "off";
+  /** Search exactly what was typed, without typo correction. */
+  exact?: boolean;
 };
+
+export type Near = { lat: number; lon: number; only: boolean } | null;
 
 type SearchRow = Pick<Row, "id" | "title" | "company" | "city" | "country" | "region" | "workplace" | "visa" | "salary_min" | "salary_max" | "salary_currency" | "salary_period" | "level" | "years" | "skills" | "posted_at" | "category" | "verified" | "source" | "company_domain"> & { total: number };
 
 /** Searches every open job in the database. Cached briefly per query so popular searches are instant. */
-export async function searchJobs(f: JobQuery, page = 1, perPage = 40): Promise<{ jobs: JobLite[]; total: number }> {
+export async function searchJobs(f: JobQuery, page = 1, perPage = 40, near: Near = null): Promise<{ jobs: JobLite[]; total: number }> {
   "use cache";
   cacheLife("minutes");
   cacheTag("jobs");
@@ -210,6 +216,9 @@ export async function searchJobs(f: JobQuery, page = 1, perPage = 40): Promise<{
     sort: f.sort === "newest" ? "newest" : "relevance",
     lim: perPage,
     off: (Math.max(1, page) - 1) * perPage,
+    near_lat: near?.lat ?? null,
+    near_lon: near?.lon ?? null,
+    near_only: near?.only ?? false,
   });
   if (!rows) {
     // No database: search the saved feed instead.
@@ -287,4 +296,12 @@ export async function jobMap(): Promise<MapPin[]> {
   cacheTag("jobs");
   const rows = await rpc<MapPin[]>("job_map", { max_pins: 80 });
   return (rows ?? []).map((r) => ({ ...r, n: Number(r.n) }));
+}
+
+/** The query with likely typos fixed ("data enginnering" -> "data engineering"), or null when it looks right. */
+export async function correctQuery(q: string): Promise<string | null> {
+  "use cache";
+  cacheLife("hours");
+  if (!q.trim()) return null;
+  return rpc<string | null>("correct_query", { q: q.slice(0, 100) });
 }

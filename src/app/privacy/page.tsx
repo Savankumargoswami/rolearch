@@ -42,6 +42,7 @@ const sections: LegalSection[] = [
             <><strong>Company accounts and job posts:</strong> jobs a company posts, page-view counts for those jobs, and the company&rsquo;s pipeline stages, notes and messages about its applicants.</>,
             <><strong>ATS checks:</strong> a resume you upload to check against a job is processed to produce a score and suggestions. We don&rsquo;t keep that file or the improved version after your session.</>,
             <><strong>Technical data:</strong> sign-in cookies, and the IP address, browser type and request logs our hosting providers record to run and protect the service.</>,
+            <><strong>Approximate location:</strong> our host estimates the city you&rsquo;re browsing from based on your connection. We use it only to show jobs near you first, and you can switch that off on the jobs page. We don&rsquo;t store it.</>,
           ]}
         />
         <p>

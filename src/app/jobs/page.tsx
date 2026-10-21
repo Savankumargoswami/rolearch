@@ -1,13 +1,15 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { JobRow } from "@/components/job-row";
 import { JobsControls } from "@/components/jobs-explorer";
-import { getJobFeed, jobCategories, searchJobs, type JobQuery } from "@/data/db";
+import { correctQuery, getJobFeed, jobCategories, searchJobs, type JobQuery, type Near } from "@/data/db";
 import { locale, t } from "@/i18n";
 import { isCategory } from "@/lib/categories";
 import { formatJobCount, toQueryString } from "@/lib/job-query";
+import { parseQuery } from "@/lib/query-parse";
+import { viewerLocation } from "@/lib/viewer-location";
 import { requireMember } from "@/lib/require-member";
 import { whereOptions, type Where } from "@/lib/regions";
 
@@ -36,6 +38,8 @@ function parse(sp: Record<string, string | string[] | undefined>): { filters: Jo
       pay: one("pay") === "1",
       level: ["entry", "mid", "senior", "lead"].includes(level) ? level : "any",
       sort: one("sort") === "newest" ? "newest" : "match",
+      near: one("near") === "only" ? "only" : one("near") === "off" ? "off" : "auto",
+      exact: one("exact") === "1",
     },
   };
 }
@@ -54,8 +58,11 @@ export default function JobsPage({ searchParams }: { searchParams: Search }) {
 async function Results({ searchParams }: { searchParams: Search }) {
   const { filters, page } = parse(await searchParams);
   await requireMember(`/jobs${toQueryString(filters, page)}`);
-  const [{ jobs, total }, cats, feed] = await Promise.all([searchJobs(filters, page, PER_PAGE), jobCategories(), getJobFeed()]);
+  const [result, cats, feed] = await Promise.all([findJobs(filters, page), jobCategories(), getJobFeed()]);
+  const { jobs, total, corrected, mode, loc, parsed } = result;
   const counts = Object.fromEntries(cats.map((c) => [c.category, c.n]));
+  const link = (patch: Partial<JobQuery>) => `/jobs${toQueryString({ ...filters, ...patch })}`;
+  const understood = [parsed.remote && !filters.remote && t("jobs.understoodRemote"), parsed.visa && !filters.visa && t("jobs.understoodVisa"), parsed.entry && filters.level === "any" && t("jobs.understoodEntry")].filter(Boolean);
   const pages = Math.ceil(total / PER_PAGE);
 
   return (
@@ -66,6 +73,37 @@ async function Results({ searchParams }: { searchParams: Search }) {
           {total === 1 ? t("jobs.countOne") : t("jobs.count", { n: formatJobCount(total) })}
         </p>
         <p className="text-sm text-muted">{updatedNote(feed.updatedAt, feed.companies)}</p>
+      </div>
+      <div className="mt-2 flex flex-col gap-1.5 text-sm">
+        {corrected && (
+          <p>
+            {t("jobs.correctedLead")} <strong>{corrected}</strong>.{" "}
+            <Link href={link({ exact: true })} className="underline underline-offset-4 hover:decoration-2">
+              {t("jobs.searchExact", { q: filters.q })}
+            </Link>
+          </p>
+        )}
+        {understood.length > 0 && <p className="text-muted">{t("jobs.understood", { f: understood.join(", ") })}</p>}
+        {loc && mode !== "none" && (
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-ink-soft px-3 py-1">
+              <MapPin aria-hidden="true" className="size-3.5" />
+              {mode === "only" ? t("jobs.nearOnly", { place: loc.label }) : t("jobs.nearFirst", { place: loc.label })}
+            </span>
+            {mode === "boost" && (
+              <Link href={link({ near: "only" })} className="underline underline-offset-4">{t("jobs.nearShowOnly")}</Link>
+            )}
+            <Link href={link({ near: "off" })} className="underline underline-offset-4">{t("jobs.nearAnywhere")}</Link>
+          </p>
+        )}
+        {loc && mode === "none" && filters.near === "off" && (
+          <p>
+            <Link href={link({ near: "auto" })} className="inline-flex items-center gap-1.5 underline underline-offset-4">
+              <MapPin aria-hidden="true" className="size-3.5" />
+              {t("jobs.nearShow", { place: loc.label })}
+            </Link>
+          </p>
+        )}
       </div>
 
       {jobs.length > 0 ? (
@@ -105,6 +143,46 @@ async function Results({ searchParams }: { searchParams: Search }) {
       )}
     </>
   );
+}
+
+/**
+ * Runs a search the way people mean it: filler words dropped, "remote"/"visa"/"near me"/"entry level" turned into
+ * filters, jobs near the visitor first (only nearby when just browsing), and likely typos fixed when the exact words
+ * find almost nothing.
+ */
+async function findJobs(filters: JobQuery, page: number) {
+  const parsed = parseQuery(filters.q);
+  const loc = await viewerLocation();
+  const effective: JobQuery = {
+    ...filters,
+    q: parsed.text,
+    remote: filters.remote || parsed.remote,
+    visa: filters.visa || parsed.visa,
+    level: filters.level === "any" && parsed.entry ? "entry" : filters.level,
+  };
+  const located = loc && effective.where === "anywhere" && !effective.remote && filters.near !== "off";
+  const automatic = filters.near !== "only" && !parsed.nearMe;
+  let mode: "none" | "boost" | "only" = !located ? "none" : !automatic || !effective.q ? "only" : "boost";
+  const near = (m: typeof mode): Near => (loc && m !== "none" ? { lat: loc.lat, lon: loc.lon, only: m === "only" } : null);
+
+  let res = await searchJobs(effective, page, PER_PAGE, near(mode));
+  // Browsing near someone with no jobs around: show everything instead of an empty page.
+  if (mode === "only" && automatic && res.total === 0) {
+    mode = "none";
+    res = await searchJobs(effective, page, PER_PAGE, null);
+  }
+  let corrected: string | null = null;
+  if (effective.q && !filters.exact && res.total < 3) {
+    const fixed = await correctQuery(effective.q);
+    if (fixed && fixed !== effective.q) {
+      const retry = await searchJobs({ ...effective, q: fixed }, page, PER_PAGE, near(mode));
+      if (retry.total > res.total) {
+        res = retry;
+        corrected = fixed;
+      }
+    }
+  }
+  return { ...res, corrected, mode, loc, parsed };
 }
 
 function Skeleton() {
