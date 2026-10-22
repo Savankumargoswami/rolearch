@@ -319,15 +319,22 @@ export async function companyDomains(names: string[]): Promise<Record<string, st
 /** Job ids per public sitemap file (Google reads at most 50,000 URLs per file). */
 export const SITEMAP_PAGE = 20000;
 
-// A failed lookup throws rather than returning nothing: a refresh that errors keeps serving the last good
-// sitemaps, where "0 jobs" would be cached and turn every file after the first into a 404 for search engines.
+// While the site runs, a failed lookup throws: the refresh errors and the last good sitemaps keep being served,
+// where "0 jobs" would be cached and turn every file after the first into a 404 for search engines.
+// During a build there is no last good version, and a database hiccup must never fail the deployment: fall back
+// to a generous page count (files past the end are simply empty) and let the hourly refresh fill them in.
+const BUILDING = process.env.NEXT_PHASE === "phase-production-build";
+const FALLBACK_PAGES = 60;
 
-/** How many sitemap files the open jobs fill. */
+/** How many sitemap files the open jobs fill (db/021_sitemap_pages.sql keeps them prebuilt). */
 export async function jobSitemapPages(): Promise<number> {
   "use cache";
   cacheLife("hours");
   const n = await rpc<number>("job_sitemap_count", {});
-  if (n == null) throw new Error("job_sitemap_count failed");
+  if (n == null) {
+    if (BUILDING) return FALLBACK_PAGES;
+    throw new Error("job_sitemap_count failed");
+  }
   return Math.max(1, Math.ceil(n / SITEMAP_PAGE));
 }
 
@@ -336,6 +343,9 @@ export async function jobSitemap(page: number): Promise<[string, string | null][
   "use cache";
   cacheLife("hours");
   const rows = await rpc<[string, string | null][]>("job_sitemap", { p_page: page, p_size: SITEMAP_PAGE });
-  if (rows == null) throw new Error(`job_sitemap page ${page} failed`);
+  if (rows == null) {
+    if (BUILDING) return [];
+    throw new Error(`job_sitemap page ${page} failed`);
+  }
   return rows;
 }
