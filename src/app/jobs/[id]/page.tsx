@@ -76,7 +76,8 @@ function jobPostingLd(job: Job, text: string) {
     description: text.trim().length >= 120 ? descriptionHtml(text) : fallback,
     identifier: { "@type": "PropertyValue", name: job.company, value: job.id },
     datePosted: (job.postedAt ?? "").slice(0, 10) || undefined,
-    ...(job.source === "Rolearch" && { employmentType: "FULL_TIME", directApply: true }),
+    // No directApply: applying needs a Rolearch account first.
+    ...(job.source === "Rolearch" && { employmentType: "FULL_TIME" }),
     hiringOrganization: {
       "@type": "Organization",
       name: job.company,
@@ -213,17 +214,9 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
                   </ul>
                 </>
               )}
-              {job.jobUrl && job.source !== "Rolearch" && (
-                <a
-                  href={job.jobUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 inline-flex min-h-11 items-center gap-1.5 font-medium underline decoration-line underline-offset-4 hover:decoration-ink"
-                >
-                  {t("job.applyOnSite", { c: job.company })}
-                  <ArrowUpRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
-                </a>
-              )}
+              <Suspense fallback={null}>
+                <EmployerLink job={job} />
+              </Suspense>
             </section>
 
             <Suspense fallback={<Requirements job={job} match={null} req={null} />}>
@@ -305,35 +298,34 @@ async function ApplyArea({ job }: { job: Job }) {
 
 /** Visitors can read the job and apply on the employer's site; saving and tracking need a free account. */
 function VisitorApply({ job }: { job: Job }) {
-  const next = encodeURIComponent(`/jobs/${job.id}`);
+  // After sign-up, Rolearch jobs go straight to the apply form; other jobs back to this page and its apply link.
+  const next = encodeURIComponent(job.source === "Rolearch" ? `/jobs/${job.id}/apply` : `/jobs/${job.id}`);
   return (
     <>
-      {job.source === "Rolearch" ? (
-        <Link
-          href={`/signup?next=${encodeURIComponent(`/jobs/${job.id}/apply`)}`}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
-        >
-          {t("apply.cta")}
-        </Link>
-      ) : job.applyUrl ? (
-        <a
-          href={job.applyUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
-        >
-          {t("job.applyOnSite", { c: job.company })}
-          <ArrowUpRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
-        </a>
-      ) : null}
-      <p className="text-sm text-muted text-pretty">{t("job.visitorSave")}</p>
       <Link
         href={`/signup?next=${next}`}
-        className="inline-flex min-h-11 items-center justify-center rounded-full border border-ink px-5 font-medium transition-colors duration-200 hover:bg-ink-soft"
+        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
       >
-        {t("job.visitorSaveCta")}
+        {t("job.signUpToApply")}
       </Link>
+      <p className="text-sm text-muted text-pretty">{t("job.visitorSave")}</p>
     </>
+  );
+}
+
+/** The employer's own job page, for members (visitors apply after signing up). */
+async function EmployerLink({ job }: { job: Job }) {
+  if (!job.jobUrl || job.source === "Rolearch" || !(await loadViewer())) return null;
+  return (
+    <a
+      href={job.jobUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-5 inline-flex min-h-11 items-center gap-1.5 font-medium underline decoration-line underline-offset-4 hover:decoration-ink"
+    >
+      {t("job.applyOnSite", { c: job.company })}
+      <ArrowUpRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
+    </a>
   );
 }
 

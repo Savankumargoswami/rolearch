@@ -154,8 +154,8 @@ const en = {
   workplace: { remote: "Remote", hybrid: "Hybrid", onsite: "On-site" },
   verdict: { strong: "Strong match", partial: "Partial match", weak: "Not a match yet" },
   job: {
-    visitorSave: "Create a free account to save this job, see how well you match and check your resume against it.",
-    visitorSaveCta: "Sign up free",
+    signUpToApply: "Sign up free to apply",
+    visitorSave: "A free account lets you apply, save this job, see how well you match and check your resume against it.",
     back: "All jobs",
     apply: "Apply on company site",
     opensNewTab: "(opens the company's site in a new tab)",
