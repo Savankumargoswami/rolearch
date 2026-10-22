@@ -1,0 +1,824 @@
+name,country,domain
+# Fast-growing US startups and scale-ups (Inc. 5000-style, set 2, by region), not found on Greenhouse/Lever/Ashby by slug
+Bumble,US,bumble.com
+Kasasa,US,kasasa.com
+Digital Turbine,US,digitalturbine.com
+Workrise,US,workrise.com
+Hypergiant,US,hypergiant.com
+Phunware,US,phunware.com
+Upland Software,US,uplandsoftware.com
+BigCommerce,US,bigcommerce.com
+Vyopta,US,vyopta.com
+Zilliant,US,zilliant.com
+Khoros,US,khoros.com
+ShipStation,US,shipstation.com
+Ambiq Micro,US,ambiq.com
+WP Engine,US,wpengine.com
+Mutual Mobile,US,mutualmobile.com
+Enverus,US,enverus.com
+Pariveda Solutions,US,parivedasolutions.com
+Intrusion Inc.,US,intrusion.com
+Quorum Software,US,quorumsoftware.com
+Vroom,US,vroom.com
+Core Scientific,US,corescientific.com
+Applied Digital,US,applieddigital.com
+Codeup,US,codeup.com
+Jungle Disk,US,jungledisk.com
+Spiceworks,US,spiceworks.com
+Crossover,US,crossover.com
+Rackspace Technology,US,rackspace.com
+Mavenir,US,mavenir.com
+Tyler Technologies,US,tylertech.com
+Thryv,US,thryv.com
+Accruent,US,accruent.com
+NetSpend,US,netspend.com
+TrustRadius,US,trustradius.com
+BuildASign,US,buildasign.com
+Mark Cuban Cost Plus Drug Company,US,costplusdrugs.com
+Castle Biosciences,US,castlebiosciences.com
+Pieces Technologies,US,piecestech.com
+ClearDATA,US,cleardata.com
+Catapult Health,US,catapulthealth.com
+Emerus Holdings,US,emerus.com
+Monarch Dental,US,monarchdental.com
+Rodeo Dental & Orthodontics,US,rodeodental.com
+Mission Pharmacal,US,missionpharmacal.com
+Sanara MedTech,US,sanaramedtech.com
+Lantern Pharma,US,lanternpharma.com
+Taysha Gene Therapies,US,tayshagtx.com
+Instil Bio,US,instilbio.com
+Aeglea BioTherapeutics,US,aegleabio.com
+Molecular Templates,US,moleculartemplates.com
+Savara,US,savarapharma.com
+Asuragen,US,asuragen.com
+Genprex,US,genprex.com
+XBiotech,US,xbiotech.com
+Shattuck Labs,US,shattucklabs.com
+VolitionRx,US,volition.com
+Monogram Technologies,US,monogramorthopaedics.com
+bioAffinity Technologies,US,bioaffinitytech.com
+Lexicon Pharmaceuticals,US,lexpharma.com
+Tvardi Therapeutics,US,tvardi.com
+Moleculin Biotech,US,moleculin.com
+Salarius Pharmaceuticals,US,salariuspharma.com
+Kiromic BioPharma,US,kiromic.com
+Greenwich LifeSciences,US,greenwichlifesciences.com
+FibroBiologics,US,fibrobiologics.com
+Coya Therapeutics,US,coyatherapeutics.com
+CNS Pharmaceuticals,US,cnspharma.com
+HealthMarkets,US,healthmarkets.com
+Texas Oncology,US,texasoncology.com
+The US Oncology Network,US,usoncology.com
+U.S. Anesthesia Partners,US,usap.com
+Orthofix,US,orthofix.com
+Hanger,US,hanger.com
+Spectral AI,US,spectral-ai.com
+CareView Communications,US,careviewcommunications.com
+Tiff's Treats,US,tiffstreats.com
+Waterloo Sparkling Water,US,drinkwaterloo.com
+Tito's Handmade Vodka,US,titosvodka.com
+Blue Bell Creameries,US,bluebell.com
+Cuvée Coffee,US,cuveecoffee.com
+Austin Eastciders,US,austineastciders.com
+Pecan Deluxe Candy Company,US,pecandeluxe.com
+Bluebonnet Nutrition,US,bluebonnetnutrition.com
+Saint Arnold Brewing Company,US,saintarnold.com
+Rogers-O'Brien Construction,US,rogers-obrien.com
+Harvey-Cleary Builders,US,harveycleary.com
+Pogue Construction,US,poguecc.com
+Marek,US,marekbros.com
+Cadence McShane Construction,US,cadencemcshane.com
+Tellepsen,US,tellepsen.com
+Satterfield & Pontikes Construction,US,sp-construction.com
+Vaughn Construction,US,vaughnconstruction.com
+Linbeck,US,linbeck.com
+Bartlett Cocke General Contractors,US,bartlettcocke.com
+Jordan Foster Construction,US,jordanfoster.com
+Daseke,US,daseke.com
+Transplace,US,transplace.com
+Lone Star Transportation,US,lonestartrans.com
+Kirby Corporation,US,kirbycorp.com
+Mouser Electronics,US,mouser.com
+Axiom Space,US,axiomspace.com
+Mission Solar Energy,US,missionsolar.com
+Lancium,US,lancium.com
+Sunnova Energy,US,sunnova.com
+Enchanted Rock,US,enchantedrock.com
+Solaris Energy Infrastructure,US,solaris-energy.com
+NextDecade,US,next-decade.com
+Excelerate Energy,US,excelerateenergy.com
+Base Power Company,US,basepowercompany.com
+Jupiter Power,US,jupiterpower.com
+Barrios Technology,US,barrios.com
+Bastion Technologies,US,bastiontechnologies.com
+Pape-Dawson Engineers,US,pape-dawson.com
+Vivid Seats,US,vividseats.com
+Cleverbridge,US,cleverbridge.com
+Uptake,US,uptake.com
+Sertifi,US,sertifi.com
+Ocient,US,ocient.com
+Fetch,US,fetch.com
+Avant,US,avant.com
+Root Insurance,US,joinroot.com
+Lower,US,lower.com
+Hyland,US,hyland.com
+Park Place Technologies,US,parkplacetechnologies.com
+Everstream,US,everstream.net
+Liquid Web,US,liquidweb.com
+Nutshell,US,nutshell.com
+Altair,US,altair.com
+Formstack,US,formstack.com
+Springbuk,US,springbuk.com
+Scale Computing,US,scalecomputing.com
+High Alpha,US,highalpha.com
+Aunalytics,US,aunalytics.com
+Direct Supply,US,directsupply.com
+Skyward,US,skyward.com
+Calabrio,US,calabrio.com
+Code42,US,code42.com
+Infinite Campus,US,infinitecampus.com
+Daugherty Business Solutions,US,daugherty.com
+West Monroe,US,westmonroe.com
+Sikich,US,sikich.com
+Plante Moran,US,plantemoran.com
+Wipfli,US,wipfli.com
+Rehmann,US,rehmann.com
+Clark Schaefer Hackett,US,cshco.com
+Boulay,US,boulaygroup.com
+Redpath and Company,US,redpathcpas.com
+"Katz, Sapper & Miller (KSM)",US,ksmcpa.com
+Brown Smith Wallace,US,bswllc.com
+Resultant,US,resultant.com
+Centric Consulting,US,centricconsulting.com
+SPR Consulting,US,spr.com
+Addison Group,US,addisongroup.com
+Ettain Group,US,ettain.com
+The Mom Project,US,themomproject.com
+Alera Group,US,aleragroup.com
+Hylant,US,hylant.com
+Cresset Partners,US,cressetpartners.com
+Mesirow,US,mesirow.com
+Hightower Advisors,US,hightoweradvisors.com
+Moneta Group,US,monetagroup.com
+Buckingham Strategic Wealth,US,buckinghamstrategicwealth.com
+Mairs & Power,US,mairsandpower.com
+PEAK6,US,peak6.com
+Allied Solutions,US,alliedsolutions.net
+Gainbridge,US,gainbridge.io
+Hantz Financial Services,US,hantz.com
+Guaranteed Rate,US,rate.com
+Bader Rutter,US,baderrutter.com
+Colle McVoy,US,collemcvoy.com
+Kuno Creative,US,kunocreative.com
+The Nerdery,US,nerdery.com
+Fahlgren Mortine,US,fahlgrenmortine.com
+BitPay,US,bitpay.com
+Cardlytics,US,cardlytics.com
+Bakkt,US,bakkt.com
+Paya,US,paya.com
+Sharecare,US,sharecare.com
+Terminus,US,terminus.com
+Greenway Health,US,greenwayhealth.com
+Flock Safety,US,flocksafety.com
+Aptean,US,aptean.com
+PrimeRevenue,US,primerevenue.com
+CoreCard,US,corecard.com
+Ebix,US,ebix.com
+SecureWorks,US,secureworks.com
+Relias,US,relias.com
+JAGGAER,US,jaggaer.com
+AvidXchange,US,avidxchange.com
+Phreesia,US,phreesia.com
+nCino,US,ncino.com
+Asurion,US,asurion.com
+Emma,US,myemma.com
+HealthStream,US,healthstream.com
+FreightWaves,US,freightwaves.com
+BellHops,US,bellhops.com
+Skuid,US,skuid.com
+Benefitfocus,US,benefitfocus.com
+BoomTown,US,boomtownroi.com
+Blue Acorn iCi,US,blueacorn.com
+Shipt,US,shipt.com
+Daxko,US,daxko.com
+ADTRAN,US,adtran.com
+Brasfield & Gorrie,US,brasfieldgorrie.com
+Robins & Morton,US,robinsmorton.com
+Choate Construction,US,choateconstruction.com
+Batson-Cook Construction,US,batson-cook.com
+Hardin Construction,US,hardinconstruction.com
+Samet Corporation,US,sametcorp.com
+Barnhill Contracting,US,barnhillcontracting.com
+Metcon,US,metconinc.com
+Rogers Group,US,rogersgroupinc.com
+Mungo Homes,US,mungohomes.com
+Eastwood Homes,US,eastwoodhomes.com
+Crescent Communities,US,crescentcommunities.com
+Averitt Express,US,averitt.com
+Kenco Group,US,kencogroup.com
+Capstone Logistics,US,capstonelogistics.com
+Landair Transport,US,landair.com
+Southeastern Freight Lines,US,sefl.com
+Strata Clean Energy,US,stratacleanenergy.com
+Silicon Ranch,US,siliconranchcorp.com
+Hanwha Qcells,US,qcells.com
+Torch Technologies,US,torchtechnologies.com
+COLSA Corporation,US,colsa.com
+Sentar,US,sentar.com
+Davidson Technologies,US,davidsontech.com
+Pro2Serve,US,pro2serve.com
+Navarro Research and Engineering,US,navarro-inc.com
+Milo's Tea Company,US,drinkmilos.com
+Cheerwine (Carolina Beverage Corp.),US,cheerwine.com
+Mt. Olive Pickle Company,US,mtolivepickles.com
+Standard Candy Company (Goo Goo Cluster),US,googoo.com
+Lodge Cast Iron,US,lodgecastiron.com
+Savannah Bee Company,US,savannahbee.com
+Byrd Cookie Company,US,byrdcookiecompany.com
+Counter Culture Coffee,US,counterculturecoffee.com
+Royal Cup Coffee & Tea,US,royalcup.com
+Buffalo Rock Company,US,buffalorock.com
+Red Diamond,US,reddiamond.com
+T.W. Garner Food Company (Texas Pete),US,twgarner.com
+Biscuitville,US,biscuitville.com
+Jim 'N Nick's Bar-B-Q,US,jimnnicks.com
+Zaxby's,US,zaxbys.com
+Cook Out,US,cookout.com
+Bojangles,US,bojangles.com
+Zeus Industrial Products,US,zeusinc.com
+Spanx,US,spanx.com
+Atlas Roofing,US,atlasroofing.com
+Pratt Industries,US,prattindustries.com
+Charlotte Pipe and Foundry,US,charlottepipe.com
+BambooHR,US,bamboohr.com
+Health Catalyst,US,healthcatalyst.com
+Motivosity,US,motivosity.com
+MX Technologies,US,mx.com
+Galileo Financial Technologies,US,galileo-ft.com
+Nav,US,nav.com
+Homie,US,homie.com
+Chatbooks,US,chatbooks.com
+Jive Communications,US,jive.com
+Ivanti,US,ivanti.com
+SecurityMetrics,US,securitymetrics.com
+Alianza,US,alianza.com
+Owlet,US,owletcare.com
+Cricut,US,cricut.com
+Velocity Global,US,velocityglobal.com
+Pax8,US,pax8.com
+DispatchHealth,US,dispatchhealth.com
+Inspirato,US,inspirato.com
+Techstars,US,techstars.com
+Bonusly,US,bonusly.com
+Healthgrades,US,healthgrades.com
+Keap,US,keap.com
+WebPT,US,webpt.com
+Switch,US,switch.com
+Sightline Payments,US,sightlinepayments.com
+Clearwater Analytics,US,clearwateranalytics.com
+Healthwise,US,healthwise.org
+Kochava,US,kochava.com
+ClickBank,US,clickbank.com
+MetaGeek,US,metageek.com
+Bodybuilding.com,US,bodybuilding.com
+Kodiak Cakes,US,kodiakcakes.com
+Lifetime Products,US,lifetime.com
+Swig,US,swigdrinks.com
+Cafe Rio,US,caferio.com
+Nature's Sunshine,US,naturessunshine.com
+Young Living,US,youngliving.com
+doTERRA,US,doterra.com
+Blue Raven Solar,US,blueravensolar.com
+Layton Construction,US,laytonconstruction.com
+Okland Construction,US,okland.com
+Big-D Construction,US,big-d.com
+C.R. England,US,crengland.com
+Blue Canyon Technologies,US,bluecanyontech.com
+Namaste Solar,US,namastesolar.com
+Advanced Energy,US,advancedenergy.com
+Dragonfly Energy,US,dragonflyenergy.com
+Sierra Nevada Corporation,US,sncorp.com
+Idahoan Foods,US,idahoan.com
+Litehouse Foods,US,litehousefoods.com
+Melaleuca,US,melaleuca.com
+Idaho Forest Group,US,idahoforest.com
+Scentsy,US,scentsy.com
+Rocky Mountain Hardware,US,rockymountainhardware.com
+New Belgium Brewing,US,newbelgium.com
+Odell Brewing,US,odellbrewing.com
+Oskar Blues Brewery,US,oskarblues.com
+Birch Benders,US,birchbenders.com
+"Snooze, an A.M. Eatery",US,snoozeeatery.com
+Illegal Pete's,US,illegalpetes.com
+Saunders Construction,US,saundersinc.com
+Adolfson & Peterson Construction,US,a-p.com
+GH Phipps Construction,US,ghphipps.com
+Hensel Phelps,US,henselphelps.com
+Sturgeon Electric,US,sturgeonelectric.com
+Kitchell,US,kitchell.com
+Wespac Construction,US,wespac.com
+Sundt Construction,US,sundt.com
+Kahala Brands,US,kahalabrands.com
+Fox Restaurant Concepts,US,foxrc.com
+Cold Stone Creamery,US,coldstonecreamery.com
+Fender Musical Instruments,US,fender.com
+Cavco Industries,US,cavco.com
+Topo Designs,US,topodesigns.com
+Namely,US,namely.com
+Chainalysis,US,chainalysis.com
+Noom,US,noom.com
+Dataminr,US,dataminr.com
+Mediaocean,US,mediaocean.com
+Hyperscience,US,hyperscience.com
+Lunchbox,US,lunchbox.io
+Bluecore,US,bluecore.com
+Vecna Robotics,US,vecnarobotics.com
+Seegrid,US,seegrid.com
+Vertex Inc,US,vertexinc.com
+iCIMS,US,icims.com
+Oscar Health,US,oscarhealth.com
+Nuvation Bio,US,nuvationbio.com
+Kallyope,US,kallyope.com
+Madrigal Pharmaceuticals,US,madrigalpharma.com
+Cabaletta Bio,US,cabalettabio.com
+Century Therapeutics,US,centurytx.com
+Verrica Pharmaceuticals,US,verrica.com
+Ocugen,US,ocugen.com
+Harmony Biosciences,US,harmonybiosciences.com
+Krystal Biotech,US,krystalbio.com
+Intra-Cellular Therapies,US,intracellular.com
+Verve Therapeutics,US,vervetx.com
+Intellia Therapeutics,US,intelliatx.com
+Apellis Pharmaceuticals,US,apellis.com
+Biohaven,US,biohaven.com
+Hyperfine,US,hyperfine.io
+Kyruus Health,US,kyruushealth.com
+CareCloud,US,carecloud.com
+Immunome,US,immunome.com
+Cullinan Oncology,US,cullinanoncology.com
+Celularity,US,celularity.com
+Commonwealth Financial Network,US,commonwealth.com
+Cross River,US,crossriver.com
+Esusu,US,esusu.com
+Risk Strategies,US,risk-strategies.com
+Better,US,better.com
+Yieldstreet,US,yieldstreet.com
+Ocrolus,US,ocrolus.com
+Vestwell,US,vestwell.com
+Edelman Financial Engines,US,edelmanfinancialengines.com
+Citrin Cooperman,US,citrincooperman.com
+EisnerAmper,US,eisneramper.com
+Withum,US,withum.com
+CohnReznick,US,cohnreznick.com
+Prager Metis,US,pragermetis.com
+Wolf & Company,US,wolfandco.com
+Sax LLP,US,sax.com
+Anchin,US,anchin.com
+PKF O'Connor Davies,US,pkfod.com
+Tinuiti,US,tinuiti.com
+Gregory FCA,US,gregoryfca.com
+Atrium Staffing,US,atriumstaff.com
+Mondo,US,mondo.com
+The Judge Group,US,judge.com
+Beacon Hill Staffing Group,US,beaconhillstaffing.com
+Aquent,US,aquent.com
+Yoh,US,yoh.com
+Eliassen Group,US,eliassen.com
+Collabera,US,collabera.com
+Matlen Silver,US,matlensilver.com
+Analysis Group,US,analysisgroup.com
+Cambridge Associates,US,cambridgeassociates.com
+Chobani,US,chobani.com
+Mike's Hot Honey,US,mikeshothoney.com
+Athletic Brewing Company,US,athleticbrewing.com
+Spindrift,US,drinkspindrift.com
+Kettle Cuisine,US,kettlecuisine.com
+Harpoon Brewery,US,harpoonbrewery.com
+Rastelli Foods Group,US,rastellis.com
+Brooklyn Brewery,US,brooklynbrewery.com
+FreshDirect,US,freshdirect.com
+Philly Pretzel Factory,US,phillypretzelfactory.com
+Sweet Street Desserts,US,sweetstreet.com
+Suffolk Construction,US,suffolk.com
+Consigli Construction,US,consigli.com
+LiRo Group,US,liro.com
+Hunter Roberts Construction Group,US,hrcg.com
+Torcon,US,torcon.com
+D.J. Keating Construction,US,djkeating.com
+Hill International,US,hill-intl.com
+Greenskies Clean Focus,US,greenskies.com
+BlueWave Solar,US,bluewavesolar.com
+Ameresco,US,ameresco.com
+Plug Power,US,plugpower.com
+Desktop Metal,US,desktopmetal.com
+Gradiant,US,gradiant.com
+Transfix,US,transfix.io
+Pitt Ohio,US,pittohio.com
+A. Duie Pyle,US,aduiepyle.com
+Ward Transport & Logistics,US,wardtlc.com
+Janel Corporation,US,janelgroup.com
+Assured Information Security,US,ainfosec.com
+Charles River Analytics,US,cra.com
+Cvent,US,cvent.com
+ZeroFox,US,zerofox.com
+Enveil,US,enveil.com
+Catalyte,US,catalyte.io
+Fearless,US,fearless.tech
+Cybrary,US,cybrary.it
+GovCIO,US,govcio.com
+Octo,US,octo.us
+Ad Hoc,US,adhocteam.us
+Nava,US,navapbc.com
+Rebellion Defense,US,rebelliondefense.com
+Arcfield,US,arcfield.com
+Protenus,US,protenus.com
+Carahsoft,US,carahsoft.com
+WillowTree,US,willowtreeapps.com
+Brivo,US,brivo.com
+Tenable,US,tenable.com
+Elder Research,US,elderresearch.com
+Snagajob,US,snagajob.com
+Deltek,US,deltek.com
+ThreatConnect,US,threatconnect.com
+Evolent Health,US,evolent.com
+WellDoc,US,welldoc.com
+Precision for Medicine,US,precisionformedicine.com
+The Emmes Company,US,emmes.com
+American Gene Technologies,US,americangene.com
+Cellphire,US,cellphire.com
+Theradaptive,US,theradaptive.com
+Sirnaomics,US,sirnaomics.com
+Arcellx,US,arcellx.com
+BIOQUAL,US,bioqual.com
+Noble Life Sciences,US,noblelifesci.com
+HemoShear Therapeutics,US,hemoshear.com
+Afton Scientific,US,aftonscientific.com
+Ceres Nanosciences,US,ceresnano.com
+Parabon NanoLabs,US,parabon-nanolabs.com
+BrainScope,US,brainscope.com
+Brightview Senior Living,US,brightview.com
+Maxim Healthcare Services,US,maximhealthcare.com
+Sanaria,US,sanaria.com
+Gliknik,US,gliknik.com
+Contraline,US,contraline.com
+Landos Biopharma,US,landosbiopharma.com
+Sonavex,US,sonavex.com
+Galen Robotics,US,galenrobotics.com
+Sunrise Senior Living,US,sunriseseniorliving.com
+Vigene Biosciences,US,vigene.com
+20/20 GeneSystems,US,2020gene.com
+NexImmune,US,neximmune.com
+Processa Pharmaceuticals,US,processapharma.com
+Cartesian Therapeutics,US,cartesiantx.com
+Sensei Biotherapeutics,US,senseibio.com
+Champions Oncology,US,championsoncology.com
+Capital Digestive Care,US,capitaldigestivecare.com
+Lentigen Technology,US,lentigen.com
+Altimmune,US,altimmune.com
+Diffusion Pharmaceuticals,US,diffusionpharma.com
+Adial Pharmaceuticals,US,adial.com
+Brown Advisory,US,brownadvisory.com
+Chevy Chase Trust,US,chevychasetrust.com
+Sullivan Bruyette Speros & Blayney,US,sbsb.com
+Davenport & Company,US,davenportllc.com
+Aronson LLC,US,aronsonllc.com
+SB & Company,US,sbandco.com
+Keiter,US,keitercpa.com
+PBMares,US,pbmares.com
+Thompson Greenspon,US,tgcpa.com
+Gelman Rosenberg & Freedman,US,grfcpa.com
+Summit Consulting,US,summitllc.us
+Avascent,US,avascent.com
+LMI,US,lmi.org
+Planit,US,planit.com
+Hager Sharp,US,hagersharp.com
+Sage Communications,US,sagecomm.com
+Kinsale Capital Group,US,kinsalecapitalgroup.com
+Capital Bancorp (Capital Bank),US,capitalbankmd.com
+Burke & Herbert Bank,US,burkeandherbertbank.com
+MainStreet Bank,US,mstreetbank.com
+EagleBank,US,eaglebankcorp.com
+John Marshall Bank,US,johnmarshallbank.com
+Primis Bank,US,primisbank.com
+Apex Systems,US,apexsystems.com
+PenFed Credit Union,US,penfed.org
+Virginia Credit Union,US,vacu.org
+Langley Federal Credit Union,US,langleyfcu.org
+SECU Maryland,US,secumd.org
+Sev1Tech,US,sev1tech.com
+Applied Insight,US,appliedinsight.com
+Intelligent Waves,US,intelligentwaves.com
+Fearless,US,fearless.com
+MetroStar,US,metrostar.com
+Telos,US,telos.com
+ECS,US,ecstech.com
+Standard Solar,US,standardsolar.com
+Sun Tribe Solar,US,suntribesolar.com
+Greenspring Energy,US,greenspringenergy.com
+HITT Contracting,US,hitt.com
+Davis Construction,US,davisconstruction.com
+Southway Builders,US,southwaybuilders.com
+Forrester Construction,US,forresterconstruction.com
+Donohoe Construction,US,donohoe.com
+Hourigan,US,hourigan.group
+Dewberry,US,dewberry.com
+Compass Coffee,US,compasscoffee.com
+&pizza,US,andpizza.com
+Heavy Seas Beer,US,heavyseas.com
+Flying Dog Brewery,US,flyingdog.com
+Port City Brewing Company,US,portcitybrewing.com
+Cuisine Solutions,US,cuisinesolutions.com
+Hungry Harvest,US,hungryharvest.net
+MISSION BBQ,US,mission-bbq.com
+Virginia Distillery Co.,US,vadistillery.com
+Zentech Manufacturing,US,zentech.com
+Medifast,US,medifastinc.com
+Icertis,US,icertis.com
+Pro.com,US,pro.com
+ExtraHop,US,extrahop.com
+Limeade,US,limeade.com
+Seeq,US,seeq.com
+Rad Power Bikes,US,radpowerbikes.com
+Wyze Labs,US,wyze.com
+INRIX,US,inrix.com
+Crowd Cow,US,crowdcow.com
+Leafly,US,leafly.com
+Porch Group,US,porch.com
+Impinj,US,impinj.com
+Marchex,US,marchex.com
+Moz,US,moz.com
+Vacasa,US,vacasa.com
+Jama Software,US,jamasoftware.com
+Puppet,US,puppet.com
+Act-On Software,US,act-on.com
+Zapproved,US,zapproved.com
+Gravity Payments,US,gravitypayments.com
+Metal Toad,US,metaltoad.com
+Trupanion,US,trupanion.com
+Bsquare,US,bsquare.com
+Avalara,US,avalara.com
+Sana Biotechnology,US,sana.com
+Omeros,US,omeros.com
+Cyrus Biotechnology,US,cyrusbio.com
+Athira Pharma,US,athira.com
+Aptevo Therapeutics,US,aptevotherapeutics.com
+BioLife Solutions,US,biolifesolutions.com
+ZoomCare,US,zoomcare.com
+Vera Whole Health,US,verawholehealth.com
+Tegria,US,tegria.com
+Sound Physicians,US,soundphysicians.com
+Aegis Living,US,aegisliving.com
+Prestige Care,US,prestigecare.com
+Avamere,US,avamere.com
+Cambia Health Solutions,US,cambiahealth.com
+Moda Health,US,modahealth.com
+PacificSource Health Plans,US,pacificsource.com
+CareOregon,US,careoregon.org
+Aronora,US,aronorabio.com
+Sound Pharmaceuticals,US,soundpharma.com
+Outpace Bio,US,outpacebio.com
+Kineta,US,kineta.us
+Wellpepper,US,wellpepper.com
+Cascadia Behavioral Healthcare,US,cascadiabhc.org
+Compass Health,US,compasshealth.org
+Delta Dental of Washington,US,deltadentalwa.com
+Premera Blue Cross,US,premera.com
+Regence,US,regence.com
+Confluence Health,US,confluencehealth.org
+Bloodworks Northwest,US,bloodworksnw.org
+Evergreen Treatment Services,US,evergreentreatment.org
+Zymeworks,US,zymeworks.com
+Accolade,US,accolade.com
+Monod Bio,US,monodbio.com
+Pioneer Human Services,US,pioneerhumanservices.org
+Shape Therapeutics,US,shapetx.com
+Mosaic Medical,US,mosaicmedical.org
+Moss Adams,US,mossadams.com
+Clark Nuber,US,clarknuber.com
+Peterson Sullivan,US,pscpa.com
+Perkins & Company,US,perkinsaccounting.com
+Talbot Korvola & Warwick,US,tkw.com
+Delap LLP,US,delapcpa.com
+Kernutt Stokes,US,kernuttstokes.com
+Fisher Investments,US,fisherinvestments.com
+Cascadia Capital,US,cascadiacapital.com
+Symetra,US,symetra.com
+PEMCO Insurance,US,pemco.com
+Barrett Business Services (BBSI),US,bbsi.com
+TrueBlue,US,trueblue.com
+Coastal Financial Corporation (Coastal Community Bank),US,coastalbank.com
+HomeStreet Bank,US,homestreet.com
+Heritage Financial,US,hfwa.com
+Riverview Bancorp,US,riverviewbank.com
+Washington Trust Bank,US,watrust.com
+BECU,US,becu.org
+Gesa Credit Union,US,gesa.com
+Numerica Credit Union,US,numericacu.com
+OnPoint Community Credit Union,US,onpointcu.com
+Craft3,US,craft3.org
+Timberland Bank,US,timberlandbank.com
+WaFd Bank (Washington Federal),US,wafd.com
+Substantial,US,substantial.com
+ECONorthwest,US,econw.com
+BERK Consulting,US,berkconsulting.com
+Lane Powell,US,lanepowell.com
+Miller Nash,US,millernash.com
+Tillamook County Creamery Association,US,tillamook.com
+Bob's Red Mill,US,bobsredmill.com
+Cascade Designs,US,cascadedesigns.com
+Theo Chocolate,US,theochocolate.com
+Salt & Straw,US,saltandstraw.com
+Deschutes Brewery,US,deschutesbrewery.com
+Fremont Brewing,US,fremontbrewing.com
+Burgerville,US,burgerville.com
+Pacific Seafood,US,pacificseafood.com
+Smith Brothers Farms,US,smithbrothersfarms.com
+Franz Bakery,US,franz.com
+Stemilt Growers,US,stemilt.com
+Washington Fruit & Produce,US,washingtonfruit.com
+Rainier Fruit Company,US,rainierfruit.com
+Yakima Chief Hops,US,yakimachief.com
+Woodinville Whiskey Co.,US,woodinvillewhiskeyco.com
+Organically Grown Company,US,organicgrown.com
+Leatherman,US,leatherman.com
+Benchmade Knife Company,US,benchmade.com
+Ruffwear,US,ruffwear.com
+Hydro Flask,US,hydroflask.com
+Pendleton Woolen Mills,US,pendleton-usa.com
+Schoolhouse,US,schoolhouse.com
+Rejuvenation,US,rejuvenation.com
+Hoffman Construction Company,US,hoffmancorp.com
+Lease Crutcher Lewis,US,lcl.com
+Sellen Construction,US,sellen.com
+Fortis Construction,US,fortisconstruction.com
+Walsh Construction,US,walshconstructionco.com
+Hayden Homes,US,haydenhomes.com
+Lakeside Industries,US,lakesideindustries.com
+Lynden Inc.,US,lynden.com
+Foss Maritime,US,foss.com
+Oak Harbor Freight Lines,US,oakharbor.com
+Tidewater Barge Lines,US,tidewater.com
+Columbia Helicopters,US,colheli.com
+Electroimpact,US,electroimpact.com
+Vigor,US,vigor.net
+Hampton Lumber,US,hamptonlumber.com
+Freres Lumber,US,frereslumber.com
+Swanson Group,US,swansongroup.com
+Cascade Energy,US,cascadeenergy.com
+Perteet,US,perteet.com
+Insitu,US,insitu.com
+Hims & Hers Health,US,hims.com
+Honey Science,US,joinhoney.com
+TrueCar,US,truecar.com
+Cornerstone OnDemand,US,cornerstoneondemand.com
+Boingo Wireless,US,boingo.com
+Edmunds,US,edmunds.com
+Headspace,US,headspace.com
+Snap Inc.,US,snap.com
+JustFab,US,justfab.com
+Tilly's,US,tillys.com
+Bird Rides,US,bird.co
+Tinder,US,tinder.com
+Cars.com,US,cars.com
+GoodRx,US,goodrx.com
+Mitek Systems,US,miteksystems.com
+Kareo,US,kareo.com
+Pacific Life,US,pacificlife.com
+Hulu,US,hulu.com
+Grindr,US,grindr.com
+Beachbody,US,beachbodyondemand.com
+Quantum Computing Inc,US,quantumcomputinginc.com
+Cognito Forms,US,cognitoforms.com
+SpaceX,US,spacex.com
+Ring,US,ring.com
+Whisper,US,whisper.sh
+Gelson's,US,gelsons.com
+Eventbrite,US,eventbrite.com
+NantHealth,US,nanthealth.com
+Rubicon Project,US,rubiconproject.com
+Biosplice Therapeutics,US,biosplice.com
+Poseida Therapeutics,US,poseida.com
+Design Therapeutics,US,designtx.com
+Artiva Biotherapeutics,US,artivabio.com
+Ventyx Biosciences,US,ventyxbio.com
+Aspen Neuroscience,US,aspenneuroscience.com
+Crinetics Pharmaceuticals,US,crinetics.com
+Viking Therapeutics,US,vikingtherapeutics.com
+AnaptysBio,US,anaptysbio.com
+BioAtla,US,bioatla.com
+Avidity Biosciences,US,aviditybio.com
+Inhibrx,US,inhibrx.com
+Arcturus Therapeutics,US,arcturusrx.com
+Travere Therapeutics,US,travere.com
+Epic Sciences,US,epicsciences.com
+Truvian Sciences,US,truvian.com
+Exagen,US,exagen.com
+Bionano Genomics,US,bionano.com
+Alphatec Spine,US,alphatecspine.com
+Cidara Therapeutics,US,cidara.com
+Heron Therapeutics,US,herontx.com
+Belite Bio,US,belitebio.com
+Astrana Health,US,astranahealth.com
+Radiology Partners,US,radpartners.com
+Prospect Medical Holdings,US,prospectmedical.com
+Xencor,US,xencor.com
+Arrowhead Pharmaceuticals,US,arrowheadpharma.com
+ImmunityBio,US,immunitybio.com
+Capricor Therapeutics,US,capricor.com
+Puma Biotechnology,US,pumabiotechnology.com
+Evolus,US,evolus.com
+Axonics,US,axonics.com
+Inari Medical,US,inarimedical.com
+RxSight,US,rxsight.com
+Sonendo,US,sonendo.com
+Cryoport,US,cryoport.com
+Genelux,US,genelux.com
+ChromaDex,US,chromadex.com
+Erewhon,US,erewhon.com
+Blenders Eyewear,US,blenderseyewear.com
+Cymbiotika,US,cymbiotika.com
+Suja Life,US,sujajuice.com
+Sambazon,US,sambazon.com
+Stone Brewing,US,stonebrewing.com
+Pressed Juicery,US,pressedjuicery.com
+Kitsch,US,mykitsch.com
+The Beachbody Company,US,thebeachbodycompany.com
+Xos Trucks,US,xostrucks.com
+Aptera Motors,US,aptera.us
+Beam Global,US,beamforall.com
+Clean Energy Fuels,US,cleanenergyfuels.com
+Sullivan Solar Power,US,sullivansolarpower.com
+Baker Electric Solar,US,bakerelectric.com
+Flock Freight,US,flockfreight.com
+Sukut Construction,US,sukut.com
+Bernards,US,bernards.com
+Soltek Pacific Construction,US,soltekpacific.com
+Heliogen,US,heliogen.com
+Phoenix Motorcars,US,phoenixmotorcars.com
+Kratos Defense & Security Solutions,US,kratosdefense.com
+Cubic Corporation,US,cubic.com
+Lazy Dog Restaurants,US,lazydogrestaurants.com
+Sugarfina,US,sugarfina.com
+Dave's Hot Chicken,US,daveshotchicken.com
+Chosen Foods,US,chosenfoods.com
+Hyperice,US,hyperice.com
+Orgain,US,orgain.com
+Tapatío Foods,US,tapatio.com
+Bumble Bee Foods,US,bumblebee.com
+Coda,US,coda.io
+Grammarly,US,grammarly.com
+Superhuman,US,superhuman.com
+Ironclad,US,ironcladapp.com
+Rubrik,US,rubrik.com
+HeartFlow,US,heartflow.com
+Verily,US,verily.com
+Calico Life Sciences,US,calicolabs.com
+Mirvie,US,mirvie.com
+Verge Genomics,US,vergegenomics.com
+Visby Medical,US,visbymedical.com
+Nurx,US,nurx.com
+Mammoth Biosciences,US,mammoth.bio
+Reflexion Medical,US,reflexion.com
+BioAge Labs,US,bioagelabs.com
+Evidation Health,US,evidation.com
+Metagenomi,US,metagenomi.co
+Kyverna Therapeutics,US,kyverna.com
+PROCEPT BioRobotics,US,procept-biorobotics.com
+Pulmonx,US,pulmonx.com
+Forge Global,US,forgeglobal.com
+Armanino,US,armanino.com
+Burr Pilger Mayer (BPM),US,bpm.com
+"Frank, Rimerman + Co.",US,frankrimerman.com
+Hood & Strong,US,hoodstrong.com
+Exponent,US,exponent.com
+Riviera Partners,US,rivierapartners.com
+Akraya,US,akraya.com
+Metric Theory,US,metrictheory.com
+Duarte,US,duarte.com
+SynergisticIT,US,synergisticit.com
+Impossible Foods,US,impossiblefoods.com
+Eat Just,US,eatjust.com
+Perfect Day,US,perfectday.com
+Miyoko's Creamery,US,miyokos.com
+REBBL,US,rebbl.co
+Sun Basket,US,sunbasket.com
+Philz Coffee,US,philzcoffee.com
+Equator Coffees,US,equatorcoffees.com
+Numi Organic Tea,US,numitea.com
+Nutiva,US,nutiva.com
+Back to the Roots,US,backtotheroots.com
+UPSIDE Foods,US,upsidefoods.com
+Ripple Foods,US,ripplefoods.com
+Zero Acre Farms,US,zeroacre.com
+Wildtype,US,wildtypefoods.com
+GoPro,US,gopro.com
+Reconstruct,US,reconstructinc.com
+Mighty Buildings,US,mightybuildings.com
+Cover,US,cover.build
+Build Group,US,buildgroup.com
+Webcor,US,webcor.com
+Cupertino Electric,US,cei.com
+Enphase Energy,US,enphase.com
+Bloom Energy,US,bloomenergy.com
+PlusAI,US,plus.ai
+Carbon,US,carbon3d.com

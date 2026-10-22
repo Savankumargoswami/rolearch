@@ -8,12 +8,13 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import asyncio
 import logging
 import os
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from . import companies as company_file
@@ -51,8 +52,14 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--feed-limit", type=int, default=1500)
     r.add_argument("--only", help="run companies whose name or token contains this text")
     r.add_argument("--concurrency", type=int, default=8)
+    r.add_argument("--shard", help='run one slice of the list, "i/n" (e.g. "0/8"); slices are stable as the list grows')
 
-    for s in (d, h, r):
+    f = sub.add_parser("finalize", help="after sharded runs: close jobs of companies no longer listed, refresh site totals")
+    f.add_argument("--companies", type=Path, default=DEFAULTS["companies"])
+    f.add_argument("--state", type=Path, default=DEFAULTS["state"])
+    f.add_argument("--grace-hours", type=float, default=12, help="keep companies refreshed this recently even if unlisted")
+
+    for s in (d, h, r, f):
         s.add_argument("-v", "--verbose", action="store_true")
     args = p.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(message)s")
@@ -78,7 +85,24 @@ def main(argv: list[str] | None = None) -> int:
             print("Not found (add the right slug or a careers_url):", ", ".join(sorted(missing)))
         return 0
 
+    if args.cmd == "finalize":
+        store = open_store(args.state)
+        try:
+            listed = {c.key for c in company_file.load(args.companies)}
+            since = datetime.now(timezone.utc) - timedelta(hours=args.grace_hours)
+            retired = store.retire_companies(listed, since)
+            if hasattr(store, "refresh_summary"):
+                store.refresh_summary()
+        finally:
+            store.close()
+        print(f"{len(listed)} companies listed · {retired} jobs closed from companies no longer listed · site totals refreshed")
+        return 0
+
     companies = company_file.load(args.companies)
+    if getattr(args, "shard", None):
+        i, n = (int(x) for x in args.shard.split("/"))
+        # Stable slices: a company stays in the same shard when others are added or removed.
+        companies = [c for c in companies if int(hashlib.sha1(c.key.encode()).hexdigest(), 16) % n == i]
     if args.only:
         needle = args.only.lower()
         companies = [c for c in companies if needle in c.name.lower() or needle in c.token.lower()]
@@ -92,7 +116,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         results = asyncio.run(pull_all(companies, store, args.concurrency))
         # Only the full, default list is authoritative; a subset run must not close other companies' jobs.
-        full_run = not args.only and args.companies == DEFAULTS["companies"]
+        full_run = not args.only and not getattr(args, "shard", None) and args.companies == DEFAULTS["companies"]
         # Companies whose jobs another run stored after this one began (e.g. a list updated mid-run) stay open.
         retired = store.retire_companies({c.key for c in companies}, run_start) if full_run else 0
         if hasattr(store, "refresh_summary"):

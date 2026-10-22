@@ -1,0 +1,914 @@
+name,country,domain
+# S&P MidCap 400 and SmallCap 600 companies not already covered (the next ~1,000 US companies)
+Alcoa,US,alcoa.com
+American Airlines Group,US,aa.com
+AAON,US,aaon.com
+AECOM,US,aecom.com
+Agree Realty,US,agreerealty.com
+Advanced Energy,US,advanced-energy.com
+American Financial Group,US,afginc.com
+AGNC Investment,US,agnc.com
+American Healthcare REIT,US,americanhealthcarereit.com
+Applied Industrial Technologies,US,applied.com
+Allegro MicroSystems,US,allegromicro.com
+Alaska Air Group,US,alaskaair.com
+Allison Transmission,US,allisontransmission.com
+Autoliv,US,autoliv.com
+Antero Midstream,US,anteromidstream.com
+Affiliated Managers Group,US,amg.com
+American Homes 4 Rent,US,amh.com
+Amkor Technology,US,amkor.com
+Abercrombie & Fitch,US,abercrombie.com
+APi Group,US,apigroupcorp.com
+AppFolio,US,appfolio.com
+Antero Resources,US,anteroresources.com
+Aramark,US,aramark.com
+Arrowhead Pharmaceuticals,US,arrowheadpharma.com
+Associated Bank,US,associatedbank.com
+Ashland Global,US,ashland.com
+ATI Inc.,US,atimaterials.com
+AptarGroup,US,aptar.com
+AeroVironment,US,avinc.com
+Avient,US,avient.com
+Avnet,US,avnet.com
+Avantor,US,avantorsciences.com
+Axalta,US,axalta.com
+Acuity Brands,US,acuitybrands.com
+Brunswick,US,brunswick.com
+Brink's,US,brinks.com
+Belden Inc.,US,belden.com
+Brighthouse Financial,US,brighthousefinancial.com
+Bill Holdings,US,bill.com
+Black Hills Corporation,US,blackhillscorp.com
+BioMarin Pharmaceutical,US,biomarin.com
+Bruker,US,bruker.com
+Dutch Bros Inc.,US,dutchbros.com
+Brixmor Property Group,US,brixmor.com
+Bentley Systems,US,bentley.com
+BrightSpring Health Services,US,brightspringhealth.com
+Burlington Stores,US,burlingtonstores.com
+BWX Technologies,US,bwxt.com
+Boyd Gaming,US,boydgaming.com
+Avis Budget Group,US,avisbudgetgroup.com
+Cava Group,US,cava.com
+Commerce Bancshares,US,commercebank.com
+Cabot Corp,US,cabotcorp.com
+Crown Holdings,US,crowncork.com
+Coeur Mining,US,coeur.com
+COPT Defense Properties,US,copt.com
+Celsius Holdings,US,celsiusholdingsinc.com
+Frost Bank,US,frostbank.com
+Carlyle Group (The),US,carlyle.com
+Cognex,US,cognex.com
+Churchill Downs Inc.,US,churchilldownsincorporated.com
+Chemed Corp.,US,chemed.com
+Choice Hotels,US,choicehotels.com
+Chord Energy,US,chordenergy.com
+Cleveland-Cliffs,US,clevelandcliffs.com
+Clean Harbors,US,cleanharbors.com
+Commercial Metals,US,cmc.com
+CNH Industrial,US,cnh.com
+Core & Main,US,coreandmain.com
+CNX Resources,US,cnx.com
+Columbia Banking System,US,columbiabank.com
+Columbia Sportswear,US,columbia.com
+Corcept Therapeutics,US,corcept.com
+Crane,US,craneco.com
+Corebridge Financial,US,corebridgefinancial.com
+Crocs,US,crocs.com
+Carpenter Technology,US,carpentertechnology.com
+Cirrus Logic,US,cirrus.com
+Carlisle Companies,US,carlisle.com
+CareTrust REIT,US,caretrustreit.com
+Corteva,US,corteva.com
+CubeSmart,US,cubesmart.com
+Cousins Properties,US,cousins.com
+CommVault Systems,US,commvault.com
+Curtiss-Wright,US,curtisswright.com
+Crane NXT,US,cranenxt.com
+Cytokinetics,US,cytokinetics.com
+Darling Ingredients,US,darlingii.com
+Donaldson Company,US,donaldson.com
+HF Sinclair,US,hfsinclair.com
+Dolby,US,dolby.com
+DigitalOcean,US,digitalocean.com
+Doximity,US,doximity.com
+Docusign,US,docusign.com
+Dynatrace,US,dynatrace.com
+DT Midstream,US,dtmidstream.com
+Duolingo,US,duolingo.com
+Dycom Industries,US,dycom.com
+Brinker International,US,brinker.com
+Euronet Worldwide,US,euronetworldwide.com
+EastGroup Properties,US,eastgroup.net
+Elanco,US,elanco.com
+e.l.f. Beauty,US,elfbeauty.com
+Equity Lifestyle Properties,US,equitylifestyleproperties.com
+EnerSys,US,enersys.com
+Ensign Group,US,ensigngroup.net
+Entegris,US,entegris.com
+EPR Properties,US,eprkc.com
+Equitable Holdings,US,equitableholdings.com
+Essent Group Ltd.,US,essentgroup.com
+Evercore,US,evercore.com
+East West Bancorp,US,eastwestbank.com
+Exelixis,US,exelixis.com
+EXL Service,US,exlservice.com
+Eagle Materials,US,eaglematerials.com
+"Exponent, Inc.",US,exponent.com
+First American Financial Corporation,US,firstam.com
+Fortune Brands Innovations,US,fbin.com
+FirstCash,US,firstcash.com
+FTI Consulting,US,fticonsulting.com
+First Financial Bankshares,US,ffin.com
+Federated Hermes,US,federatedhermes.com
+First Horizon,US,firsthorizon.com
+Five Below,US,fivebelow.com
+Flagstar Bank,US,flagstar.com
+Flowserve,US,flowserve.com
+Fabrinet,US,fabrinet.com
+FNB Corporation,US,fnb-online.com
+Floor & Decor,US,flooranddecor.com
+Fidelity National Financial,US,fnf.com
+"FormFactor, Inc.",US,formfactor.com
+Shift4,US,shift4.com
+First Industrial Realty Trust,US,firstindustrial.com
+TechnipFMC,US,technipfmc.com
+Genpact,US,genpact.com
+GATX,US,gatx.com
+Glacier Bancorp,US,glacierbancorp.com
+"Greif, Inc.",US,greif.com
+Graco Inc.,US,graco.com
+Graham Holdings,US,ghco.com
+Gaming and Leisure Properties,US,glpropinc.com
+GameStop,US,gamestop.com
+Globus Medical,US,globusmedical.com
+Gentex,US,gentex.com
+Guidewire Software,US,guidewire.com
+GXO Logistics,US,gxo.com
+Hyatt,US,hyatt.com
+Haemonetics,US,haemonetics.com
+Halozyme,US,halozyme.com
+Hilton Grand Vacations,US,hiltongrandvacations.com
+Hims & Hers Health,US,forhims.com
+Hecla Mining,US,hecla.com
+Houlihan Lokey,US,hl.com
+Hamilton Lane,US,hamiltonlane.com
+Harley-Davidson,US,harley-davidson.com
+Home BancShares,US,homebancshares.com
+HealthEquity,US,healthequity.com
+Healthcare Realty Trust,US,healthcarerealty.com
+H&R Block,US,hrblock.com
+HubSpot,US,hubspot.com
+Hancock Whitney,US,hancockwhitney.com
+Hexcel,US,hexcel.com
+Intl Bancshares Corp,US,ibc.com
+Idacorp,US,idacorpinc.com
+InterDigital,US,interdigital.com
+IES Holdings,US,ies-co.com
+Ingredion,US,ingredion.com
+IPG Photonics,US,ipgphotonics.com
+Independence Realty Trust,US,irtliving.com
+ITT Inc.,US,itt.com
+Jazz Pharmaceuticals,US,jazzpharma.com
+Jefferies,US,jefferies.com
+KB Home,US,kbhome.com
+"KBR, Inc.",US,kbr.com
+Kirby Corporation,US,kirbycorp.com
+Knife River Corporation,US,kniferiver.com
+Kinsale Capital Group,US,kinsalecapital.com
+Knight-Swift,US,knightswift.com
+Kilroy Realty Corp,US,kilroyrealty.com
+Kite Realty Group Trust,US,kiterealty.com
+Krystal Biotech,US,krystalbio.com
+Kratos Defense & Security Solutions,US,kratosdefense.com
+Lithia Motors,US,lithia.com
+Lamar Advertising Company,US,lamar.com
+Lear,US,lear.com
+Lincoln Electric,US,lincolnelectric.com
+Littelfuse,US,littelfuse.com
+LivaNova,US,livanova.com
+Lantheus Holdings,US,lantheus.com
+Louisiana-Pacific,US,lpcorp.com
+Lattice Semiconductor,US,latticesemi.com
+Landstar System,US,landstar.com
+Manhattan Associates,US,manh.com
+Medpace,US,medpace.com
+Middleby,US,middleby.com
+MKS Instruments,US,mks.com
+Mueller Industries,US,muellerindustries.com
+Maximus Inc.,US,maximus.com
+Moog Inc.,US,moog.com
+"Morningstar, Inc.",US,morningstar.com
+MP Materials,US,mpmaterials.com
+MSA Safety,US,msasafety.com
+MGIC Investment Corporation,US,mgic.com
+Vail Resorts,US,vailresorts.com
+MACOM Technology Solutions,US,macom.com
+MasTec,US,mastec.com
+Murphy Oil,US,murphyoilcorp.com
+Murphy USA,US,murphyusa.com
+The Marzetti Company,US,marzetti.com
+Neurocrine Biosciences,US,neurocrine.com
+NewMarket Corporation,US,newmarket.com
+National Fuel Gas,US,nfg.com
+New Jersey Resources,US,njresources.com
+Annaly Capital Management,US,annaly.com
+NNN Reit,US,nnnreit.com
+NOV Inc.,US,nov.com
+Novanta,US,novanta.com
+Nutanix,US,nutanix.com
+Envista Holdings,US,envistaco.com
+nVent Electric plc,US,nvent.com
+NorthWestern Energy,US,northwesternenergy.com
+Nexstar Media Group,US,nexstar.tv
+Nextpower,US,nextpower.com
+New York Times Company,US,nytco.com
+Owens Corning,US,owenscorning.com
+OGE Energy,US,oge.com
+One Gas,US,onegas.com
+Omega Healthcare Investors,US,omegahealthcare.com
+Universal Display,US,oled.com
+Ollie's Bargain Outlet,US,ollies.us
+Old National Bank,US,oldnational.com
+Onto Innovation,US,ontoinnovation.com
+Option Care Health,US,optioncarehealth.com
+Ormat Technologies,US,ormat.com
+Old Republic International,US,oldrepublic.com
+Ovintiv,US,ovintiv.com
+Bank OZK,US,ozk.com
+Penske Automotive Group,US,penskeautomotive.com
+Prosperity Bancshares,US,prosperitybankusa.com
+PBF Energy,US,pbfenergy.com
+Paylocity,US,paylocity.com
+Pegasystems,US,pega.com
+"Penumbra, Inc.",US,penumbrainc.com
+Performance Food Group,US,pfgc.com
+Park Hotels & Resorts,US,parkhotels.com
+Planet Fitness,US,planetfitness.com
+Pinnacle Financial Partners,US,pnfp.com
+Portland General Electric,US,portlandgeneral.com
+Post Holdings,US,postholdings.com
+Pilgrim's Pride,US,pilgrims.com
+Permian Resources,US,permianres.com
+Primerica,US,primerica.com
+Parsons Corporation,US,parsons.com
+Qualys,US,qualys.com
+Ryder,US,ryder.com
+RB Global,US,rbglobal.com
+RBC Bearings,US,rbcbearings.com
+Rexford Industrial Realty,US,rexfordindustrial.com
+Reinsurance Group of America,US,rgare.com
+Repligen,US,repligen.com
+Royal Gold,US,royalgold.com
+RH,US,rh.com
+RLI Corp.,US,rlicorp.com
+RenaissanceRe,US,renre.com
+Roivant Sciences,US,roivant.com
+"Roku, Inc.",US,roku.com
+RPM International,US,rpminc.com
+Range Resources,US,rangeresources.com
+Regal Rexnord,US,regalrexnord.com
+"Reliance, Inc.",US,reliance.com
+Ryan Specialty,US,ryansg.com
+Rayonier,US,rayonier.com
+Saia,US,saia.com
+Science Applications Intl Corp,US,saic.com
+Sanmina Corporation,US,sanmina.com
+StandardAero,US,standardaero.com
+Sabra Health Care REIT,US,sabrahealth.com
+Service Corp Intl,US,sci-corp.com
+SEI Investments Company,US,seic.com
+Stifel,US,stifel.com
+Somnigroup International,US,somnigroup.com
+Sotera Health,US,soterahealth.com
+Selective Insurance Group,US,selective.com
+SiriusXM,US,siriusxm.com
+SiTime,US,sitime.com
+Silicon Labs,US,silabs.com
+Silgan Holdings,US,silgan.com
+SLM Corp,US,salliemae.com
+Scotts Miracle-Gro Company,US,scotts.com
+Semtech,US,semtech.com
+SharkNinja,US,sharkninja.com
+Solstice Advanced Materials,US,solstice.com
+Sonoco,US,sonoco.com
+SPX Technologies,US,spx.com
+Spire,US,spireenergy.com
+South State Bank,US,southstatebank.com
+Simpson Manufacturing,US,simpsonmfg.com
+Sensata Technologies,US,sensata.com
+STAG Industrial,US,stagindustrial.com
+Sterling Infrastructure,US,strlco.com
+Starwood Property Trust,US,starwoodpropertytrust.com
+Sun Communities,US,suncommunities.com
+Southwest Gas Corp,US,swgas.com
+Synaptics,US,synaptics.com
+Texas Capital Bancshares,US,texascapitalbank.com
+Terex,US,terex.com
+Hanover Insurance,US,hanover.com
+Thor Industries,US,thorindustries.com
+Timken,US,timken.com
+Talen Energy,US,talenenergy.com
+Travel + Leisure Co.,US,travelandleisureco.com
+Toll Brothers,US,tollbrothers.com
+"Toast, Inc.",US,toasttab.com
+Trex,US,trex.com
+Toro,US,thetorocompany.com
+Tetra Tech,US,tetratech.com
+TTM Technologies,US,ttm.com
+TXNM Energy,US,txnmenergy.com
+UFP Industries,US,ufpi.com
+UGI Corp,US,ugicorp.com
+UL Solutions,US,ul.com
+UMB Financial Corp.,US,umb.com
+United Therapeutics,US,unither.com
+Visteon,US,visteon.com
+Viavi Solutions,US,viavisolutions.com
+Vicor Corporation,US,vicr.com
+Valley Bank,US,valley.com
+Valmont Industries,US,valmont.com
+Vornado Realty Trust,US,vno.com
+Vontier,US,vontier.com
+Voya Financial,US,voya.com
+Valvoline,US,valvoline.com
+Western Alliance Bancorporation,US,westernalliancebancorporation.com
+WESCO International,US,wesco.com
+WEX Inc.,US,wexinc.com
+Weatherford International,US,weatherford.com
+Wingstop,US,wingstop.com
+Westlake Corporation,US,westlake.com
+Warner Music Group,US,wmg.com
+Advanced Drainage Systems,US,adspipe.com
+W. P. Carey,US,wpcarey.com
+Watsco,US,watsco.com
+Wintrust Financial,US,wintrust.com
+Essential Utilities,US,essential.co
+Watts Water Technologies,US,watts.com
+"Woodward, Inc.",US,woodward.com
+Dentsply Sirona,US,dentsplysirona.com
+Yeti Holdings,US,yeti.com
+Zions Bancorporation,US,zionsbancorporation.com
+Acadian Asset Management Inc.,US,acadian-asset.com
+American Assets Trust,US,americanassetstrust.com
+Ameris Bancorp,US,amerisbank.com
+Asbury Automotive Group,US,asburyauto.com
+"ABM Industries, Inc.",US,abm.com
+Arbor Realty Trust,US,arbor.com
+"Arcosa, Inc.",US,arcosa.com
+Acadia Pharmaceuticals,US,acadia.com
+Acadia Healthcare,US,acadiahealthcare.com
+ACI Worldwide,US,aciworldwide.com
+"Axcelis Technologies, Inc.",US,axcelis.com
+"Enact Holdings, Inc.",US,enactmi.com
+"Adamas Trust, Inc.",US,adamastrust.com
+"Adeia, Inc.",US,adeia.com
+ADI Global Distribution,US,adiglobal.com
+"ADMA Biologics, Inc.",US,admabiologics.com
+Adient,US,adient.com
+ADT Inc.,US,adt.com
+Addus HomeCare Corp.,US,addus.com
+American Eagle Outfitters,US,aeo-inc.com
+"eXp World Holdings, Inc.",US,expworldholdings.com
+Assured Guaranty Ltd.,US,assuredguaranty.com
+"Argan, Inc.",US,arganinc.com
+"Agilysys, Inc.",US,agilysys.com
+AdaptHealth Corp.,US,adapthealth.com
+Albany International Corp.,US,albint.com
+AAR Corp.,US,aarcorp.com
+Acadia Realty Trust,US,acadiarealty.com
+Alamo Group,US,alamo-group.com
+Allegiant Travel Company,US,allegiantair.com
+"Alignment Healthcare, Inc.",US,alignmenthealthcare.com
+Alkermes plc,US,alkermes.com
+"Alarm.Com, Inc.",US,alarm.com
+"Amn Healthcare Services, Inc.",US,amnhealthcare.com
+"Amphstar Pharmaceuticals, Inc.",US,amphastar.com
+"Alpha Metallurgical Resources, Inc.",US,alphametresources.com
+Amneal Pharmaceuticals,US,amneal.com
+"Amerisafe, Inc.",US,amerisafe.com
+Amentum,US,amentum.com
+"The Andersons, Inc.",US,andersonsinc.com
+"ANI Pharmaceuticals, Inc.",US,anipharmaceuticals.com
+Artivion,US,artivion.com
+"Alpha and Omega Semiconductor, Ltd.",US,aosmd.com
+"Artisan Partners Asset Management, Inc.",US,artisanpartners.com
+"Apple Hospitality REIT, Inc.",US,applehospitalityreit.com
+"Apogee Enterprises, Inc.",US,apog.com
+ArcBest Corp.,US,arcb.com
+Arlo Technologies,US,arlo.com
+"Archrock, Inc.",US,archrock.com
+Armour Residential REIT,US,armourreit.com
+Academy Sports + Outdoors,US,academy.com
+"Astec Industries, Inc.",US,astecindustries.com
+"Astrana Health, Inc.",US,astranahealth.com
+"A10 Networks, Inc.",US,a10networks.com
+Atmus Filtration Technologies Inc.,US,atmus.com
+"Atlantic Union Bankshares, Corp.",US,atlanticunionbank.com
+Avista Corporation,US,avistacorp.com
+American States Water Company,US,aswater.com
+"Axos Financial, Inc.",US,axosfinancial.com
+"Azenta, Inc.",US,azenta.com
+"AZZ, Inc.",US,azz.com
+"Banc Of California, Inc.",US,bancofcal.com
+Bancfirst Corp,US,bancfirst.bank
+Banner Corporation,US,bannerbank.com
+Beacon Financial Corp.,US,beaconfinancialcorp.com
+Boise Cascade,US,bc.com
+Balchem Corporation,US,balchem.com
+Bright Horizons Family Solutions Inc.,US,brighthorizons.com
+"Bread Financial Holdings, Inc.",US,breadfinancial.com
+"Saul Centers, Inc.",US,saulcenters.com
+"BGC Group, Inc.",US,bgcg.com
+"Benchmark Electronics, Inc.",US,bench.com
+"BJ's Restaurants, Inc.",US,bjsrestaurants.com
+"The Buckle, Inc.",US,buckle.com
+"BankUnited, Inc.",US,bankunited.com
+"BlackLine Systems, Inc.",US,blackline.com
+"BioLife Solutions, Inc.",US,biolifesolutions.com
+Blackbaud,US,blackbaud.com
+"Badger Meter, Inc.",US,badgermeter.com
+"Broadstone Net Lease, Inc.",US,broadstone.com
+Bank of Hawaii,US,boh.com
+"Boot Barn Holdings, Inc.",US,bootbarn.com
+"Box, Inc.",US,box.com
+Brady Corporation,US,bradycorp.com
+"Peabody Energy, Inc.",US,peabodyenergy.com
+"Blackstone Mortgage Trust, Inc.",US,blackstonemortgagetrust.com
+Credit Acceptance,US,creditacceptance.com
+"The Cheesecake Factory, Inc.",US,thecheesecakefactory.com
+"Cal-Maine Foods, Inc.",US,calmainefoods.com
+Calix,US,calix.com
+Callaway Golf Company,US,callawaygolf.com
+CarGurus,US,cargurus.com
+"Pathward Financial, Inc.",US,pathward.com
+Cathay General Bancorp,US,cathaybank.com
+Cracker Barrel,US,crackerbarrel.com
+"Community Bank System, Inc.",US,communitybankna.com
+Chemours,US,chemours.com
+"Cogent Communications Holdings, Inc.",US,cogentco.com
+"Century Communities, Inc.",US,centurycommunities.com
+Celanese,US,celanese.com
+Central Garden & Pet Company,US,central.com
+Central Garden & Pet Company (Class A),US,central.com
+Century Aluminum Company,US,centuryaluminum.com
+"Certara, Inc.",US,certara.com
+Capitol Federal Savings Bank,US,capfed.com
+City Holding Company,US,bankatcity.com
+"Chefs' Warehouse, Inc.",US,chefswarehouse.com
+"CleanSpark, Inc.",US,cleanspark.com
+"Cinemark Holdings, Inc.",US,cinemark.com
+CONMED Corporation,US,conmed.com
+"Core Natural Resources, Inc.",US,corenaturalresources.com
+"Cohen & Steers, Inc.",US,cohenandsteers.com
+Concentrix,US,concentrix.com
+"PC Connection, Inc.",US,connection.com
+The Vita Coco Company,US,thevitacococompany.com
+"Cohu, Inc.",US,cohu.com
+"Collegium Pharmaceutical, Inc.",US,collegiumpharma.com
+"Concentra Group Holdings Parent, Inc.",US,concentra.com
+Corcept Therapeutics Incorporated,US,corcept.com
+Coty,US,coty.com
+The Campbell's Company,US,thecampbellscompany.com
+Central Pacific Financial Corp.,US,cpb.bank
+Chesapeake Utilities Corp.,US,chpk.com
+California Resources Corporation,US,crc.com
+Crescent Energy Company,US,crescentenergyco.com
+"Carter's, Inc.",US,carters.com
+"Comstock Resources, Inc.",US,comstockresources.com
+Corsair Gaming,US,corsair.com
+CorVel Corporation,US,corvel.com
+"CSW Industrials, Inc.",US,cswindustrials.com
+CTS Corporation,US,ctscorp.com
+"Customers Bancorp, Inc.",US,customersbank.com
+Curbline Properties Corp.,US,curbline.com
+CVB Financial Corp.,US,cbbank.com
+"Cavco Industries, Inc.",US,cavco.com
+"CVR Energy, Inc.",US,cvrenergy.com
+Covista Inc.,US,covista.com
+"Clearway Energy, Inc. (Class C)",US,clearwayenergy.com
+"Clearway Energy, Inc. (Class A)",US,clearwayenergy.com
+"Casella Waste Systems, Inc.",US,casella.com
+California Water Service Group,US,calwatergroup.com
+"Sprinklr, Inc.",US,sprinklr.com
+CoreCivic,US,corecivic.com
+Caesars Entertainment,US,caesars.com
+Dana Incorporated,US,dana.com
+"Dave, Inc.",US,dave.com
+Diebold Nixdorf,US,dieboldnixdorf.com
+Dauch Corporation,US,dauch.com
+"Dime Community Bancshares, Inc.",US,dime.com
+"Easterly Government Properties, Inc.",US,easterlyreit.com
+Douglas Emmett,US,douglasemmett.com
+"Dream Finders Homes, Inc.",US,dreamfindershomes.com
+"Donnelley Financial Solutions, Inc.",US,dfinsolutions.com
+Digi International Inc.,US,digi.com
+Diodes Incorporated,US,diodes.com
+Deluxe Corporation,US,deluxe.com
+Del Monte Corporation,US,freshdelmonte.com
+NOW Inc,US,dnow.com
+"Dorman Products, Inc.",US,dormanproducts.com
+DiamondRock Hospitality Company,US,drhc.com
+DoubleVerify Holdings Inc.,US,doubleverify.com
+"DXP Enterprises, Inc.",US,dxpe.com
+"Brinker International, Inc.",US,brinker.com
+"Eastern Bankshares, Inc.",US,easternbank.com
+"Everus Construction Group, Inc.",US,everus.com
+"Encore Capital Group, Inc.",US,encorecapital.com
+Everforth Inc.,US,everforth.com
+Eagle Bancorp Inc,US,eaglebankcorp.com
+"Employers Holdings, Inc.",US,employers.com
+Eastman Chemical Company,US,eastman.com
+Enovis,US,enovis.com
+Enphase Energy,US,enphase.com
+Energizer,US,energizerholdings.com
+"Enova International, Inc.",US,enova.com
+Enerpac Tool Group,US,enerpactoolgroup.com
+EPAM Systems,US,epam.com
+Edgewell Personal Care,US,edgewell.com
+"Essential Properties Realty Trust, Inc.",US,essentialproperties.com
+ESCO Technologies Inc.,US,escotechnologies.com
+Etsy,US,etsy.com
+"EVERTEC, Inc.",US,evertecinc.com
+"Extreme Networks, Inc.",US,extremenetworks.com
+National Vision Holdings,US,nationalvision.com
+"EZCORP, Inc.",US,ezcorp.com
+First Advantage Corporation,US,fadv.com
+FB Financial Corp.,US,firstbankonline.com
+First Bancorp (Southern Pines NC),US,firstbancorp.com
+First BanCorp (Puerto Rico),US,firstbankpr.com
+"First Commonwealth Financial, Corp.",US,fcbanking.com
+"Four Corners Property Trust, Inc.",US,fcpt.com
+Franklin Electric,US,franklin-electric.com
+First Financial Bancorp,US,bankatfirst.com
+"F&G Annuities & Life, Inc.",US,fglife.com
+"First Hawaiian, Inc.",US,fhb.com
+"First Interstate BancSystem, Inc.",US,firstinterstate.com
+"Five9, Inc.",US,five9.com
+National Beverage Corp.,US,nationalbeverage.com
+Flowers Foods,US,flowersfoods.com
+FMC Corporation,US,fmc.com
+"FormFactor, Inc.",US,formfactor.com
+Fox Factory,US,ridefox.com
+Freshpet,US,freshpet.com
+Federal Signal Corporation,US,federalsignal.com
+"Frontdoor, Inc.",US,frontdoor.com
+Fortrea,US,fortrea.com
+H.B. Fuller Company,US,hbfuller.com
+Fulton Financial Corporation,US,fultonbank.com
+Six Flags,US,sixflags.com
+"The Greenbrier Companies, Inc.",US,gbrx.com
+"GEO Group, Inc.",US,geogroup.com
+Griffon Corporation,US,griffon.com
+"G-III Apparel Group, Ltd.",US,g-iii.com
+Glaukos Corp.,US,glaukos.com
+"Global Net Lease, Inc.",US,globalnetlease.com
+Grocery Outlet,US,groceryoutlet.com
+Acushnet Company,US,acushnetholdingscorp.com
+"Group 1 Automotive, Inc.",US,group1auto.com
+Gulfport Energy Corporation,US,gulfportenergy.com
+"Green Brick Partners, Inc.",US,greenbrickpartners.com
+"Goosehead Insurance, Inc.",US,goosehead.com
+Gates Corporation,US,gates.com
+ZoomInfo,US,zoominfo.com
+Getty Realty Corp.,US,gettyrealty.com
+"Granite Construction, Inc.",US,graniteconstruction.com
+Hanmi Financial Corporation,US,hanmi.com
+"Hannon Armstrong Sustainable Infrastructure Capital, Inc.",US,hannonarmstrong.com
+"Hayward Holdings, Inc.",US,hayward.com
+"Warrior Met Coal, Inc.",US,warriormetcoal.com
+"HCI Group, Inc.",US,hcigroup.com
+"Healthcare Services Group, Inc.",US,hcsgcorp.com
+"Hawaiian Electric Industries, Inc.",US,hawaiianelectricindustries.com
+Heritage Financial Corporation,US,heritagebanknw.com
+Highwoods Properties,US,highwoods.com
+Harmonic Inc.,US,harmonicinc.com
+"Helix Energy Solutions Group, Inc.",US,helixesg.com
+Horace Mann Educators Corporation,US,horacemann.com
+HNI Corporation,US,hnicorp.com
+"Hope Bancorp, Inc.",US,bankofhope.com
+"Helmerich & Payne, Inc.",US,hpinc.com
+"Harmony Biosciences Holdings, Inc.",US,harmonybiosciences.com
+"HealthStream, Inc.",US,healthstream.com
+Hilltop Holdings Inc.,US,hilltop-holdings.com
+"Heartland Express, Inc.",US,heartlandexpress.com
+H2O America,US,h2oamerica.com
+"Hub Group, Inc.",US,hubgroup.com
+"Hawkins, Inc.",US,hawkinsinc.com
+"MarineMax, Inc.",US,marinemax.com
+Integra Lifesciences Holdings,US,integralife.com
+"Installed Building Products, Inc.",US,installedbuildingproducts.com
+"Ichor Holdings, Ltd.",US,ichorsystems.com
+ICU Medical,US,icumed.com
+"Innovative Industrial Properties, Inc.",US,innovativeindustrialproperties.com
+Independent Bank Corp.,US,rockland.com
+Indivior,US,indivior.com
+"Inspire Medical Systems, Inc.",US,inspiresleep.com
+"International Seaways, Inc.",US,intlseas.com
+"Innovex International, Inc.",US,innovex-inc.com
+"Innospec, Inc.",US,innospecinc.com
+"Inter Parfums, Inc.",US,interparfums.com
+Iridium Communications,US,iridium.com
+Integer Holdings Corporation,US,integer.net
+"Itron, Inc.",US,itron.com
+InvenTrust Properties,US,inventrustproperties.com
+JBG Smith,US,jbgsmith.com
+"John B. Sanfilippo & Son, Inc.",US,jbssinc.com
+JBT Marel Corporation,US,jbtc.com
+J&J Snack Foods Corp.,US,jjsnack.com
+St. Joe Company,US,joe.com
+"Jackson Financial, Inc.",US,jackson.com
+Kadant Inc.,US,kadant.com
+Kaiser Aluminum Corporation,US,kaiseraluminum.com
+Korn/Ferry International,US,kornferry.com
+"Kodiak Gas Services, Inc.",US,kodiakgas.com
+Kemper Corporation,US,kemper.com
+Kennametal,US,kennametal.com
+Knowles Corporation,US,knowles.com
+"Kinetik Holdings, Inc.",US,kinetik.com
+"Koppers Holdings, Inc.",US,koppers.com
+Kontoor Brands,US,kontoorbrands.com
+Quaker Chemical Corporation,US,quakerhoughton.com
+"Laureate Education, Inc.",US,laureate.net
+Lazard,US,lazard.com
+"Liberty Energy, Inc.",US,libertyenergy.com
+LCI Industries,US,lci1.com
+Leggett & Platt,US,leggett.com
+Centrus Energy Corp.,US,centrusenergy.com
+Lifestance Health,US,lifestance.com
+LGI Homes,US,lgihomes.com
+Life360,US,life360.com
+"Ligand Pharmaceuticals, Inc.",US,ligand.com
+Lakeland Financial,US,lakecitybank.com
+LKQ Corporation,US,lkqcorp.com
+LeMaitre Vascular,US,lemaitre.com
+Lincoln Financial,US,lfg.com
+Lindsay Corporation,US,lindsay.com
+Dorian LPG Ltd.,US,dorianlpg.com
+Liquidia Corporation,US,liquidia.com
+"Liquidity Services, Inc.",US,liquidityservices.com
+"Stride, Inc.",US,stridelearning.com
+"LTC Properties, Inc.",US,ltcreit.com
+"Life Time Group Holdings, Inc.",US,lifetime.life
+Lamb Weston,US,lambweston.com
+Lexington Realty Trust,US,lxp.com
+"LegalZoom.com, Inc.",US,legalzoom.com
+"La-Z-Boy, Inc.",US,la-z-boy.com
+Macerich,US,macerich.com
+ManpowerGroup,US,manpowergroup.com
+"MARA Holdings, Inc.",US,mara.com
+Matthews International Corporation,US,matthewsintl.com
+"Matson, Inc.",US,matson.com
+"MasterBrand, Inc.",US,masterbrand.com
+Merchants Bancorp,US,merchantsbank.com
+Moelis & Company,US,moelis.com
+"Monarch Casino & Resort, Inc.",US,monarchcasino.com
+Mercury General,US,mercuryinsurance.com
+Pediatrix Medical Group,US,pediatrix.com
+"MDU Resources Group, Inc.",US,mdu.com
+"MGE Energy, Inc.",US,mgeenergy.com
+"Magnolia Oil & Gas, Corp.",US,magnoliaoilgas.com
+Mohawk Industries,US,mohawkind.com
+"M/I Homes, Inc.",US,mihomes.com
+"Mirion Technologies, Inc.",US,mirion.com
+MarketAxess,US,marketaxess.com
+"MillerKnoll, Inc.",US,millerknoll.com
+"Marcus & Millichap, Inc.",US,marcusmillichap.com
+"Merit Medical Systems, Inc.",US,merit.com
+Medical Properties Trust,US,medicalpropertiestrust.com
+Mercury Systems,US,mrcy.com
+"Millrose Properties, Inc.",US,millroseproperties.com
+"Marten Transport, Ltd.",US,marten.com
+Middlesex Water Company,US,middlesexwater.com
+Madison Square Garden Sports Corp.,US,msgsports.com
+Match Group,US,mtch.com
+Meritage Homes Corporation,US,meritagehomes.com
+Materion Corp.,US,materion.com
+Metallus Inc,US,metallus.com
+Minerals Technologies,US,mineralstech.com
+Mueller Water Products,US,muellerwaterproducts.com
+"MaxLinear, Inc.",US,maxlinear.com
+"MYR Group, Inc.",US,myrgroup.com
+"N-able, Inc.",US,n-able.com
+NCR Atleos,US,ncratleos.com
+Navient,US,navient.com
+National Bank Holdings Corporation,US,nationalbankholdings.com
+"NBT Bancorp, Inc.",US,nbtbank.com
+Noble Corporation,US,noblecorp.com
+"NeoGenomics Laboratories, Inc.",US,neogenomics.com
+Neogen,US,neogen.com
+"Ingevity, Corp.",US,ingevity.com
+"National Healthcare, Corp.",US,nhccare.com
+"National Health Investors, Inc.",US,nhireit.com
+Nicolet Bankshares,US,nicoletbank.com
+"Northern Oil and Gas, Inc.",US,northernoil.com
+"EnPro Industries, Inc.",US,enpro.com
+Insperity,US,insperity.com
+Napco Security Technologies,US,napcosecurity.com
+"NETSCOUT Systems, Inc.",US,netscout.com
+NETSTREIT Corp.,US,netstreit.com
+"Northwest Bancshares, Inc.",US,northwest.bank
+Newell Brands,US,newellbrands.com
+NW Natural,US,nwnatural.com
+Quanex Building Products Corporation,US,quanex.com
+"NexPoint Residential Trust, Inc.",US,nxrt.com
+OFG Bancorp,US,ofgbancorp.com
+"O-I Glass, Inc.",US,o-i.com
+"Oceaneering International, Inc.",US,oceaneering.com
+Omnicell,US,omnicell.com
+"OPENLANE, Inc.",US,openlane.com
+"OSI Systems, Inc.",US,osi-systems.com
+OneSpaWorld Holdings Limited,US,onespaworld.com
+Otter Tail Corporation,US,ottertail.com
+Outfront Media,US,outfront.com
+Phibro Animal Health,US,pahc.com
+"Par Pacific Holdings, Inc.",US,parpacific.com
+Paycom,US,paycom.com
+Payoneer Global Inc.,US,payoneer.com
+"Patrick Industries, Inc.",US,patrickind.com
+Prestige Consumer Healthcare,US,prestigeconsumerhealthcare.com
+"Pitney Bowes, Inc.",US,pitneybowes.com
+"Pacira BioSciences, Inc.",US,pacira.com
+"PDF Solutions, Inc.",US,pdf.com
+Pebblebrook Hotel Trust,US,pebblebrookhotels.com
+Phillips Edison & Company,US,phillipsedison.com
+"Penguin Solutions, Inc.",US,penguinsolutions.com
+Penn Entertainment,US,pennentertainment.com
+Preferred Bank,US,preferredbank.com
+"Provident Financial Services, Inc.",US,provident.bank
+"Progyny, Inc.",US,progyny.com
+"PHINIA, Inc.",US,phinia.com
+"Impinj, Inc.",US,impinj.com
+Piper Sandler Companies,US,pipersandler.com
+"PJT Partners, Inc.",US,pjtpartners.com
+"Photronics, Inc.",US,photronics.com
+"Palomar Holdings, Inc.",US,plmr.com
+"ePlus, Inc.",US,eplus.com
+Plexus Corp.,US,plexus.com
+PennyMac Mortgage Investment Trust,US,pennymacmortgageinvestmenttrust.com
+Pool Corporation,US,poolcorp.com
+Power Integrations,US,power.com
+"Powell Industries, Inc.",US,powellind.com
+People Inc.,US,people.inc
+Perdoceo Education Corp.,US,perdoceo.com
+"PROG Holdings, Inc.",US,progholdings.com
+Perrigo,US,perrigo.com
+Progress Software Corporation,US,progress.com
+Primoris Services Corporation,US,prim.com
+United Parks & Resorts,US,unitedparks.com
+Protolabs,US,protolabs.com
+"Pursuit Attractions & Hospitality, Inc.",US,pursuitcollection.com
+"Privia Health Group, Inc.",US,priviahealth.com
+PriceSmart,US,pricesmart.com
+"PTC Therapeutics, Inc.",US,ptcbio.com
+"Patterson-UTI Energy, Inc.",US,patenergy.com
+"Peloton Interactive, Inc.",US,onepeloton.com
+Papa John's Pizza,US,papajohns.com
+QuidelOrtho,US,quidelortho.com
+"QuinStreet, Inc.",US,quinstreet.com
+"Q2 Holdings, Inc.",US,q2.com
+"LiveRamp Holdings, Inc.",US,liveramp.com
+Ralliant Corp,US,ralliant.com
+"Arcus Biosciences, Inc.",US,arcusbio.com
+"Radian Group, Inc.",US,radian.com
+"RadNet, Inc.",US,radnet.com
+Remitly,US,remitly.com
+"RPC, Inc.",US,rpc.net
+Reynolds Consumer Products,US,reynoldsconsumerproducts.com
+REX American Resources Corporation,US,rexamerican.com
+"Resideo Technologies, Inc.",US,resideo.com
+Ryman Hospitality Properties,US,rymanhp.com
+Rithm Capital,US,rithmcap.com
+"RingCentral, Inc.",US,ringcentral.com
+Renasant Corp.,US,renasantbank.com
+"Construction Partners, Inc.",US,constructionpartners.net
+"Gibraltar Industries, Inc.",US,gibraltar1.com
+Rogers Corporation,US,rogerscorp.com
+"Red Rock Resorts, Inc.",US,redrockresorts.com
+"Rush Street Interactive, Inc.",US,rushstreetinteractive.com
+Sunrun,US,sunrun.com
+Rush Enterprises,US,rushenterprises.com
+"RXO, Inc.",US,rxo.com
+"Safehold, Inc.",US,safeholdinc.com
+Sabre,US,sabre.com
+"Safety Insurance Group, Inc.",US,safetyinsurance.com
+"Sonic Automotive, Inc.",US,sonicautomotive.com
+Seacoast Banking Corporation of Florida,US,seacoastbank.com
+"Southside Bancshares, Inc.",US,southside.com
+Scholastic Corporation,US,scholastic.com
+Stepan Company,US,stepan.com
+"ScanSource, Inc.",US,scansource.com
+"Schrödinger, Inc.",US,schrodinger.com
+SolarEdge,US,solaredge.com
+"Solaris Energy Infrastructure, Inc.",US,solaris-energy.com
+Sezzle,US,sezzle.com
+"ServisFirst Bancshares, Inc.",US,servisfirstbank.com
+Simmons First National Corporation,US,simmonsbank.com
+"Shake Shack, Inc.",US,shakeshack.com
+Shenandoah Telecommunications Co,US,shentel.com
+"Sunstone Hotel Investors, Inc.",US,sunstonehotels.com
+"Steven Madden, Ltd.",US,stevemadden.com
+Signet Jewelers,US,signetjewelers.com
+"Tanger Factory Outlet Centers, Inc.",US,tanger.com
+"Champion Homes, Inc.",US,championhomes.com
+"SkyWest, Inc.",US,skywest.com
+SL Green Realty,US,slgreen.com
+Sylvamo Corp.,US,sylvamo.com
+SM Energy Company,US,sm-energy.com
+"Standard Motor Products, Inc.",US,standardbrand.com
+Simply Good Foods Company,US,smplfoods.com
+Schneider National,US,schneider.com
+StoneX Group Inc.,US,stonex.com
+"Sonos, Inc.",US,sonos.com
+Sphere Entertainment,US,sphereentertainmentco.com
+SiriusPoint Ltd.,US,siriuspt.com
+"SPS Commerce, Inc.",US,spscommerce.com
+Sarepta Therapeutics,US,sarepta.com
+STAAR Surgical Company,US,staar.com
+"S&T Bancorp, Inc.",US,stbancorp.com
+Stewart Information Services Corporation,US,stewart.com
+StepStone Group,US,stepstonegroup.com
+"Strategic Education, Inc.",US,strategiceducation.com
+"Supernus Pharmaceuticals, Inc.",US,supernus.com
+Standex International Corporation,US,standex.com
+Sensient Technologies,US,sensient.com
+"The Bancorp, Inc.",US,thebancorp.com
+Teradata,US,teradata.com
+"Telephone and Data Systems, Inc.",US,tdsinc.com
+"Tidewater, Inc.",US,tdw.com
+"Triumph Bancorp, Inc.",US,tfin.com
+"TG Therapeutics, Inc.",US,tgtherapeutics.com
+Gentherm Incorporated,US,gentherm.com
+"Interface, Inc.",US,interface.com
+"TransMedics Group, Inc.",US,transmedics.com
+Tennant Company,US,tennantco.com
+Tandem Diabetes Care,US,tandemdiabetes.com
+Tutor Perini Corporation,US,tutorperini.com
+"Tootsie Roll Industries, Inc.",US,tootsie.com
+TripAdvisor,US,tripadvisor.com
+Trustmark Corp.,US,trustmark.com
+"Trinity Industries, Inc.",US,trin.net
+Terreno Realty Corporation,US,terreno.com
+TrustCo Bank Corp NY,US,trustco.com
+Trupanion,US,trupanion.com
+"United Community Banks, Inc.",US,ucbi.com
+"Ultra Clean Holdings, Inc.",US,uct.com
+Urban Edge Properties,US,urbanedgeproperties.com
+"United Fire Group, Inc.",US,unitedfiregroup.com
+"UFP Technologies, Inc.",US,ufpt.com
+UniFirst Corporation,US,unifirst.com
+United Natural Foods Inc,US,unfi.com
+Uniti Group,US,uniti.com
+"Upbound Group, Inc.",US,upbound.com
+"Upwork, Inc.",US,upwork.com
+"Urban Outfitters, Inc.",US,urbn.com
+"United States Lime & Minerals, Inc.",US,uslm.com
+"U.S. Physical Therapy, Inc.",US,usph.com
+Universal Technical Institute,US,uti.edu
+Unitil Corporation,US,unitil.com
+Universal Corporation,US,universalcorp.com
+Marriott Vacations Worldwide,US,marriottvacationsworldwide.com
+Vericel,US,vcel.com
+"Victory Capital Holdings, Inc.",US,vcm.com
+"Veracyte, Inc.",US,veracyte.com
+Versigent PLC,US,versigent.com
+"Vir Biotechnology, Inc.",US,vir.bio
+"Virtu Financial, Inc.",US,virtu.com
+Verra Mobility Corporation,US,verramobility.com
+"Virtus Investment Partners, Inc.",US,virtus.com
+"Viasat, Inc.",US,viasat.com
+VSE Corporation,US,vsecorp.com
+Vishay Intertechnology,US,vishay.com
+"Versant Media Group, Inc.",US,versantmedia.com
+Vestis,US,vestis.com
+Bristow Group Inc.,US,bristowgroup.com
+"V2X, Inc.",US,gov2x.com
+NCR Voyix,US,ncrvoyix.com
+Westamerica Bank,US,westamerica.com
+"WaFd, Inc.",US,wafdbank.com
+Waystar Holding Corp,US,waystar.com
+"Walker & Dunlop, Inc.",US,walkerdunlop.com
+WD-40 Company,US,wd40company.com
+The Wendy's Company,US,wendys.com
+Werner Enterprises,US,werner.com
+"Winnebago Industries, Inc.",US,winnebagoind.com
+"Cactus, Inc.",US,cactusinc.com
+Winmark,US,winmarkcorporation.com
+John Wiley & Sons,US,wiley.com
+Worthington Enterprises,US,worthingtonenterprises.com
+Warby Parker,US,warbyparker.com
+World Acceptance Corporation,US,loansbyworld.com
+Worthington Steel,US,worthingtonsteel.com
+WesBanco,US,wesbanco.com
+WillScot Holdings Corp.,US,willscot.com
+WSFS Financial Corporation,US,wsfsbank.com
+"WisdomTree Investments, Inc.",US,wisdomtree.com
+Western Union,US,westernunion.com
+"Wolverine World Wide, Inc.",US,wolverineworldwide.com
+"Xenia Hotels & Resorts, Inc.",US,xeniareit.com
+Xencor Inc,US,xencor.com
+"XPEL, Inc.",US,xpel.com
+"Yelp, Inc.",US,yelp.com
+"Clear Secure, Inc.",US,clearme.com
+Ziff Davis,US,ziffdavis.com
+Zurn Elkay Water Solutions Corp.,US,zurnelkay.com

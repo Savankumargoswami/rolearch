@@ -1,0 +1,481 @@
+name,country,domain
+# Fast-growing US startups and scale-ups (Inc. 5000-style), not found on Greenhouse/Lever/Ashby by slug
+Marqeta,US,marqeta.com
+Bill.com,US,bill.com
+Flywire,US,flywire.com
+Paymentus,US,paymentus.com
+Remitly,US,remitly.com
+Chime,US,chime.com
+MoneyLion,US,moneylion.com
+LendingClub,US,lendingclub.com
+Bolt,US,bolt.com
+Treasury Prime,US,treasuryprime.com
+Moov,US,moov.io
+Dwolla,US,dwolla.com
+Repay,US,repay.com
+i3 Verticals,US,i3verticals.com
+BlueSnap,US,bluesnap.com
+Stash,US,stash.com
+Expensify,US,expensify.com
+Tipalti,US,tipalti.com
+Varo Bank,US,varomoney.com
+Bluevine,US,bluevine.com
+Fundbox,US,fundbox.com
+Lendio,US,lendio.com
+Open Lending,US,openlending.com
+Alkami Technology,US,alkami.com
+Nymbus,US,nymbus.com
+Apex Fintech Solutions,US,apexfintechsolutions.com
+Addepar,US,addepar.com
+Check,US,checkhq.com
+Priority Technology Holdings,US,prioritycommerce.com
+Hugging Face,US,huggingface.co
+Glean,US,glean.com
+DataRobot,US,datarobot.com
+Hippocratic AI,US,hippocraticai.com
+Gong,US,gong.io
+Clarifai,US,clarifai.com
+C3 AI,US,c3.ai
+SoundHound AI,US,soundhound.com
+Tempus AI,US,tempus.com
+Applied Intuition,US,appliedintuition.com
+Anduril,US,anduril.com
+Aurora Innovation,US,aurora.tech
+Gecko Robotics,US,geckorobotics.com
+Abnormal Security,US,abnormalsecurity.com
+Hebbia,US,hebbia.com
+Jasper,US,jasper.ai
+SambaNova Systems,US,sambanova.ai
+Groq,US,groq.com
+H2O.ai,US,h2o.ai
+Moveworks,US,moveworks.com
+Uniphore,US,uniphore.com
+Veritone,US,veritone.com
+BigBear.ai,US,bigbear.ai
+Fireflies.ai,US,fireflies.ai
+Viz.ai,US,viz.ai
+Recursion,US,recursion.com
+ThoughtSpot,US,thoughtspot.com
+Eightfold AI,US,eightfold.ai
+Postman,US,postman.com
+Retool,US,retool.com
+Confluent,US,confluent.io
+Chronosphere,US,chronosphere.io
+dbt Labs,US,getdbt.com
+Dagster Labs,US,dagster.io
+DigitalOcean,US,digitalocean.com
+Couchbase,US,couchbase.com
+Pulumi,US,pulumi.com
+Harness,US,harness.io
+Sourcegraph,US,sourcegraph.com
+Anaconda,US,anaconda.com
+Gradle,US,gradle.com
+Timescale,US,timescale.com
+Apollo GraphQL,US,apollographql.com
+CloudBees,US,cloudbees.com
+Redpanda,US,redpanda.com
+Alteryx,US,alteryx.com
+Domo,US,domo.com
+Mode,US,mode.com
+Heap,US,heap.io
+Segment,US,segment.com
+mParticle,US,mparticle.com
+Census,US,getcensus.com
+Rudderstack,US,rudderstack.com
+Alation,US,alation.com
+Informatica,US,informatica.com
+Observe Inc,US,observeinc.com
+Splunk,US,splunk.com
+Tecton,US,tecton.ai
+Weights & Biases,US,wandb.ai
+Pecan AI,US,pecan.ai
+Qlik,US,qlik.com
+Looker,US,looker.com
+Tableau,US,tableau.com
+Yellowbrick Data,US,yellowbrick.com
+Fiddler AI,US,fiddler.ai
+Bigeye,US,bigeye.com
+Privacera,US,privacera.com
+Clari,US,clari.com
+Wiz,US,wiz.io
+Arctic Wolf,US,arcticwolf.com
+Cybereason,US,cybereason.com
+Blumira,US,blumira.com
+ReliaQuest,US,reliaquest.com
+SailPoint,US,sailpoint.com
+Cyera,US,cyera.com
+Claroty,US,claroty.com
+Armis,US,armis.com
+Sublime Security,US,sublime.security
+IRONSCALES,US,ironscales.com
+Black Kite,US,blackkite.com
+Bitsight,US,bitsight.com
+Red Canary,US,redcanary.com
+Appgate,US,appgate.com
+Securonix,US,securonix.com
+Exabeam,US,exabeam.com
+Optiv,US,optiv.com
+Trail of Bits,US,trailofbits.com
+Cobalt,US,cobalt.io
+Pindrop,US,pindrop.com
+Fortra,US,fortra.com
+Aembit,US,aembit.io
+Oscar Health,US,hioscar.com
+Hims & Hers Health,US,forhims.com
+Cityblock Health,US,cityblock.com
+Devoted Health,US,devoted.com
+Spring Health,US,springhealth.com
+Hinge Health,US,hingehealth.com
+Collective Health,US,collectivehealth.com
+Datavant,US,datavant.com
+Innovaccer,US,innovaccer.com
+Color Health,US,color.com
+Carrot Fertility,US,get-carrot.com
+Progyny,US,progyny.com
+Cerebral,US,cerebral.com
+Alma,US,helloalma.com
+Grow Therapy,US,growtherapy.com
+Thirty Madison,US,thirtymadison.com
+Carbon Health,US,carbonhealth.com
+Truepill,US,truepill.com
+Monogram Health,US,monogramhealth.com
+Ribbon Health,US,ribbonhealth.com
+Waystar,US,waystar.com
+Ensemble Health Partners,US,ensemblehp.com
+CareBridge,US,carebridgehealth.com
+Sprinter Health,US,sprinterhealth.com
+Lumeris,US,lumeris.com
+Zelis,US,zelis.com
+Machinify,US,machinify.com
+Turquoise Health,US,turquoise.health
+Seamless.AI,US,seamless.ai
+Highspot,US,highspot.com
+Seismic,US,seismic.com
+People.ai,US,people.ai
+Common Room,US,commonroom.io
+Sendoso,US,sendoso.com
+Podium,US,podium.com
+Birdeye,US,birdeye.com
+Optimizely,US,optimizely.com
+Rippling,US,rippling.com
+Deel,US,deel.com
+Gem,US,gem.com
+Fountain,US,fountain.com
+HireVue,US,hirevue.com
+Pave,US,pave.com
+Navan,US,navan.com
+Pilot,US,pilot.com
+Planful,US,planful.com
+Billtrust,US,billtrust.com
+Metronome,US,metronome.com
+Paycor,US,paycor.com
+Allbirds,US,allbirds.com
+Warby Parker,US,warbyparker.com
+Olaplex,US,olaplex.com
+Magic Spoon,US,magicspoon.com
+Poppi,US,drinkpoppi.com
+AG1 (Athletic Greens),US,drinkag1.com
+FIGS,US,wearfigs.com
+Vuori,US,vuoriclothing.com
+Alo Yoga,US,aloyoga.com
+SKIMS,US,skims.com
+Fabletics,US,fabletics.com
+Cuyana,US,cuyana.com
+Kendra Scott,US,kendrascott.com
+Solo Brands,US,solobrands.com
+Traeger,US,traeger.com
+Purple Innovation,US,purple.com
+Backcountry,US,backcountry.com
+Chubbies,US,chubbiesshorts.com
+The Honest Company,US,honest.com
+Jones Road Beauty,US,jonesroadbeauty.com
+Summer Fridays,US,summerfridays.com
+Rare Beauty,US,rarebeauty.com
+Cotopaxi,US,cotopaxi.com
+Burrow,US,burrow.com
+Article,US,article.com
+Lovevery,US,lovevery.com
+Branch Furniture,US,branchfurniture.com
+ThredUp,US,thredup.com
+Graza,US,graza.co
+Our Place,US,fromourplace.com
+Caraway,US,carawayhome.com
+Kizik,US,kizik.com
+Black Rifle Coffee,US,blackriflecoffee.com
+NEXT Trucking,US,nexttrucking.com
+ShipBob,US,shipbob.com
+Shippo,US,goshippo.com
+Stord,US,stord.com
+Flowspace,US,flowspace.com
+Symbotic,US,symbotic.com
+Plus One Robotics,US,plusone.ai
+Kodiak Robotics,US,kodiak.ai
+Gatik,US,gatik.ai
+Lime,US,li.me
+Getaround,US,getaround.com
+Turo,US,turo.com
+Joby Aviation,US,jobyaviation.com
+Archer Aviation,US,archer.com
+EVgo,US,evgo.com
+Onfleet,US,onfleet.com
+Tive,US,tive.co
+Veho,US,shipveho.com
+Cart.com,US,cart.com
+EasyPost,US,easypost.com
+Trucker Path,US,truckerpath.com
+Redwood Logistics,US,redwoodlogistics.com
+Echo Global Logistics,US,echo.com
+Worldwide Express,US,wwex.com
+Shipwell,US,shipwell.com
+GreyOrange,US,greyorange.com
+Interos,US,interos.ai
+Overhaul,US,over-haul.com
+Zonar Systems,US,zonarsystems.com
+Ridecell,US,ridecell.com
+Shipium,US,shipium.com
+Anvyl,US,anvyl.com
+Optoro,US,optoro.com
+Denim,US,denim.com
+RoadSync,US,roadsync.com
+Procore Technologies,US,procore.com
+Opendoor,US,opendoor.com
+Offerpad,US,offerpad.com
+Buildertrend,US,buildertrend.com
+Briq,US,briq.com
+Flyhomes,US,flyhomes.com
+EquityMultiple,US,equitymultiple.com
+ServiceTitan,US,servicetitan.com
+Housecall Pro,US,housecallpro.com
+EagleView,US,eagleview.com
+Mynd,US,mynd.co
+Landis,US,landis.com
+Belong,US,belong.com
+Placer.ai,US,placer.ai
+Dusty Robotics,US,dustyrobotics.com
+Built Robotics,US,builtrobotics.com
+Canvas Construction,US,canvas.build
+Boxabl,US,boxabl.com
+Rently,US,rently.com
+Bilt Rewards,US,biltrewards.com
+ResMan,US,resman.com
+Zumper,US,zumper.com
+Apartment List,US,apartmentlist.com
+Unison,US,unison.com
+Point,US,point.com
+Homebot,US,homebot.ai
+Assemble Systems,US,assemblesystems.com
+Document Crunch,US,documentcrunch.com
+Rhumbix,US,rhumbix.com
+Command Alkon,US,commandalkon.com
+Porch Group,US,porchgroup.com
+Bungalow,US,bungalow.com
+Compass,US,compass.com
+Bluebeam,US,bluebeam.com
+Nerdy (Varsity Tutors),US,nerdy.com
+Quizlet,US,quizlet.com
+Course Hero,US,coursehero.com
+Codecademy,US,codecademy.com
+Pluralsight,US,pluralsight.com
+Skillshare,US,skillshare.com
+Renaissance,US,renaissance.com
+PowerSchool,US,powerschool.com
+Securly,US,securly.com
+Gaggle,US,gaggle.net
+Panorama Education,US,panoramaed.com
+Age of Learning,US,ageoflearning.com
+Remind,US,remind.com
+Anthology,US,anthology.com
+Ellucian,US,ellucian.com
+Teachable,US,teachable.com
+Kajabi,US,kajabi.com
+Tynker,US,tynker.com
+Flatiron School,US,flatironschool.com
+Tutor.com,US,tutor.com
+Wyzant,US,wyzant.com
+Study.com,US,study.com
+Albert,US,albert.io
+Turnitin,US,turnitin.com
+ParentSquare,US,parentsquare.com
+Frontline Education,US,frontlineeducation.com
+Branching Minds,US,branchingminds.com
+Imagine Learning,US,imaginelearning.com
+Lexia Learning,US,lexialearning.com
+Edlio,US,edlio.com
+Niche,US,niche.com
+VitalSource,US,vitalsource.com
+Prenda,US,prenda.com
+EVERFI,US,everfi.com
+Lightcast,US,lightcast.io
+Palmetto,US,palmetto.com
+Commonwealth Fusion Systems,US,cfs.energy
+Helion Energy,US,helionenergy.com
+TAE Technologies,US,tae.com
+Sila Nanotechnologies,US,silanano.com
+Intersect Power,US,intersectpower.com
+Nextracker,US,nextracker.com
+Array Technologies,US,arraytechinc.com
+Shoals Technologies,US,shoals.com
+Fluence Energy,US,fluenceenergy.com
+"Stem, Inc.",US,stem.com
+Energy Vault,US,energyvault.com
+ESS Tech,US,essinc.com
+Eos Energy Enterprises,US,eose.com
+LanzaTech,US,lanzatech.com
+Origin Materials,US,originmaterials.com
+Boston Metal,US,bostonmetal.com
+EnergySage,US,energysage.com
+Uplight,US,uplight.com
+Sense,US,sense.com
+Dandelion Energy,US,dandelionenergy.com
+Sublime Systems,US,sublime-systems.com
+Pachama,US,pachama.com
+Persefoni,US,persefoni.com
+NuScale Power,US,nuscalepower.com
+X-energy,US,x-energy.com
+TerraPower,US,terrapower.com
+Ascend Elements,US,ascendelements.com
+QuantumScape,US,quantumscape.com
+Enovix,US,enovix.com
+Summit Ridge Energy,US,summitridgeenergy.com
+Altus Power,US,altuspower.com
+Gevo,US,gevo.com
+OhmConnect,US,ohmconnect.com
+Indigo Ag,US,indigoag.com
+10x Genomics,US,10xgenomics.com
+Quanterix,US,quanterix.com
+Emerald Cloud Lab,US,emeraldcloudlab.com
+Caris Life Sciences,US,carislifesciences.com
+Akoya Biosciences,US,akoyabio.com
+Nautilus Biotechnology,US,nautilus.bio
+Scale Biosciences,US,scalebio.com
+Mission Bio,US,missionbio.com
+Cytek Biosciences,US,cytekbio.com
+Telesis Bio,US,telesisbio.com
+Opentrons,US,opentrons.com
+Formulatrix,US,formulatrix.com
+Biosero,US,biosero.com
+HighRes Biosolutions,US,highres.bio
+Inari Agriculture,US,inari.com
+Sherlock Biosciences,US,sherlock.bio
+GRAIL,US,grail.com
+Personalis,US,personalis.com
+Zymo Research,US,zymoresearch.com
+Atomwise,US,atomwise.com
+Fulgent Genetics,US,fulgentgenetics.com
+Elegen,US,elegenbio.com
+Molecular Instruments,US,molecularinstruments.com
+Meso Scale Diagnostics,US,mesoscale.com
+Vizgen,US,vizgen.com
+BioIVT,US,bioivt.com
+Discovery Life Sciences,US,dls.com
+Quantum-Si,US,quantum-si.com
+Arzeda,US,arzeda.com
+Solugen,US,solugen.com
+Root Insurance,US,root.com
+Hippo,US,hippo.com
+NEXT Insurance,US,nextinsurance.com
+At-Bay,US,at-bay.com
+Vouch,US,vouch.us
+Policygenius,US,policygenius.com
+Ethos,US,ethos.com
+Ladder Life,US,ladderlife.com
+Corvus Insurance,US,corvusinsurance.com
+Cowbell,US,cowbell.insure
+Duck Creek Technologies,US,duckcreek.com
+Guidewire,US,guidewire.com
+Majesco,US,majesco.com
+Applied Systems,US,appliedsystems.com
+Vertafore,US,vertafore.com
+SelectQuote,US,selectquote.com
+GoHealth,US,gohealth.com
+eHealth,US,ehealth.com
+Insurity,US,insurity.com
+Socotra,US,socotra.com
+Zywave,US,zywave.com
+Bold Penguin,US,boldpenguin.com
+Newfront,US,newfront.com
+Clearcover,US,clearcover.com
+CCC Intelligent Solutions,US,cccis.com
+Snapsheet,US,snapsheet.me
+Nirvana Insurance,US,nirvanatech.com
+Jerry,US,getjerry.com
+The Zebra,US,thezebra.com
+Neptune Flood,US,neptuneflood.com
+Slide Insurance,US,slideinsurance.com
+Agentero,US,agentero.com
+Hagerty,US,hagerty.com
+Betterview,US,betterview.com
+Embroker,US,embroker.com
+Insureon,US,insureon.com
+Founder Shield,US,foundershield.com
+Podia,US,podia.com
+Beacons,US,beacons.ai
+Whatnot,US,whatnot.com
+LTK,US,ltk.com
+Fourthwall,US,fourthwall.com
+Stan,US,stan.store
+Opendorse,US,opendorse.com
+Aspire,US,aspire.io
+Dropout,US,dropout.tv
+Jukin Media,US,jukinmedia.com
+Dhar Mann Studios,US,dharmann.com
+Mythical Entertainment,US,mythical.com
+beehiiv,US,beehiiv.com
+theSkimm,US,theskimm.com
+Puck,US,puck.news
+Complex Networks,US,complex.com
+Bustle Digital Group,US,bustle.com
+Libsyn,US,libsyn.com
+Vimeo,US,vimeo.com
+Rumble,US,rumble.com
+PLAYSTUDIOS,US,playstudios.com
+Skillz,US,skillz.com
+Mythical Games,US,mythicalgames.com
+Super Evil Megacorp,US,superevilmegacorp.com
+Niantic,US,nianticlabs.com
+Rec Room,US,recroom.com
+Hi-Rez Studios,US,hirezstudios.com
+Valve,US,valvesoftware.com
+Medal.tv,US,medal.tv
+100 Thieves,US,100thieves.com
+WEBTOON Entertainment,US,webtoon.com
+CuriosityStream,US,curiositystream.com
+Gaia,US,gaia.com
+Cineverse,US,cineverse.com
+Skool,US,skool.com
+Soundstripe,US,soundstripe.com
+Bandcamp,US,bandcamp.com
+Reverb,US,reverb.com
+Hadrian,US,hadrian.co
+Castelion,US,castelion.com
+Firefly Aerospace,US,fireflyspace.com
+Relativity Space,US,relativityspace.com
+Rocket Lab,US,rocketlabusa.com
+Impulse Space,US,impulsespace.com
+Stoke Space,US,stokespace.com
+Apex Space,US,apexspace.com
+K2 Space,US,k2space.com
+True Anomaly,US,trueanomaly.space
+Varda Space Industries,US,varda.com
+BETA Technologies,US,beta.team
+Boom Supersonic,US,boomsupersonic.com
+Sierra Space,US,sierraspace.com
+Voyager Technologies,US,voyagertechnologies.com
+Red Cat Holdings,US,redcatholdings.com
+Boston Dynamics,US,bostondynamics.com
+Divergent Technologies,US,divergent3d.com
+Firestorm Labs,US,firestorm.co
+Redwire,US,redwirespace.com
+Intuitive Machines,US,intuitivemachines.com
+Astrobotic,US,astrobotic.com
+Saildrone,US,saildrone.com
+Hidden Level,US,hiddenlevel.com
+Fortem Technologies,US,fortemtech.com
+Govini,US,govini.com
+Spire Global,US,spire.com
+Ouster,US,ouster.com
+Carbon Robotics,US,carbonrobotics.com
+Wisk Aero,US,wisk.aero
+Palladyne AI,US,palladyneai.com
+Forterra,US,forterra.ai
+Overland AI,US,overland.ai

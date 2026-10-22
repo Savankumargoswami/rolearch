@@ -1,5 +1,7 @@
 # Refreshes jobs from every company board (Greenhouse, Lever, Ashby, Workday, ...) and USAJOBS.
 # Needs repository secrets: DATABASE_URL, USAJOBS_API_KEY, USAJOBS_EMAIL (and ADZUNA_APP_ID / ADZUNA_APP_KEY for the weekly harvest).
+# The company list is split into 8 stable shards that refresh in parallel; a final job then closes jobs of
+# companies no longer listed and refreshes the site's totals.
 name: Refresh jobs
 
 on:
@@ -15,10 +17,50 @@ concurrency:
   group: refresh-jobs
   cancel-in-progress: false
 
+env:
+  PYTHONIOENCODING: utf-8
+
 jobs:
+  discover:
+    if: github.event.schedule == '0 3 * * 1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: worker
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+      ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: worker/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Find new employers
+        run: |
+          python -m rolearch_worker harvest
+          python -m rolearch_worker discover
+      - name: Save new employers
+        run: |
+          git config user.name "rolearch-bot"
+          git config user.email "admin@rolearch.com"
+          git add companies/
+          git diff --cached --quiet || (git commit -m "Add newly discovered employer job boards" && git push)
+
   refresh:
+    needs: discover
+    # Runs on every schedule; on Mondays it waits for discovery (and still runs if discovery failed).
+    if: ${{ always() && needs.discover.result != 'cancelled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     defaults:
       run:
         working-directory: worker
@@ -28,26 +70,38 @@ jobs:
       USAJOBS_EMAIL: ${{ secrets.USAJOBS_EMAIL }}
       ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
       ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
-      PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }} # include employers the discover job just committed
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
           cache: pip
           cache-dependency-path: worker/requirements.txt
       - run: pip install -r requirements.txt
-      - name: Find new employers (weekly)
-        if: github.event.schedule == '0 3 * * 1'
-        run: |
-          python -m rolearch_worker harvest
-          python -m rolearch_worker discover
-      - name: Save new employers (weekly)
-        if: github.event.schedule == '0 3 * * 1'
-        run: |
-          git config user.name "rolearch-bot"
-          git config user.email "admin@rolearch.com"
-          git add companies/
-          git diff --cached --quiet || (git commit -m "Add newly discovered employer job boards" && git push)
-      - name: Refresh jobs
-        run: python -m rolearch_worker run --feed - --concurrency 12
+      - name: Refresh jobs (shard ${{ matrix.shard }} of 8)
+        run: python -m rolearch_worker run --feed - --concurrency 12 --shard ${{ matrix.shard }}/8
+
+  finalize:
+    needs: refresh
+    if: ${{ always() && needs.refresh.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: worker
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: worker/requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Close jobs of removed companies and refresh site totals
+        run: python -m rolearch_worker finalize
