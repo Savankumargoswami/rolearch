@@ -10,7 +10,7 @@ from collections.abc import Awaitable, Callable
 
 from ..http import Fetcher
 from ..models import Company, RawJob
-from . import adzuna, amazon, apple, ashby, avature, bestbuy, eightfold, google, greenhouse, ibm, icims, jibe, jsonld, lever, oracle, personio, phenom, recruitee, sitemap, smartrecruiters, successfactors, taleo, usajobs, virecruit, workable, workday
+from . import adzuna, amazon, apple, ashby, avature, bamboohr, bestbuy, eightfold, gem, google, greenhouse, ibm, icims, jazzhr, jibe, jobvite, jsonld, lever, oracle, personio, phenom, recruitee, rippling, sitemap, smartrecruiters, successfactors, taleo, usajobs, virecruit, workable, workday
 
 Source = Callable[[Fetcher, Company], Awaitable[list[RawJob]]]
 
@@ -40,6 +40,11 @@ SOURCES: dict[str, Source] = {
     "apple": apple.fetch,
     "avature": avature.fetch,
     "virecruit": virecruit.fetch,
+    "rippling": rippling.fetch,
+    "gem": gem.fetch,
+    "bamboohr": bamboohr.fetch,
+    "jazzhr": jazzhr.fetch,
+    "jobvite": jobvite.fetch,
     # Aggregators: one "company" row per feed; each job carries its real employer's name.
     "usajobs": usajobs.fetch,
     "adzuna": adzuna.fetch,

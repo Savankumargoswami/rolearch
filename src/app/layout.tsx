@@ -19,7 +19,7 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://rolearch.com"),
+  metadataBase: new URL("https://www.rolearch.com"),
   title: { default: t("meta.title"), template: t("meta.titleTemplate") },
   description: t("meta.description"),
   applicationName: "Rolearch",

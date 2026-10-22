@@ -147,6 +147,58 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* ATS check: lives on every job page; shown here so visitors know it exists */}
+        <section aria-labelledby="ats-h" className="mx-auto mt-24 grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+          <div className="order-last rounded-3xl border border-line bg-surface p-5 sm:p-7 lg:order-first">
+            <p className="text-sm text-muted">{copy.atsSample.label}</p>
+            <div className="mt-3 flex items-end gap-3">
+              <span className="font-display text-6xl font-semibold leading-none tabular-nums">82</span>
+              <span className="pb-1 text-muted">/ 100</span>
+              <span className="ms-auto rounded-full bg-signal/30 px-3 py-1.5 text-sm font-medium">{t("ats.band_good")}</span>
+            </div>
+            <dl className="mt-6 space-y-3">
+              {copy.atsSample.parts.map((p) => (
+                <div key={p.name} className="grid grid-cols-[8.5rem_1fr_2.5rem] items-center gap-3 text-sm">
+                  <dt>{p.name}</dt>
+                  <dd aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-ink-soft">
+                    <span className="block h-full rounded-full bg-ink" style={{ width: `${p.score}%` }} />
+                  </dd>
+                  <dd className="text-end tabular-nums text-muted">{p.score}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-6 text-sm font-medium">{copy.atsSample.missing}</p>
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {copy.atsSample.keywords.map((k) => (
+                <li key={k} className="rounded-full border border-dashed border-[#b4532a]/60 px-2.5 py-1 text-sm">
+                  {k}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h2 id="ats-h" className="max-w-[14ch] font-display text-3xl font-semibold leading-[1.05] tracking-[-0.025em] text-balance sm:text-5xl">
+              {t("home.atsTitle")}
+            </h2>
+            <p className="mt-4 max-w-[48ch] text-lg text-muted text-pretty">{t("home.atsBody")}</p>
+            <dl className="mt-6 divide-y divide-line border-y border-line">
+              {copy.atsPoints.map((p) => (
+                <div key={p.title} className="py-4">
+                  <dt className="font-semibold">{p.title}</dt>
+                  <dd className="mt-1 text-muted text-pretty">{p.body}</dd>
+                </div>
+              ))}
+            </dl>
+            <Link
+              href="/jobs"
+              className="mt-6 inline-flex min-h-12 items-center rounded-full bg-ink px-6 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
+            >
+              {t("home.atsCta")}
+            </Link>
+            <p className="mt-3 max-w-[48ch] text-sm text-muted text-pretty">{t("ats.disclaimer")}</p>
+          </div>
+        </section>
+
         {/* Companies */}
         <section id="companies" aria-labelledby="companies-h" className="mt-24 scroll-mt-20 bg-ink text-paper">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-6 md:grid-cols-[1.3fr_1fr] md:items-end md:py-20">

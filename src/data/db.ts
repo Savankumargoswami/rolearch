@@ -315,3 +315,21 @@ export async function companyDomains(names: string[]): Promise<Record<string, st
   const rows = await rpc<{ name: string; domain: string }[]>("company_domains", { names: list });
   return Object.fromEntries((rows ?? []).map((r) => [r.name, r.domain]));
 }
+
+/** Job ids per public sitemap file (Google reads at most 50,000 URLs per file). */
+export const SITEMAP_PAGE = 20000;
+
+/** How many sitemap files the open jobs fill. */
+export async function jobSitemapPages(): Promise<number> {
+  "use cache";
+  cacheLife("hours");
+  const n = await rpc<number>("job_sitemap_count", {});
+  return Math.max(1, Math.ceil((n ?? 0) / SITEMAP_PAGE));
+}
+
+/** One sitemap file's open jobs: [id, posted date]. */
+export async function jobSitemap(page: number): Promise<[string, string | null][]> {
+  "use cache";
+  cacheLife("hours");
+  return (await rpc<[string, string | null][]>("job_sitemap", { p_page: page, p_size: SITEMAP_PAGE })) ?? [];
+}

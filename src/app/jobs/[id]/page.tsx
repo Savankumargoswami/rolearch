@@ -19,7 +19,6 @@ import { place, postedAgo, salaryRange } from "@/lib/format";
 import { jobRequirements, type JobRequirements } from "@/lib/job-requirements";
 import type { Match, ReqStatus, Requirement } from "@/lib/match";
 import { loadViewer } from "@/lib/profile";
-import { requireMember } from "@/lib/require-member";
 import { matchProfile } from "@/lib/role-match";
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,15 +30,14 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Promise<Metadata> {
   const { id } = await params;
-  // Job details are for members, including the page title.
-  if (!(await loadViewer())) return { title: t("jobs.title"), robots: { index: false } };
   const job = await getJob(id);
-  if (!job) return {};
+  if (!job) return { robots: { index: false } };
   const where = place(job);
+  // Job pages are public so search engines can list them; match, ATS check and tracking need an account.
   return {
     title: `${job.title} at ${job.company}`,
     description: [job.summary, `${job.company} · ${where}.`, job.salary ? `${salaryRange(job.salary)}.` : ""].filter(Boolean).join(" "),
-    robots: { index: false },
+    alternates: { canonical: `/jobs/${job.id}` },
   };
 }
 
@@ -50,20 +48,53 @@ async function similarTo(job: Job) {
   return jobs.filter((j) => j.id !== job.id).slice(0, 3);
 }
 
-/** Only for jobs posted directly on Rolearch; feed jobs already carry this on the employer's own page. */
-function jobPostingLd(job: Job) {
+const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** The plain-text description as simple HTML: paragraphs, and bullet lines as lists. */
+function descriptionHtml(text: string) {
+  return text
+    .split(/\n\s*\n/)
+    .map((block) => {
+      const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+      if (lines.length > 1 && lines.every((l) => /^[-•*·]\s/.test(l))) {
+        return `<ul>${lines.map((l) => `<li>${escapeHtml(l.replace(/^[-•*·]\s+/, ""))}</li>`).join("")}</ul>`;
+      }
+      return lines.length ? `<p>${lines.map(escapeHtml).join("<br>")}</p>` : "";
+    })
+    .join("");
+}
+
+/** schema.org JobPosting, so search engines (Google for Jobs) can list the job. Matches what the page shows. */
+function jobPostingLd(job: Job, text: string) {
   const remote = job.workplace === "remote";
+  const country = job.countryCode || undefined;
+  const fallback = `<p>${escapeHtml(job.summary)}</p>${job.duties.length ? `<ul>${job.duties.map((d) => `<li>${escapeHtml(d)}</li>`).join("")}</ul>` : ""}`;
   return {
     "@context": "https://schema.org",
     "@type": "JobPosting",
     title: job.title,
-    description: `<p>${job.summary}</p><ul>${job.duties.map((d) => `<li>${d}</li>`).join("")}</ul>`,
+    description: text.trim().length >= 120 ? descriptionHtml(text) : fallback,
+    identifier: { "@type": "PropertyValue", name: job.company, value: job.id },
     datePosted: (job.postedAt ?? "").slice(0, 10) || undefined,
-    employmentType: "FULL_TIME",
-    hiringOrganization: { "@type": "Organization", name: job.company },
+    ...(job.source === "Rolearch" && { employmentType: "FULL_TIME", directApply: true }),
+    hiringOrganization: {
+      "@type": "Organization",
+      name: job.company,
+      ...(job.companyDomain && { sameAs: `https://${job.companyDomain}`, logo: `https://www.rolearch.com/logo/${job.companyDomain}` }),
+    },
     ...(remote
-      ? { jobLocationType: "TELECOMMUTE", applicantLocationRequirements: { "@type": "Country", name: job.country } }
-      : { jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: job.city, addressCountry: job.country } } }),
+      ? { jobLocationType: "TELECOMMUTE", ...(country && { applicantLocationRequirements: { "@type": "Country", name: country } }) }
+      : {
+          jobLocation: {
+            "@type": "Place",
+            // Without a known city, `city` holds the country name; leave the locality out then.
+            address: {
+              "@type": "PostalAddress",
+              ...(job.city && job.city !== "Remote" && job.city !== job.country && { addressLocality: job.city }),
+              addressCountry: country ?? job.country,
+            },
+          },
+        }),
     ...(job.salary && {
       baseSalary: {
         "@type": "MonetaryAmount",
@@ -108,7 +139,6 @@ export default function JobPage({ params }: PageProps<"/jobs/[id]">) {
 
 async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }) {
   const { id } = await params;
-  await requireMember(`/jobs/${id}`);
   const job = await getJob(id);
   if (!job) notFound();
   if (job.source === "Rolearch") {
@@ -118,7 +148,7 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
       await db.rpc("record_job_view", { p_job: job.id });
     });
   }
-  const similar = await similarTo(job);
+  const [similar, text] = await Promise.all([similarTo(job), getJobText(job.id)]);
   const where = place(job);
 
   return (
@@ -128,11 +158,12 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
       default="none"
     >
       <article className="mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
-        {job.source === "Rolearch" && (
+        {/* Search engines require a description, so jobs without one get no listing data. */}
+        {(text.trim() || job.summary.trim()) && (
           <script
             type="application/ld+json"
-            // Structured data for search engines' job listings. Content is our own data.
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingLd(job)).replace(/</g, "\\u003c") }}
+            // Structured data for search engines' job listings; "<" is escaped so the text can't close the tag.
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingLd(job, text)).replace(/</g, "\\u003c") }}
           />
         )}
         <Link
@@ -237,6 +268,7 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
 /** Apply and save controls: Rolearch jobs apply with the profile; other jobs go to the company and can be tracked. */
 async function ApplyArea({ job }: { job: Job }) {
   const viewer = await loadViewer();
+  if (!viewer) return <VisitorApply job={job} />;
   const db = await createClient();
   const [{ data: tracked }, { data: app }] = viewer
     ? await Promise.all([
@@ -267,6 +299,40 @@ async function ApplyArea({ job }: { job: Job }) {
         <ApplyButton company={job.company} />
       )}
       {!app && <TrackButton id={job.id} status={status} />}
+    </>
+  );
+}
+
+/** Visitors can read the job and apply on the employer's site; saving and tracking need a free account. */
+function VisitorApply({ job }: { job: Job }) {
+  const next = encodeURIComponent(`/jobs/${job.id}`);
+  return (
+    <>
+      {job.source === "Rolearch" ? (
+        <Link
+          href={`/signup?next=${encodeURIComponent(`/jobs/${job.id}/apply`)}`}
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
+        >
+          {t("apply.cta")}
+        </Link>
+      ) : job.applyUrl ? (
+        <a
+          href={job.applyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
+        >
+          {t("job.applyOnSite", { c: job.company })}
+          <ArrowUpRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
+        </a>
+      ) : null}
+      <p className="text-sm text-muted text-pretty">{t("job.visitorSave")}</p>
+      <Link
+        href={`/signup?next=${next}`}
+        className="inline-flex min-h-11 items-center justify-center rounded-full border border-ink px-5 font-medium transition-colors duration-200 hover:bg-ink-soft"
+      >
+        {t("job.visitorSaveCta")}
+      </Link>
     </>
   );
 }

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const base = "https://rolearch.com";
+const base = "https://www.rolearch.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

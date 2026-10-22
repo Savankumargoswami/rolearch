@@ -4,13 +4,14 @@ import { NextResponse, type NextRequest } from "next/server";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
 const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-const MEMBERS_ONLY = /^\/jobs(\/|$)/;
+// The job search list and applying are for members; single job pages (/jobs/{id}) are public for search engines.
+const MEMBERS_ONLY = /^\/jobs(\/?$|\/[^/]+\/apply)/;
 
 /** Keeps Supabase sign-in sessions fresh: refreshes the access token and writes the new cookies. */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   const hasSession = request.cookies.getAll().some((c) => c.name.startsWith("sb-"));
-  // Job listings are for members: send visitors to sign up, then back to what they asked for.
+  // Send visitors to sign up, then back to what they asked for.
   if (!hasSession && MEMBERS_ONLY.test(request.nextUrl.pathname)) {
     const to = new URL("/signup", request.url);
     to.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
@@ -36,5 +37,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Skip static files, images and metadata routes.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|opengraph-image|brand/|logo/|pwa-|robots.txt|sitemap.xml|manifest.webmanifest).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|opengraph-image|brand/|logo/|pwa-|robots.txt|sitemap.xml|sitemaps/|manifest.webmanifest).*)"],
 };

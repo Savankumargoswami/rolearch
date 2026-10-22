@@ -51,7 +51,7 @@ async def pull_one(http: Fetcher, store: Store, company: Company) -> Result:
             res.error = f"skipped: last fetched {hours:.0f}h ago (runs once every {AGGREGATOR_EVERY_HOURS}h to stay inside the API quota)"
             return res
     source = SOURCES.get(company.ats)
-    if company.ats in ("workday", "oracle", "eightfold", "icims", "phenom", "sitemap", "smartrecruiters", "taleo", "avature"):
+    if company.ats in ("workday", "oracle", "eightfold", "icims", "phenom", "sitemap", "smartrecruiters", "taleo", "avature", "rippling", "bamboohr", "jazzhr", "jobvite"):
         company.described = store.described_ids(company)
     if company.ats in ("sitemap", "successfactors", "bestbuy", "google"):
         company.known_urls = store.known_urls(company)
