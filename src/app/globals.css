@@ -262,3 +262,45 @@ body {
 .rail::-webkit-scrollbar {
   display: none;
 }
+
+/* Profile header backdrops (components/profile-backdrop.tsx): one slow movement per scene.
+   Shapes are drawn in their resting state, so with reduced motion (above) each scene shows still and complete. */
+.pb :is(.pb-spin, .pb-spin-slow, .pb-bob, .pb-type, .pb-ping) {
+  transform-box: fill-box;
+}
+.pb .pb-flow { animation: pb-flow 5s linear infinite; }
+.pb .pb-trace { animation: pb-trace 3.2s linear infinite; }
+.pb .pb-draft { animation: pb-draft 9s ease-in-out infinite; }
+.pb .pb-spin { animation: pb-spin 14s linear infinite; transform-origin: center; }
+.pb .pb-spin-slow { animation: pb-spin 40s linear infinite; transform-origin: center; }
+.pb .pb-blink { animation: pb-blink 1.1s steps(1) infinite; }
+.pb .pb-type { animation: pb-type 4.5s ease-out infinite; transform-origin: left center; }
+.pb .pb-bob { animation: pb-bob 6s ease-in-out infinite; transform-origin: center bottom; }
+.pb .pb-rise { animation: pb-rise 9s ease-out infinite; }
+.pb .pb-ping { animation: pb-ping 2.4s ease-out infinite; transform-origin: center; }
+.pb .pb-drift { animation: pb-drift 18s ease-in-out infinite; }
+
+@keyframes pb-flow { to { stroke-dashoffset: -100; } }
+@keyframes pb-trace { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+@keyframes pb-draft {
+  0% { stroke-dashoffset: 100; }
+  45%, 80% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -100; }
+}
+@keyframes pb-spin { to { rotate: 360deg; } }
+@keyframes pb-blink { 50% { opacity: 0; } }
+@keyframes pb-type {
+  0% { scale: 0 1; }
+  70%, 100% { scale: 1 1; }
+}
+@keyframes pb-bob { 50% { scale: 1 0.82; } }
+@keyframes pb-rise {
+  0% { translate: 0 0; opacity: 0; }
+  20% { opacity: 1; }
+  100% { translate: 0 -440px; opacity: 0; }
+}
+@keyframes pb-ping {
+  0% { scale: 0.6; opacity: 0.9; }
+  100% { scale: 1.6; opacity: 0; }
+}
+@keyframes pb-drift { 50% { translate: -24px 12px; } }

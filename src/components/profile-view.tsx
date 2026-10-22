@@ -6,9 +6,11 @@ import { Avatar } from "@/components/avatar";
 import { FollowButton } from "@/components/follow-button";
 import { PostComposer } from "@/components/post-composer";
 import { PostList } from "@/components/post-card";
+import { ProfileBackdrop } from "@/components/profile-backdrop";
 import { ResumeView } from "@/components/resume-view";
 import { t } from "@/i18n";
 import { expertiseOf, formatMonths, totalMonths } from "@/lib/expertise";
+import { occupationScene } from "@/lib/occupation-scene";
 import type { AccountProfile } from "@/lib/profile";
 import type { ProfileData } from "@/lib/profile-schema";
 import type { Post, Social } from "@/lib/social";
@@ -53,12 +55,7 @@ export function ProfileView({ account, mode, social, posts, viewerId, canPost = 
   return (
     <>
       <section aria-labelledby="profile-name" className="relative overflow-hidden rounded-3xl bg-ink text-paper">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.07)_1px,transparent_1px)] [background-size:18px_18px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
-        />
-        <div aria-hidden="true" className="pointer-events-none absolute -end-24 -top-24 size-80 rounded-full bg-signal/20 blur-3xl" />
-        <div aria-hidden="true" className="pointer-events-none absolute -bottom-32 -start-20 size-72 rounded-full bg-[#3b6ea5]/25 blur-3xl" />
+        <ProfileBackdrop scene={occupationScene(p.headline, now?.title)} />
 
         <div className="relative flex flex-col gap-6 p-6 sm:p-10 md:flex-row md:items-center md:gap-8 md:pe-48">
           <div className="rise self-start md:self-center">
@@ -133,7 +130,7 @@ export function ProfileView({ account, mode, social, posts, viewerId, canPost = 
         </div>
 
         {(years > 0 || now) && (
-          <dl className="relative grid border-t border-white/15 bg-black/10 md:grid-cols-3">
+          <dl className="relative grid border-t border-white/15 bg-[#0a1724]/80 backdrop-blur-md md:grid-cols-3">
             {years > 0 && (
               <Stat label={t("profile.totalExperience")}>
                 <span className="font-display text-3xl font-semibold tabular-nums text-signal sm:text-4xl">{formatMonths(years)}</span>
