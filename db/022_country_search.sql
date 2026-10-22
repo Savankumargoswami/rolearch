@@ -1,7 +1,9 @@
 -- Search by country ("remote jobs in india", "nurse in usa"), a 'match most words' mode for queries no single job
 -- matches in full, and wider typo correction. Run after 021_sitemap_pages.sql. Safe to re-run.
 
-create index if not exists jobs_open_country_idx on public.jobs (country_code, posted_at desc) where status = 'open';
+-- No index on country_code: one on (country_code, posted_at) made the planner pick it for every text search, which
+-- turned "nurse" from 0.4s into a timeout. Country filtering rides on the text and browse plans instead.
+drop index if exists public.jobs_open_country_idx;
 
 -- Typo vocabulary: job titles and cities as before, plus company names and skills ("microsfot", "pyhton").
 create or replace function public.refresh_job_vocab()
