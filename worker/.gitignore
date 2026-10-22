@@ -1,0 +1,5 @@
+
+# Source lists used once to build companies.csv (Census, Medicare, college directory); not needed at run time.
+rolearch_worker/data/census_places_2024.csv
+rolearch_worker/data/cms_hospitals.csv
+rolearch_worker/data/ipeds/
