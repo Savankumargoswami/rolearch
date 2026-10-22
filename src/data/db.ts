@@ -319,17 +319,23 @@ export async function companyDomains(names: string[]): Promise<Record<string, st
 /** Job ids per public sitemap file (Google reads at most 50,000 URLs per file). */
 export const SITEMAP_PAGE = 20000;
 
+// A failed lookup throws rather than returning nothing: a refresh that errors keeps serving the last good
+// sitemaps, where "0 jobs" would be cached and turn every file after the first into a 404 for search engines.
+
 /** How many sitemap files the open jobs fill. */
 export async function jobSitemapPages(): Promise<number> {
   "use cache";
   cacheLife("hours");
   const n = await rpc<number>("job_sitemap_count", {});
-  return Math.max(1, Math.ceil((n ?? 0) / SITEMAP_PAGE));
+  if (n == null) throw new Error("job_sitemap_count failed");
+  return Math.max(1, Math.ceil(n / SITEMAP_PAGE));
 }
 
 /** One sitemap file's open jobs: [id, posted date]. */
 export async function jobSitemap(page: number): Promise<[string, string | null][]> {
   "use cache";
   cacheLife("hours");
-  return (await rpc<[string, string | null][]>("job_sitemap", { p_page: page, p_size: SITEMAP_PAGE })) ?? [];
+  const rows = await rpc<[string, string | null][]>("job_sitemap", { p_page: page, p_size: SITEMAP_PAGE });
+  if (rows == null) throw new Error(`job_sitemap page ${page} failed`);
+  return rows;
 }
