@@ -111,6 +111,7 @@ const en = {
     understoodRemote: "remote",
     understoodVisa: "visa sponsorship",
     understoodEntry: "entry level",
+    partialMatch: "No job has all of those words, so these have the most of them, best matches first.",
     nearFirst: "Jobs near {place} first",
     nearOnly: "Jobs near {place}",
     nearShowOnly: "Only nearby",

@@ -59,10 +59,15 @@ async function Results({ searchParams }: { searchParams: Search }) {
   const { filters, page } = parse(await searchParams);
   await requireMember(`/jobs${toQueryString(filters, page)}`);
   const [result, cats, feed] = await Promise.all([findJobs(filters, page), jobCategories(), getJobFeed()]);
-  const { jobs, total, corrected, mode, loc, parsed } = result;
+  const { jobs, total, corrected, mode, loc, parsed, partial } = result;
   const counts = Object.fromEntries(cats.map((c) => [c.category, c.n]));
   const link = (patch: Partial<JobQuery>) => `/jobs${toQueryString({ ...filters, ...patch })}`;
-  const understood = [parsed.remote && !filters.remote && t("jobs.understoodRemote"), parsed.visa && !filters.visa && t("jobs.understoodVisa"), parsed.entry && filters.level === "any" && t("jobs.understoodEntry")].filter(Boolean);
+  const understood = [
+    parsed.country?.name,
+    parsed.remote && !filters.remote && t("jobs.understoodRemote"),
+    parsed.visa && !filters.visa && t("jobs.understoodVisa"),
+    parsed.entry && filters.level === "any" && t("jobs.understoodEntry"),
+  ].filter(Boolean);
   const pages = Math.ceil(total / PER_PAGE);
 
   return (
@@ -84,6 +89,7 @@ async function Results({ searchParams }: { searchParams: Search }) {
           </p>
         )}
         {understood.length > 0 && <p className="text-muted">{t("jobs.understood", { f: understood.join(", ") })}</p>}
+        {partial && <p className="text-muted">{t("jobs.partialMatch")}</p>}
         {loc && mode !== "none" && (
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-ink-soft px-3 py-1">
@@ -146,9 +152,9 @@ async function Results({ searchParams }: { searchParams: Search }) {
 }
 
 /**
- * Runs a search the way people mean it: filler words dropped, "remote"/"visa"/"near me"/"entry level" turned into
- * filters, jobs near the visitor first (only nearby when just browsing), and likely typos fixed when the exact words
- * find almost nothing.
+ * Runs a search the way people mean it: filler words dropped; "remote"/"visa"/"near me"/"entry level" and a named
+ * country ("in india", "in the usa") turned into filters; jobs near the visitor first (only nearby when just browsing);
+ * likely typos fixed; and when no job has every word, the jobs with the most of them.
  */
 async function findJobs(filters: JobQuery, page: number) {
   const parsed = parseQuery(filters.q);
@@ -159,30 +165,45 @@ async function findJobs(filters: JobQuery, page: number) {
     remote: filters.remote || parsed.remote,
     visa: filters.visa || parsed.visa,
     level: filters.level === "any" && parsed.entry ? "entry" : filters.level,
+    country: parsed.country?.code,
   };
-  const located = loc && effective.where === "anywhere" && !effective.remote && filters.near !== "off";
+  // A named country or remote work replaces "near me".
+  const located = loc && effective.where === "anywhere" && !effective.remote && !effective.country && filters.near !== "off";
   const automatic = filters.near !== "only" && !parsed.nearMe;
   let mode: "none" | "boost" | "only" = !located ? "none" : !automatic || !effective.q ? "only" : "boost";
   const near = (m: typeof mode): Near => (loc && m !== "none" ? { lat: loc.lat, lon: loc.lon, only: m === "only" } : null);
 
+  // The typo check runs alongside the search instead of after it.
+  const fixing = effective.q && !filters.exact ? correctQuery(effective.q) : Promise.resolve(null);
   let res = await searchJobs(effective, page, PER_PAGE, near(mode));
   // Browsing near someone with no jobs around: show everything instead of an empty page.
   if (mode === "only" && automatic && res.total === 0) {
     mode = "none";
     res = await searchJobs(effective, page, PER_PAGE, null);
   }
+  let q = effective.q;
   let corrected: string | null = null;
-  if (effective.q && !filters.exact && res.total < 3) {
-    const fixed = await correctQuery(effective.q);
-    if (fixed && fixed !== effective.q) {
-      const retry = await searchJobs({ ...effective, q: fixed }, page, PER_PAGE, near(mode));
-      if (retry.total > res.total) {
-        res = retry;
-        corrected = fixed;
-      }
+  const fixed = await fixing;
+  // Use the corrected words when the typed ones found little and the corrected ones find clearly more, so a rare
+  // but real word ("scala") isn't swapped for a common one ("scale").
+  if (fixed && fixed !== effective.q && res.total < 20) {
+    const retry = await searchJobs({ ...effective, q: fixed }, page, PER_PAGE, near(mode));
+    if (retry.total > Math.max(res.total * 3, res.total + 2) || (res.total === 0 && retry.total > 0)) {
+      res = retry;
+      q = fixed;
+      corrected = fixed;
     }
   }
-  return { ...res, corrected, mode, loc, parsed };
+  // No job has every word: show the jobs with the most of them, best first.
+  let partial = false;
+  if (res.total === 0 && q.split(/\s+/).filter(Boolean).length > 1) {
+    const some = await searchJobs({ ...effective, q, any: true }, page, PER_PAGE, near(mode));
+    if (some.total > 0) {
+      res = some;
+      partial = true;
+    }
+  }
+  return { ...res, corrected, mode, loc, parsed, partial };
 }
 
 function Skeleton() {

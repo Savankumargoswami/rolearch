@@ -194,6 +194,10 @@ export type JobQuery = {
   near?: "auto" | "only" | "off";
   /** Search exactly what was typed, without typo correction. */
   exact?: boolean;
+  /** Country code named in the search ("IN"), from "remote jobs in india". */
+  country?: string;
+  /** Match jobs with any of the words (ranked by how many), when none has them all. */
+  any?: boolean;
 };
 
 export type Near = { lat: number; lon: number; only: boolean } | null;
@@ -219,6 +223,8 @@ export async function searchJobs(f: JobQuery, page = 1, perPage = 40, near: Near
     near_lat: near?.lat ?? null,
     near_lon: near?.lon ?? null,
     near_only: near?.only ?? false,
+    country_in: f.country ?? "",
+    match_any: f.any ?? false,
   });
   if (!rows) {
     // No database: search the saved feed instead.
