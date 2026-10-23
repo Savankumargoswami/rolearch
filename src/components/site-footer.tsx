@@ -33,7 +33,8 @@ export function SiteFooter() {
         <p className="max-w-[80ch]">{t("footer.emailNotice")}</p>
         <p>
           {t("footer.rights", { y: 2026 })} · {t("footer.places")}{" "}
-          <a className="underline underline-offset-4 hover:text-ink" href="https://www.geonames.org/" rel="noopener noreferrer">GeoNames</a> (CC BY 4.0)
+          <a className="underline underline-offset-4 hover:text-ink" href="https://www.geonames.org/" rel="noopener noreferrer">GeoNames</a> (CC BY 4.0) · {t("footer.companies")}{" "}
+          <a className="underline underline-offset-4 hover:text-ink" href="https://www.peopledatalabs.com/company-dataset" rel="noopener noreferrer">People Data Labs</a> (CC BY 4.0)
         </p>
       </div>
     </footer>

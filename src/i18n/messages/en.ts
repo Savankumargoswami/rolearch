@@ -807,6 +807,7 @@ const en = {
     feedback: "Share feedback",
     rights: "© {y} Rolearch",
     places: "Place data from",
+    companies: "Company data from",
     emailNotice: "Account emails come only from noreply@rolearch.com, which doesn't accept replies. We never ask for your password or payment details by email.",
   },
   notFound: {
