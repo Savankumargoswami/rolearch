@@ -8,6 +8,7 @@ import { applicationsFor, companyJobs, daysSince, viewsFor } from "@/lib/hiring"
 import { requireMember } from "@/lib/require-member";
 import { createClient } from "@/lib/supabase/server";
 import { CompanyGate } from "./company-gate";
+import { FeedPanel, type FeedRow } from "./feed-panel";
 
 export const metadata: Metadata = { title: "Hiring dashboard", robots: { index: false } };
 
@@ -27,7 +28,19 @@ async function Dashboard() {
   const db = await createClient();
   const jobs = await companyJobs(db, viewer.id);
   const ids = jobs.map((j) => j.id);
-  const [apps, views] = await Promise.all([applicationsFor(db, viewer.id, ids), viewsFor(db, ids)]);
+  const [apps, views, { data: feedRows }] = await Promise.all([
+    applicationsFor(db, viewer.id, ids),
+    viewsFor(db, ids),
+    db.from("employer_feeds").select("id, url, status, job_count, last_error, last_checked_at").order("created_at"),
+  ]);
+  const feeds: FeedRow[] = (feedRows ?? []).map((f) => ({
+    id: f.id,
+    url: f.url,
+    status: f.status,
+    jobCount: f.job_count,
+    lastError: f.last_error,
+    checkedAgo: f.last_checked_at ? postedAgo(daysSince(f.last_checked_at)) : null,
+  }));
 
   const per = new Map(ids.map((id) => [id, { views: 0, apps: 0, fresh: 0 }]));
   for (const v of views) per.get(v.jobId)!.views += v.views;
@@ -129,6 +142,8 @@ async function Dashboard() {
           </div>
         )}
       </section>
+
+      <FeedPanel feeds={feeds} verified={viewer.companyDomainMatches} />
     </>
   );
 }

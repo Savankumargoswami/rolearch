@@ -111,10 +111,21 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     store = open_store(args.state)
+    # Feeds companies connected on Rolearch ride along with the default list (each in its shard).
+    if not args.only and args.companies == DEFAULTS["companies"] and hasattr(store, "employer_feeds"):
+        feeds = store.employer_feeds()
+        if getattr(args, "shard", None):
+            i, n = (int(x) for x in args.shard.split("/"))
+            feeds = [c for c in feeds if int(hashlib.sha1(c.key.encode()).hexdigest(), 16) % n == i]
+        companies = companies + feeds
     started = time.monotonic()
     run_start = datetime.now(timezone.utc)
     try:
         results = asyncio.run(pull_all(companies, store, args.concurrency))
+        if hasattr(store, "record_feed"):
+            for r in results:
+                if r.company.ats == "feed":
+                    store.record_feed(r.company, r.total, r.error)
         # Only the full, default list is authoritative; a subset run must not close other companies' jobs.
         full_run = not args.only and not getattr(args, "shard", None) and args.companies == DEFAULTS["companies"]
         # Companies whose jobs another run stored after this one began (e.g. a list updated mid-run) stay open.

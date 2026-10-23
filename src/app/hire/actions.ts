@@ -2,6 +2,7 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { t } from "@/i18n";
+import { checkFeed } from "@/lib/feed-check";
 import { STAGES, type Question } from "@/lib/hiring";
 import { reviewJob, type JobDraft } from "@/lib/job-review";
 import { loadViewer } from "@/lib/profile";
@@ -125,6 +126,33 @@ export async function moveApplicant(appId: string, stage: string, message = ""):
   const { error } = await c.db.rpc("set_application_stage", { p_app: appId, p_stage: stage, p_message: message.trim().slice(0, 4000) });
   if (error) return { ok: false, message: error.message.includes("withdrew") ? t("hire.errWithdrawn") : t("hire.errSave") };
   revalidatePath("/hire", "layout");
+  return { ok: true };
+}
+
+export type FeedResult = { ok: true; count: number } | { ok: false; message: string };
+
+/** Checks a job feed (public https, a readable job format) and connects it; the next refresh brings its jobs in. */
+export async function connectFeed(_: FeedResult | null, form: FormData): Promise<FeedResult> {
+  const c = await company();
+  if ("error" in c) return { ok: false, message: c.error! };
+  if (!c.viewer.companyDomainMatches) return { ok: false, message: t("hire.errUnverified") };
+  const url = String(form.get("url") ?? "").trim().slice(0, 2000);
+  const check = await checkFeed(url);
+  if (!check.ok) return { ok: false, message: t(`hire.feedErr_${check.reason}`) };
+  const { error } = await c.db.rpc("add_employer_feed", { p_url: url, p_count: check.count });
+  if (error) return { ok: false, message: error.message.includes("limit") ? t("hire.feedErr_limit") : t("hire.errSave") };
+  revalidatePath("/hire");
+  return { ok: true, count: check.count };
+}
+
+/** Disconnects a feed and closes the jobs that came from it. */
+export async function removeFeed(id: string): Promise<HireResult> {
+  const c = await company();
+  if ("error" in c) return { ok: false, message: c.error! };
+  const { error } = await c.db.rpc("remove_employer_feed", { p_id: id });
+  if (error) return { ok: false, message: t("hire.errSave") };
+  updateTag("jobs");
+  revalidatePath("/hire");
   return { ok: true };
 }
 

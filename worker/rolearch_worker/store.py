@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Protocol
@@ -233,16 +234,43 @@ class PostgresStore:
                 # A company another run refreshed after `since` is on a newer list than ours: leave it alone.
                 cur.execute("select distinct company_key from jobs where last_seen_at >= %s", (since,))
                 keep = keep | {r[0] for r in cur.fetchall()}
-            # Jobs companies post on Rolearch itself ("rolearch:<account>") aren't on the list; their posters close them.
+            # Jobs companies post on Rolearch itself ("rolearch:<account>") and jobs from feeds they connected
+            # ("feed:<id>") aren't on the list; their companies close them (removing a feed closes its jobs).
             cur.execute(
                 "update jobs set status = 'closed', closed_at = now() "
-                "where status = 'open' and not (company_key = any(%s)) and company_key not like 'rolearch:%%'",
+                "where status = 'open' and not (company_key = any(%s)) and company_key not like 'rolearch:%%' and company_key not like 'feed:%%'",
                 (list(keep),),
             )
             n = cur.rowcount
-            cur.execute("update companies set active = (key = any(%s)) where key not like 'rolearch:%%'", (list(keep),))
+            cur.execute("update companies set active = (key = any(%s)) where key not like 'rolearch:%%' and key not like 'feed:%%'", (list(keep),))
         self.conn.commit()
         return n
+
+    def employer_feeds(self) -> list[Company]:
+        """Feeds companies connected on Rolearch (db/023), as companies to read, named after the account."""
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute(
+                    "select f.id::text, f.url, coalesce(nullif(p.company_name, ''), 'Company'), coalesce(p.website, '') "
+                    "from public.employer_feeds f join public.profiles p on p.id = f.owner "
+                    "where p.account_type = 'company' and p.company_domain_matches"
+                )
+                rows = cur.fetchall()
+        except Exception as e:  # an older database without employer feeds
+            self.conn.rollback()
+            log.warning("employer feeds not read: %s", e)
+            return []
+        domain = lambda site: re.sub(r"^(https?://)?(www\.)?", "", site.strip().lower()).split("/")[0]  # noqa: E731
+        return [Company(name=name, country="US", ats="feed", token=fid, careers_url=url, domain=domain(site)) for fid, url, name, site in rows]
+
+    def record_feed(self, company: Company, total: int, error: str) -> None:
+        """What the last read of a connected feed found, for the company's dashboard."""
+        with self.conn.cursor() as cur:
+            cur.execute(
+                "update public.employer_feeds set status = %s, job_count = %s, last_error = %s, last_checked_at = now() where id = %s::uuid",
+                ("error" if error else "ok", None if error else total, error[:300] or None, company.token),
+            )
+        self.conn.commit()
 
     def open_jobs(self, launch_only: bool, limit: int) -> list[dict]:
         raise NotImplementedError("With a database, the website reads jobs from Supabase directly.")
