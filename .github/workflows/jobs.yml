@@ -1,6 +1,6 @@
 # Refreshes jobs from every company board (Greenhouse, Lever, Ashby, Workday, ...) and USAJOBS.
 # Needs repository secrets: DATABASE_URL, USAJOBS_API_KEY, USAJOBS_EMAIL (and ADZUNA_APP_ID / ADZUNA_APP_KEY for the weekly harvest).
-# The company list is split into 8 stable shards that refresh in parallel; a final job then closes jobs of
+# The company list is split into 16 stable shards that refresh in parallel; a final job then closes jobs of
 # companies no longer listed and refreshes the site's totals.
 name: Refresh jobs
 
@@ -60,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     defaults:
       run:
         working-directory: worker
@@ -80,8 +80,8 @@ jobs:
           cache: pip
           cache-dependency-path: worker/requirements.txt
       - run: pip install -r requirements.txt
-      - name: Refresh jobs (shard ${{ matrix.shard }} of 8)
-        run: python -m rolearch_worker run --feed - --concurrency 12 --shard ${{ matrix.shard }}/8
+      - name: Refresh jobs (shard ${{ matrix.shard }} of 16)
+        run: python -m rolearch_worker run --feed - --concurrency 12 --shard ${{ matrix.shard }}/16
 
   finalize:
     needs: refresh
