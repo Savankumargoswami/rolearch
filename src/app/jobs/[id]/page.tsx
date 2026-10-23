@@ -43,8 +43,11 @@ export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Pro
 
 /** Same kind of role: the title's core words, within the same category. */
 async function similarTo(job: Job) {
-  const core = job.title.replace(/\(.*?\)|[-–—|,].*$/g, " ").replace(/\b(senior|sr|junior|jr|staff|lead|principal|ii|iii|iv)\b\.?/gi, " ").trim().split(/\s+/).slice(0, 3).join(" ");
-  const { jobs } = await searchJobs({ q: core, cat: job.category ?? "all", where: "anywhere", remote: false, visa: false, pay: false, level: "any", sort: "match" }, 1, 4);
+  const words = job.title.replace(/\(.*?\)|[-–—|,].*$/g, " ").replace(/\b(senior|sr|junior|jr|staff|lead|principal|ii|iii|iv)\b\.?/gi, " ").trim().split(/\s+/).filter(Boolean);
+  // One generic word ("Associate", "Intern") matches 100,000+ jobs and is slow to rank: the newest jobs in the same
+  // category are just as relevant and fast.
+  const core = words.length > 1 ? words.slice(0, 3).join(" ") : "";
+  const { jobs } = await searchJobs({ q: core, cat: job.category ?? "all", where: "anywhere", remote: false, visa: false, pay: false, level: "any", sort: core ? "match" : "newest" }, 1, 4);
   return jobs.filter((j) => j.id !== job.id).slice(0, 3);
 }
 
