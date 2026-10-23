@@ -19,7 +19,8 @@ from ..models import Company, RawJob
 from ..text import html_to_text
 
 PAGE = 20
-MAX_JOBS = 5000  # Workday stops paging around here on most tenants
+CAP = 2000  # Workday's search returns at most this many results; bigger boards are read filter by filter
+MAX_JOBS = 40000
 DETAILS_PER_RUN = int(os.environ.get("WORKDAY_DETAILS_PER_RUN", "300"))
 # Workday rate-limits by client across all its customers' sites, so cap requests to Workday as a whole.
 _WORKDAY = asyncio.Semaphore(int(os.environ.get("WORKDAY_CONCURRENCY", "6")))
@@ -50,18 +51,59 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     api = f"{base}/wday/cxs/{tenant}/{site}"
     now = datetime.now(timezone.utc)
 
-    listed: list[dict] = []
-    offset, total = 0, None
-    while offset < MAX_JOBS:
-        async with _WORKDAY:
-            data = await http.post_json(f"{api}/jobs", {"appliedFacets": {}, "limit": PAGE, "offset": offset, "searchText": ""})
-        posts = data.get("jobPostings") or []
-        if total is None:
-            total = int(data.get("total") or 0)
-        listed.extend(p for p in posts if p.get("externalPath") and p.get("title"))
-        offset += PAGE
-        if not posts or offset >= (total or 0):
-            break
+    found: dict[str, dict] = {}
+
+    async def search(facets: dict) -> tuple[int, list[dict]]:
+        """Pages through one search; returns its total and its filters (facets)."""
+        offset, total, facet_list = 0, None, []
+        while offset < CAP and len(found) < MAX_JOBS:
+            async with _WORKDAY:
+                data = await http.post_json(f"{api}/jobs", {"appliedFacets": facets, "limit": PAGE, "offset": offset, "searchText": ""})
+            posts = data.get("jobPostings") or []
+            if total is None:
+                total, facet_list = int(data.get("total") or 0), data.get("facets") or []
+            for p in posts:
+                if p.get("externalPath") and p.get("title"):
+                    found.setdefault(p["externalPath"], p)
+            offset += PAGE
+            if not posts or offset >= (total or 0):
+                break
+        return total or 0, facet_list
+
+    def options(facet_list: list[dict], used: dict) -> list[tuple[str, list[dict]]]:
+        """Filters that split the board into pieces, flattest-to-search first."""
+        out = []
+        for f in facet_list:
+            param = f.get("facetParameter")
+            if not param or param in used:
+                continue
+            values = f.get("values") or []
+            if values and "values" in values[0]:  # grouped filters (e.g. locations by region)
+                values = [v for g in values for v in g.get("values") or []]
+            values = [v for v in values if v.get("id") and v.get("count")]
+            if len(values) > 1:
+                out.append((param, values))
+        # prefer filters whose biggest piece is under the cap, then the fewest pieces
+        return sorted(out, key=lambda pv: (max(v["count"] for v in pv[1]) >= CAP, len(pv[1])))
+
+    async def split(facets: dict, facet_list: list[dict], depth: int) -> None:
+        """A search hit Workday's cap: search each value of a filter instead (one more level if a piece is still capped)."""
+        choices = options(facet_list, facets)
+        if not choices:
+            return
+        param, values = choices[0]
+        for v in values:
+            if len(found) >= MAX_JOBS:
+                return
+            sub = {**facets, param: [v["id"]]}
+            total, sub_facets = await search(sub)
+            if total >= CAP and depth < 2:
+                await split(sub, sub_facets, depth + 1)
+
+    total, facet_list = await search({})
+    if total >= CAP:
+        await split({}, facet_list, 1)
+    listed = list(found.values())
 
     from ..normalize import job_id  # imported here to avoid a cycle (normalize imports models, not sources)
 
