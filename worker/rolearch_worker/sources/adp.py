@@ -20,6 +20,8 @@ API = "https://workforcenow.adp.com/mascsr/default/careercenter/public/events/st
 PAGE = 50
 MAX_JOBS = 5000
 DETAILS_PER_RUN = int(os.environ.get("ADP_DETAILS_PER_RUN", "200"))
+# ADP rate-limits by client across all its customers' career centers (429s), so cap requests to ADP as a whole.
+_ADP = asyncio.Semaphore(int(os.environ.get("ADP_CONCURRENCY", "2")))
 
 
 def _salary(j: dict) -> Salary | None:
@@ -42,7 +44,8 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     rows: list[dict] = []
     skip = 0
     while skip < MAX_JOBS:
-        d = await http.json(API, params={**params, "$top": PAGE, "$skip": skip})
+        async with _ADP:
+            d = await http.json(API, params={**params, "$top": PAGE, "$skip": skip}, attempts=5)
         batch = d.get("jobRequisitions") or []
         rows.extend(batch)
         skip += len(batch)
@@ -76,9 +79,9 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
             raw.touch_only = True
         elif budget > 0:
             budget -= 1
-            async with sem:
+            async with sem, _ADP:
                 try:
-                    d = await http.json(f"{API}/{j['itemID']}", params=params)
+                    d = await http.json(f"{API}/{j['itemID']}", params=params, attempts=5)
                     raw.description = html_to_text(d.get("requisitionDescription"))[:20000]
                 except Exception:
                     pass
