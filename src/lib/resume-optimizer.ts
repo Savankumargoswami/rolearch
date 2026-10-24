@@ -20,7 +20,7 @@ Rules you must follow:
 - Never invent anything: no new employers, titles, dates, projects, tools, responsibilities, certifications or numbers. Every number in your output must already appear in that role's original text.
 - You may rephrase a bullet to use the job description's exact wording for work the bullet already describes (for example "orchestration" for "scheduled Airflow DAGs"), start bullets with strong action verbs, tighten wording, and reorder bullets so the most relevant come first.
 - A missing keyword may be added only if (a) the original resume already shows that work in other words, or (b) it is in the list of skills the person confirmed they have. Otherwise list it under "skipped" with a short reason.
-- Keep the same number of roles, in the same order. Keep 3 to 6 bullets per role (fewer only when asked to fit one page); you may merge or drop weak bullets but not add new claims.
+- Keep the same number of roles, in the same order. Unless asked to fit one page, keep every bullet of every role and every project: rewrite each one, never drop or merge them. Never add new claims.
 - Headline: one line, using the job's title wording if the person's experience supports it.
 - Summary: 3 to 4 sentences opening with the job's title (when the experience supports it) and the person's real years of experience, naming the job's most important skills the resume shows. If the resume had a summary, rewrite it; otherwise write one from the resume's facts only.
 - Skills: the person's existing skills plus confirmed skills, most relevant to the job first, using the job's spelling of each skill.
@@ -80,7 +80,7 @@ export async function optimizeResume(input: {
                 `<confirmed_skills>${input.confirmed.join(", ") || "none"}</confirmed_skills>`,
                 input.mode === "onepage"
                   ? "Tailor this resume to the job following the rules, and make it fit on one page (about 550 words): keep 3-4 bullets for the most relevant recent roles and 1-2 for older or less relevant ones, and keep the summary to 2-3 sentences."
-                  : "Tailor this resume to the job following the rules. Keep all of its content: about the same length as the original, never more than 3,000 words.",
+                  : "Tailor the whole resume to the job following the rules: rewrite the headline, the summary, every bullet of every role, every project and the skills. Keep all of its content; there is no length limit.",
               ].join("\n\n"),
             },
           ],
@@ -100,7 +100,7 @@ export async function optimizeResume(input: {
       // Reject any bullet carrying a number the original role didn't have.
       const safe = next.bullets.map((b) => b.trim()).filter((b) => b && numbers(b).every((n) => roleNumbers.has(n)));
       const skills = next.skills.filter((s) => mentions(s, original) > 0 || input.confirmed.includes(s));
-      return { ...role, bullets: safe.length >= Math.min(input.mode === "onepage" ? 1 : 2, role.bullets.length) ? safe : role.bullets, skills: skills.length ? skills : role.skills };
+      return { ...role, bullets: (input.mode === "onepage" ? safe.length >= Math.min(1, role.bullets.length) : safe.length >= role.bullets.length) ? safe : role.bullets, skills: skills.length ? skills : role.skills };
     });
     const projects = resume.resume.projects.map((pr, i) => {
       const summary = out.projects[i]?.summary?.trim();
