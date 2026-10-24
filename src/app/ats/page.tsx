@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { m, t } from "@/i18n";
 import { loadViewer } from "@/lib/profile";
 import { FreeCheck } from "./free-check";
@@ -28,17 +27,16 @@ export default function AtsPage() {
         ))}
       </ul>
       <div className="mt-10">
-        <Suspense fallback={<FreeCheck signedIn={false} hasProfile={false} />}>
-          <ForViewer />
-        </Suspense>
+        {/* The form renders once; only the scan panel waits for who's viewing (so nothing typed is ever re-mounted). */}
+        <FreeCheck viewer={viewerStatus()} />
       </div>
       <p className="mt-8 max-w-[80ch] text-xs leading-relaxed text-muted">{t("ats.disclaimer")}</p>
     </div>
   );
 }
 
-async function ForViewer() {
+async function viewerStatus() {
   const viewer = await loadViewer();
   const p = viewer?.profile;
-  return <FreeCheck signedIn={Boolean(viewer)} hasProfile={Boolean(p && p.resume.experience.length + p.resume.skills.length > 0)} />;
+  return { signedIn: Boolean(viewer), hasProfile: Boolean(p && p.resume.experience.length + p.resume.skills.length > 0) };
 }
