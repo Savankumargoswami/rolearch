@@ -69,6 +69,10 @@ async def _count(http: Fetcher, ats: str, token: str) -> int:
         if ats == "workable":
             d = await http.json(f"https://apply.workable.com/api/v1/widget/accounts/{token}")
             return len(d.get("jobs") or [])
+        if ats == "hireology":
+            from .sources.hireology import jobs
+
+            return (await jobs(http, token, limit=1))[0]
         if ats == "breezy":
             from .sources.breezy import positions
 
