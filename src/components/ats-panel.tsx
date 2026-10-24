@@ -472,7 +472,7 @@ function Checks({ part, checks, jobTitle, report }: { part: AtsPartId; checks: A
   const sorted = [...checks].sort((a, b) => Number(a.ok) - Number(b.ok));
   const text = (c: AtsCheck) => {
     const [a, b] = c.detail.split("/");
-    const vars = { title: jobTitle, have: report.resumeYears, need: report.requiredYears, a, b: b ?? "", d: c.detail, level: t(`ats.degree_${c.detail}` as MessageKey) };
+    const vars = { title: jobTitle, have: report.resumeYears, need: report.requiredYears, a, b: b ?? "", d: c.detail, level: c.id === "degree" && /^[0-4]$/.test(c.detail) ? t(`ats.degree_${c.detail}` as MessageKey) : "" };
     return t(`ats.check_${c.id}_${c.ok ? "ok" : "fail"}` as MessageKey, vars);
   };
   return (

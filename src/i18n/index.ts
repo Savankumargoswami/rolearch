@@ -20,7 +20,8 @@ export type MessageKey = Leaves<Messages>;
 export function t(key: MessageKey, values?: Record<string, string | number>): string {
   const raw = key
     .split(".")
-    .reduce<unknown>((node, part) => (node as Record<string, unknown>)[part], messages[locale]);
+    // A missing key falls back to the key itself rather than throwing.
+    .reduce<unknown>((node, part) => (node && typeof node === "object" ? (node as Record<string, unknown>)[part] : undefined), messages[locale]);
   const text = typeof raw === "string" ? raw : key;
   if (!values) return text;
   return text.replace(/\{(\w+)\}/g, (_, name: string) => String(values[name] ?? `{${name}}`));
