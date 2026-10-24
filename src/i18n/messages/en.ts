@@ -485,7 +485,7 @@ const en = {
     optimizeLead: "Rolearch rewrites your summary and bullets in this job's wording and adds the skills you ticked. It never invents jobs, tools or numbers.",
     modeLabel: "How to tailor",
     modeDeep: "Full tailoring",
-    modeDeepLead: "Rewrites everything for this job, under 1,000 words.",
+    modeDeepLead: "Rewrites everything for this job and keeps all your content (up to 3,000 words).",
     modeOnePage: "One-page focus",
     modeOnePageLead: "Keeps only what matters most for this job, on one page.",
     optimize: "Tailor my resume",

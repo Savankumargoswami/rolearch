@@ -80,7 +80,7 @@ export async function optimizeResume(input: {
                 `<confirmed_skills>${input.confirmed.join(", ") || "none"}</confirmed_skills>`,
                 input.mode === "onepage"
                   ? "Tailor this resume to the job following the rules, and make it fit on one page (about 550 words): keep 3-4 bullets for the most relevant recent roles and 1-2 for older or less relevant ones, and keep the summary to 2-3 sentences."
-                  : "Tailor this resume to the job following the rules. Keep it under 1,000 words.",
+                  : "Tailor this resume to the job following the rules. Keep all of its content: about the same length as the original, never more than 3,000 words.",
               ].join("\n\n"),
             },
           ],
