@@ -6,7 +6,7 @@ name: Refresh jobs
 
 on:
   schedule:
-    - cron: "15 */8 * * *" # every 8 hours
+    - cron: "15 */5 * * *" # every 5 hours (00:15, 05:15, 10:15, 15:15, 20:15 UTC); a run takes ~3h
     - cron: "0 3 * * 1" # Mondays: also find new employers' boards
   workflow_dispatch: {}
 
