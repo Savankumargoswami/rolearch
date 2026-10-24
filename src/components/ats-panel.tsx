@@ -57,6 +57,9 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
   const [confirmed, setConfirmed] = useState<string[]>([]);
   const [mode, setMode] = useState<Mode>("deep");
   const [error, setError] = useState("");
+  // Errors from tailoring, downloads and the cover letter show next to those buttons, not up at the scan form.
+  const [actionError, setActionError] = useState("");
+  const tailoredRef = useRef<HTMLDivElement>(null);
   const [note, setNote] = useState("");
   const [checking, startCheck] = useTransition();
   const [optimizing, startOptimize] = useTransition();
@@ -118,20 +121,22 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
 
   function optimize() {
     if (!result) return;
-    setError("");
+    setActionError("");
     startOptimize(async () => {
       const res = await optimizeForJob(checked, result.resume, result.contact, confirmed, result.file, mode).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
-      if (res.ok) setBetter(res);
-      else setError(res.message);
+      if (!res.ok) return setActionError(res.message);
+      setBetter(res);
+      requestAnimationFrame(() => tailoredRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
     });
   }
 
   function download(resume: AtsDoc, format: Format) {
     if (!result) return;
     startDownload(async () => {
+      setActionError("");
       const res = await downloadResume(resume, result.contact, company, format).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
       if (res.ok) save(res);
-      else setError(res.message);
+      else setActionError(res.message);
     });
   }
 
@@ -140,7 +145,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
     startSave(async () => {
       const res = await saveProfile(toProfile(better.resume)).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
       if (res.ok) setNote(t("ats.savedToProfile"));
-      else setError(res.message);
+      else setActionError(res.message);
     });
   }
 
@@ -248,6 +253,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
             report={report}
             confirmed={confirmed}
             onToggle={(k) => setConfirmed((c) => (c.includes(k) ? c.filter((x) => x !== k) : [...c, k]))}
+            onSetAll={(names, on) => setConfirmed((c) => (on ? [...new Set([...c, ...names])] : c.filter((x) => !names.includes(x))))}
             locked={Boolean(better)}
           />
           {(["searchability", "recruiter", "formatting"] as const).map((part) => (
@@ -300,9 +306,18 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
               </div>
             </div>
           ) : (
-            <Improved better={better} source={result.source} onDownload={(f) => download(better.resume, f)} onSave={saveToProfile} downloading={downloading} saving={saving} />
+            <Improved
+              ref={tailoredRef}
+              added={better.report.keywords.filter((k) => k.inResume > 0).length - result.report.keywords.filter((k) => k.inResume > 0).length}
+              better={better}
+              source={result.source} onDownload={(f) => download(better.resume, f)} onSave={saveToProfile} downloading={downloading} saving={saving} />
           )}
-          <CoverLetter target={checked} resume={better?.resume ?? result.resume} contact={result.contact} onError={setError} />
+          {actionError && (
+            <p role="alert" className="mt-3 rounded-xl bg-[#b4532a]/10 px-3 py-2 text-sm font-medium text-[#b4532a]">
+              {actionError}
+            </p>
+          )}
+          <CoverLetter target={checked} resume={better?.resume ?? result.resume} contact={result.contact} onError={setActionError} />
           {note && (
             <p role="status" className="mt-3 text-sm font-medium">
               {note}
@@ -403,7 +418,9 @@ function Breakdown({ report }: { report: AtsReport }) {
   );
 }
 
-function Keywords({ report, confirmed, onToggle, locked }: { report: AtsReport; confirmed: string[]; onToggle: (k: string) => void; locked: boolean }) {
+type Toggle = { confirmed: string[]; onToggle: (k: string) => void; onSetAll: (names: string[], on: boolean) => void; locked: boolean };
+
+function Keywords({ report, confirmed, onToggle, onSetAll, locked }: { report: AtsReport } & Toggle) {
   return (
     <>
       {(["hard", "soft"] as const).map((kind) => (
@@ -413,6 +430,7 @@ function Keywords({ report, confirmed, onToggle, locked }: { report: AtsReport; 
           list={report.keywords.filter((k) => k.kind === kind)}
           confirmed={confirmed}
           onToggle={onToggle}
+          onSetAll={onSetAll}
           locked={locked}
         />
       ))}
@@ -420,7 +438,7 @@ function Keywords({ report, confirmed, onToggle, locked }: { report: AtsReport; 
   );
 }
 
-function KeywordList({ kind, list, confirmed, onToggle, locked }: { kind: "hard" | "soft"; list: AtsKeyword[]; confirmed: string[]; onToggle: (k: string) => void; locked: boolean }) {
+function KeywordList({ kind, list, confirmed, onToggle, onSetAll, locked }: { kind: "hard" | "soft"; list: AtsKeyword[] } & Toggle) {
   if (!list.length) return null;
   const missing = list.filter((k) => k.inResume === 0);
   const found = list.filter((k) => k.inResume > 0);
@@ -430,7 +448,21 @@ function KeywordList({ kind, list, confirmed, onToggle, locked }: { kind: "hard"
       <p className="mt-1 text-xs text-muted">{t("ats.countsLead")}</p>
       {missing.length > 0 && (
         <>
-          <p className="mt-2 text-sm text-muted">{locked ? t("ats.missingAfter") : t("ats.missingLead")}</p>
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm text-muted">{locked ? t("ats.missingAfter") : t("ats.missingLead")}</p>
+            {!locked && missing.length > 1 && (
+              <span className="flex gap-3 text-sm">
+                <button type="button" onClick={() => onSetAll(missing.map((k) => k.name), true)} className="min-h-9 cursor-pointer font-medium underline underline-offset-4">
+                  {t("ats.haveAll")}
+                </button>
+                {missing.some((k) => confirmed.includes(k.name)) && (
+                  <button type="button" onClick={() => onSetAll(missing.map((k) => k.name), false)} className="min-h-9 cursor-pointer text-muted underline underline-offset-4">
+                    {t("ats.clearAll")}
+                  </button>
+                )}
+              </span>
+            )}
+          </div>
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {missing.map((k) => {
               const on = confirmed.includes(k.name);
@@ -492,14 +524,36 @@ function Checks({ part, checks, jobTitle, report }: { part: AtsPartId; checks: A
   );
 }
 
-function Improved({ better, source, onDownload, onSave, downloading, saving }: { better: Better; source: Source; onDownload: (format: Format) => void; onSave: () => void; downloading: boolean; saving: boolean }) {
+function Improved({
+  ref,
+  added,
+  better,
+  source,
+  onDownload,
+  onSave,
+  downloading,
+  saving,
+}: {
+  ref: React.Ref<HTMLDivElement>;
+  added: number;
+  better: Better;
+  source: Source;
+  onDownload: (format: Format) => void;
+  onSave: () => void;
+  downloading: boolean;
+  saving: boolean;
+}) {
   const [all, setAll] = useState(false);
   const changes = all ? better.changes : better.changes.slice(0, 4);
   return (
-    <div className="mt-6 rounded-2xl border border-signal/50 bg-signal/10 p-4">
+    <div ref={ref} className="mt-6 scroll-mt-24 rounded-2xl border border-signal/50 bg-signal/10 p-4">
       <p className="flex items-center gap-2 font-display font-semibold">
         <Sparkles aria-hidden="true" className="size-4 text-signal-ink" />
         {t("ats.tailoredTitle")}
+      </p>
+      <p className="mt-1 text-sm">
+        {t("ats.tailoredSummary", { before: better.before, after: better.report.score, n: better.changes.length })}{" "}
+        {added > 0 ? t("ats.tailoredAdded", { n: added }) : t("ats.tailoredNoneAdded")}
       </p>
       {better.changes.length > 0 && (
         <ol className="mt-3 flex flex-col gap-3">
