@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { getJob, getJobText } from "@/data/db";
 import { t } from "@/i18n";
 import { scoreAts, type AtsFile, type AtsJob, type AtsReport } from "@/lib/ats";
-import { AtsDocSchema, fromProfile, type AtsDoc } from "@/lib/ats-doc";
+import { AtsDocSchema, fit, fromProfile, type AtsDoc } from "@/lib/ats-doc";
 import { jobAtsKeywords } from "@/lib/ats-keywords-cached";
 import { writeCoverLetter } from "@/lib/cover-letter";
 import { docxFacts } from "@/lib/docx-format";
@@ -90,6 +90,15 @@ async function jobFor(target: AtsTarget): Promise<Found> {
   return { job: { title, company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years ?? 0, system: systemFromUrl(String(target.url ?? "")) }, description };
 }
 
+/** The resume as sent back by the browser, with anything over the limits shortened (null if it isn't a resume). */
+function fitted(resume: unknown): AtsDoc | null {
+  try {
+    return fit(AtsDocSchema, resume);
+  } catch {
+    return null;
+  }
+}
+
 const sanitizeContact = (c: Contact): Contact => ({ email: String(c.email ?? "").slice(0, 200), phone: String(c.phone ?? "").slice(0, 40) });
 
 /** The layout facts of a file as the browser hands them back (it only ever sends what we sent it). */
@@ -143,18 +152,18 @@ async function optimizeForJobInner(
   mode: TailorMode = "deep",
 ): Promise<OptimizedResult> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
-  const parsed = AtsDocSchema.safeParse(resume);
-  if (!parsed.success) return { ok: false, message: t("profile.errInvalid") };
+  const parsed = fitted(resume);
+  if (!parsed) return { ok: false, message: t("profile.errInvalid") };
   const found = await jobFor(target);
   if ("error" in found) return { ok: false, message: found.error };
   const { job, description } = found;
   const safeContact = sanitizeContact(contact);
-  const before = scoreAts(job, parsed.data, safeContact, sanitizeFile(original));
+  const before = scoreAts(job, parsed, safeContact, sanitizeFile(original));
   const missing = before.keywords.filter((k) => k.inResume === 0).map((k) => k.name);
   const confirmedOk = confirmed.filter((s) => missing.includes(s)).slice(0, 30);
 
   const out = await optimizeResume({
-    resume: parsed.data,
+    resume: parsed,
     job: { title: job.title, company: job.company, description },
     missing,
     confirmed: confirmedOk,
@@ -166,7 +175,7 @@ async function optimizeForJobInner(
   let improved = out.resume;
   // Never hand back something that scores worse than what came in.
   if (report.score < before.score) {
-    improved = parsed.data;
+    improved = parsed;
     report = before;
   }
   return { ok: true, before: before.score, report, resume: improved, changes: out.changes.slice(0, 25), skipped: out.skipped.slice(0, 20) };
@@ -175,28 +184,28 @@ async function optimizeForJobInner(
 /** An ATS-friendly resume as a Word (.docx) or PDF file, as base64 for the browser to save. */
 async function downloadResumeInner(resume: AtsDoc, contact: Contact, company: string, format: "docx" | "pdf"): Promise<FileResult> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
-  const parsed = AtsDocSchema.safeParse(resume);
-  if (!parsed.success) return { ok: false, message: t("profile.errInvalid") };
+  const parsed = fitted(resume);
+  if (!parsed) return { ok: false, message: t("profile.errInvalid") };
   const safe = sanitizeContact(contact);
-  const buf = format === "pdf" ? await resumePdf(parsed.data, safe) : await resumeDocx(parsed.data, safe);
-  return { ok: true, filename: `${resumeName(parsed.data, String(company))}.${format}`, base64: buf.toString("base64"), type: format === "pdf" ? "application/pdf" : DOCX };
+  const buf = format === "pdf" ? await resumePdf(parsed, safe) : await resumeDocx(parsed, safe);
+  return { ok: true, filename: `${resumeName(parsed, String(company))}.${format}`, base64: buf.toString("base64"), type: format === "pdf" ? "application/pdf" : DOCX };
 }
 
 /** A cover letter for this job written from the resume's facts, as a Word or PDF file. */
 async function coverLetterInner(target: AtsTarget, resume: AtsDoc, contact: Contact, format: "docx" | "pdf"): Promise<FileResult & { text?: string }> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
-  const parsed = AtsDocSchema.safeParse(resume);
-  if (!parsed.success) return { ok: false, message: t("profile.errInvalid") };
+  const parsed = fitted(resume);
+  if (!parsed) return { ok: false, message: t("profile.errInvalid") };
   const found = await jobFor(target);
   if ("error" in found) return { ok: false, message: found.error };
-  const letter = await writeCoverLetter({ resume: parsed.data, job: { title: found.job.title, company: found.job.company, description: found.description } });
+  const letter = await writeCoverLetter({ resume: parsed, job: { title: found.job.title, company: found.job.company, description: found.description } });
   if ("error" in letter) return { ok: false, message: letter.error === "unavailable" ? t("ats.errOff") : t("ats.errLetter") };
   const safe = sanitizeContact(contact);
-  const buf = format === "pdf" ? await coverLetterPdf(parsed.data, safe, letter.paragraphs) : await coverLetterDocx(parsed.data, safe, letter.paragraphs);
+  const buf = format === "pdf" ? await coverLetterPdf(parsed, safe, letter.paragraphs) : await coverLetterDocx(parsed, safe, letter.paragraphs);
   const company = found.job.company;
   return {
     ok: true,
-    filename: `${slug(parsed.data.full_name || "Cover")}${company ? `_${slug(company)}` : ""}_Cover_Letter.${format}`,
+    filename: `${slug(parsed.full_name || "Cover")}${company ? `_${slug(company)}` : ""}_Cover_Letter.${format}`,
     base64: buf.toString("base64"),
     type: format === "pdf" ? "application/pdf" : DOCX,
     text: letter.paragraphs.join("\n\n"),

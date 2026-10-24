@@ -3,7 +3,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
-import type { AtsDoc } from "./ats-doc";
+import { AtsDocSchema, fit, type AtsDoc } from "./ats-doc";
 import { ResumeDraftSchema } from "./profile-schema";
 
 
@@ -68,7 +68,9 @@ export async function readResume(file: { bytes: Buffer; kind: "pdf" | "docx" }):
       .slice(0, 12);
     const education_notes = draft.resume.education.map((_, i) => (draft.education_notes[i] ?? "").trim().slice(0, 400));
     const header_lines = draft.header_lines.map((l) => l.trim().slice(0, 200)).filter(Boolean).slice(0, 4);
-    return { draft: { ...draft, status, summary: draft.summary.trim().slice(0, 2000), skill_groups, extra: draft.extra.trim().slice(0, 3000), education_notes, header_lines }, contact };
+    const doc = { ...draft, status, summary: draft.summary.trim(), skill_groups, extra: draft.extra.trim(), education_notes, header_lines };
+    // An unusually long resume is shortened to the check's limits here, so nothing later refuses it.
+    return { draft: fit(AtsDocSchema, doc), contact };
   } catch (e) {
     if (e instanceof Anthropic.BadRequestError) return { error: "unreadable" }; // e.g. a corrupt or encrypted PDF
     throw e;

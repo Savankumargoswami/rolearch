@@ -5,7 +5,7 @@ import { z } from "zod";
 const month = (what: string) => z.string().describe(`${what} as YYYY-MM, or "" if unknown`);
 
 /** Field shapes without length limits (structured output accepts these as-is). */
-function shapes<Status extends z.ZodType>(
+export function shapes<Status extends z.ZodType>(
   text: (max: number) => z.ZodString,
   list: <T extends z.ZodType>(item: T, max: number) => z.ZodArray<T>,
   status: Status,
