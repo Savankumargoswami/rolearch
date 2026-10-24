@@ -1,22 +1,24 @@
 "use client";
 
-import { Check, Download, FileUp, Loader2, Lock, Save, ScanSearch, Sparkles, UserRound, X } from "lucide-react";
+import { Check, Download, FileText, FileUp, Loader2, Lock, Save, ScanSearch, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { checkProfile, checkUpload, downloadDocx, optimizeForJob, type AtsTarget, type Checked, type OptimizedResult } from "@/app/ats/actions";
-import { ShareScore } from "@/components/share-score";
-import { savePending, takePending } from "@/lib/pending-scan";
+import { coverLetter, checkProfile, checkUpload, downloadResume, optimizeForJob, type AtsTarget, type Checked, type OptimizedResult } from "@/app/ats/actions";
 import { saveProfile } from "@/app/account/profile/actions";
+import { ShareScore } from "@/components/share-score";
 import { t, type MessageKey } from "@/i18n";
-import type { AtsCheck, AtsPartId, AtsReport } from "@/lib/ats";
-import type { ProfileData } from "@/lib/profile-schema";
+import type { AtsCheck, AtsKeyword, AtsPartId, AtsReport } from "@/lib/ats";
+import { toProfile, type AtsDoc } from "@/lib/ats-doc";
+import { savePending, takePending } from "@/lib/pending-scan";
 
 type Source = "profile" | "upload";
 type Ready = Extract<Checked, { ok: true }> & { source: Source };
 type Better = Extract<OptimizedResult, { ok: true }>;
+type Mode = "deep" | "onepage";
+type Format = "pdf" | "docx";
 
-const PARTS: AtsPartId[] = ["hard", "title", "experience", "education", "soft", "parsing", "impact"];
+const PARTS: AtsPartId[] = ["searchability", "hard", "soft", "recruiter", "formatting"];
 
 type Props = {
   target: AtsTarget;
@@ -33,6 +35,17 @@ type Props = {
   onRestore?: (target: AtsTarget) => void;
 };
 
+/** Saves a file the server sent as base64. */
+function save(res: { filename: string; base64: string; type: string }) {
+  const bytes = Uint8Array.from(atob(res.base64), (c) => c.charCodeAt(0));
+  const url = URL.createObjectURL(new Blob([bytes], { type: res.type }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = res.filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next, ready = true, lead, onRestore }: Props) {
   const router = useRouter();
   const pendingKey = typeof target === "string" ? `job:${target}` : "free";
@@ -42,6 +55,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
   const [result, setResult] = useState<Ready | null>(null);
   const [better, setBetter] = useState<Better | null>(null);
   const [confirmed, setConfirmed] = useState<string[]>([]);
+  const [mode, setMode] = useState<Mode>("deep");
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
   const [checking, startCheck] = useTransition();
@@ -102,31 +116,25 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
     if (!result) return;
     setError("");
     startOptimize(async () => {
-      const res = await optimizeForJob(checked, result.resume, result.contact, confirmed);
+      const res = await optimizeForJob(checked, result.resume, result.contact, confirmed, result.file, mode);
       if (res.ok) setBetter(res);
       else setError(res.message);
     });
   }
 
-  function download(resume: ProfileData) {
+  function download(resume: AtsDoc, format: Format) {
     if (!result) return;
     startDownload(async () => {
-      const res = await downloadDocx(resume, result.contact, company);
-      if (!res.ok) return setError(res.message);
-      const bytes = Uint8Array.from(atob(res.base64), (c) => c.charCodeAt(0));
-      const url = URL.createObjectURL(new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }));
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = res.filename;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      const res = await downloadResume(resume, result.contact, company, format);
+      if (res.ok) save(res);
+      else setError(res.message);
     });
   }
 
   function saveToProfile() {
     if (!better) return;
     startSave(async () => {
-      const res = await saveProfile(better.resume);
+      const res = await saveProfile(toProfile(better.resume));
       if (res.ok) setNote(t("ats.savedToProfile"));
       else setError(res.message);
     });
@@ -230,7 +238,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
 
       {report && result && (
         <div className="mt-6 border-t border-line pt-5" aria-live="polite">
-          <ScoreHeader score={report.score} before={better?.before} />
+          <ScoreHeader score={report.score} before={better?.before} system={report.system} />
           <Breakdown report={report} />
           <Keywords
             report={report}
@@ -238,13 +246,30 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
             onToggle={(k) => setConfirmed((c) => (c.includes(k) ? c.filter((x) => x !== k) : [...c, k]))}
             locked={Boolean(better)}
           />
-          <Checks checks={report.checks} jobTitle={jobTitle} report={report} />
+          {(["searchability", "recruiter", "formatting"] as const).map((part) => (
+            <Checks key={part} part={part} checks={report.checks.filter((c) => c.part === part)} jobTitle={jobTitle} report={report} />
+          ))}
           <ShareScore before={better?.before ?? null} after={report.score} title={jobTitle} />
 
           {!better ? (
             <div className="mt-5 rounded-2xl bg-ink p-4 text-paper">
               <p className="font-display font-semibold">{t("ats.optimizeTitle")}</p>
               <p className="mt-1 text-sm text-[#c9d2de]">{t("ats.optimizeLead")}</p>
+              <fieldset className="mt-3 grid gap-2 sm:grid-cols-2">
+                <legend className="sr-only">{t("ats.modeLabel")}</legend>
+                {(["deep", "onepage"] as const).map((m) => (
+                  <label
+                    key={m}
+                    className={`flex cursor-pointer flex-col rounded-xl border p-3 text-sm transition-colors ${mode === m ? "border-signal bg-signal/15" : "border-[#dfe5ec]/30 hover:border-[#dfe5ec]/60"}`}
+                  >
+                    <span className="flex items-center gap-2 font-medium">
+                      <input type="radio" name="mode" value={m} checked={mode === m} onChange={() => setMode(m)} className="accent-[#d9a35b]" />
+                      {t(m === "deep" ? "ats.modeDeep" : "ats.modeOnePage")}
+                    </span>
+                    <span className="mt-1 text-[#c9d2de]">{t(m === "deep" ? "ats.modeDeepLead" : "ats.modeOnePageLead")}</span>
+                  </label>
+                ))}
+              </fieldset>
               <button
                 type="button"
                 onClick={optimize}
@@ -254,19 +279,26 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
                 {optimizing ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <Sparkles aria-hidden="true" className="size-4" />}
                 {optimizing ? t("ats.optimizing") : t("ats.optimize")}
               </button>
-              <button
-                type="button"
-                onClick={() => download(result.resume)}
-                disabled={downloading}
-                className="mt-2 inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-full text-sm text-[#dfe5ec] hover:text-paper"
-              >
-                <Download aria-hidden="true" className="size-4" />
-                {t("ats.downloadCurrent")}
-              </button>
+              <p className="mt-3 text-center text-sm text-[#c9d2de]">{t("ats.downloadCurrent")}</p>
+              <div className="mt-1 grid grid-cols-2 gap-2">
+                {(["pdf", "docx"] as const).map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => download(result.resume, f)}
+                    disabled={downloading}
+                    className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-1.5 rounded-full border border-[#dfe5ec]/40 text-sm text-[#dfe5ec] hover:border-paper hover:text-paper disabled:opacity-60"
+                  >
+                    <Download aria-hidden="true" className="size-4" />
+                    {f === "pdf" ? t("ats.downloadPdf") : t("ats.downloadWord")}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
-            <Improved better={better} source={result.source} onDownload={() => download(better.resume)} onSave={saveToProfile} downloading={downloading} saving={saving} />
+            <Improved better={better} source={result.source} onDownload={(f) => download(better.resume, f)} onSave={saveToProfile} downloading={downloading} saving={saving} />
           )}
+          <CoverLetter target={checked} resume={better?.resume ?? result.resume} contact={result.contact} onError={setError} />
           {note && (
             <p role="status" className="mt-3 text-sm font-medium">
               {note}
@@ -307,31 +339,39 @@ function Shell({ children, lead }: { children: React.ReactNode; lead?: string })
   );
 }
 
-const band = (s: number) => (s >= 80 ? "strong" : s >= 65 ? "good" : "low");
+const band = (s: number) => (s >= 75 ? "strong" : s >= 50 ? "good" : "low");
 
-function ScoreHeader({ score, before }: { score: number; before?: number }) {
+function ScoreHeader({ score, before, system }: { score: number; before?: number; system: string }) {
   const r = 34;
   const c = 2 * Math.PI * r;
   const b = band(score);
   const color = b === "strong" ? "var(--color-ink)" : b === "good" ? "var(--color-signal)" : "#b4532a";
   return (
-    <div className="flex items-center gap-4">
-      <svg viewBox="0 0 80 80" className="size-20 shrink-0 -rotate-90" role="img" aria-label={t("ats.scoreAria", { n: score })}>
-        <circle cx="40" cy="40" r={r} fill="none" stroke="var(--color-ink-soft)" strokeWidth="8" />
-        <circle cx="40" cy="40" r={r} fill="none" stroke={color} strokeWidth="8" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} className="transition-[stroke-dashoffset] duration-700" />
-        <text x="40" y="40" dominantBaseline="central" textAnchor="middle" transform="rotate(90 40 40)" className="fill-ink font-display text-[22px] font-semibold">
-          {score}
-        </text>
-      </svg>
-      <div>
-        <p className="font-display text-lg font-semibold">{t(`ats.band_${b}` as MessageKey)}</p>
-        {before !== undefined ? (
-          <p className="text-sm">
-            <span className="text-muted line-through">{before}</span> → <strong className="text-ink">{score}</strong> {t("ats.afterTailoring")}
-          </p>
-        ) : (
-          <p className="text-sm text-muted">{t("ats.target")}</p>
-        )}
+    <div>
+      {system && (
+        <p className="mb-4 flex items-center gap-2 rounded-xl bg-ink-soft px-3 py-2 text-sm">
+          <ShieldCheck aria-hidden="true" className="size-4 shrink-0 text-signal-ink" />
+          <span>{t("ats.systemDetected", { s: system })}</span>
+        </p>
+      )}
+      <div className="flex items-center gap-4">
+        <svg viewBox="0 0 80 80" className="size-20 shrink-0 -rotate-90" role="img" aria-label={t("ats.scoreAria", { n: score })}>
+          <circle cx="40" cy="40" r={r} fill="none" stroke="var(--color-ink-soft)" strokeWidth="8" />
+          <circle cx="40" cy="40" r={r} fill="none" stroke={color} strokeWidth="8" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} className="transition-[stroke-dashoffset] duration-700" />
+          <text x="40" y="40" dominantBaseline="central" textAnchor="middle" transform="rotate(90 40 40)" className="fill-ink font-display text-[22px] font-semibold">
+            {score}
+          </text>
+        </svg>
+        <div>
+          <p className="font-display text-lg font-semibold">{t(`ats.band_${b}` as MessageKey)}</p>
+          {before !== undefined ? (
+            <p className="text-sm">
+              <span className="text-muted line-through">{before}</span> → <strong className="text-ink">{score}</strong> {t("ats.afterTailoring")}
+            </p>
+          ) : (
+            <p className="text-sm text-muted">{t("ats.target")}</p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -339,7 +379,7 @@ function ScoreHeader({ score, before }: { score: number; before?: number }) {
 
 function Breakdown({ report }: { report: AtsReport }) {
   return (
-    <ul className="mt-5 flex flex-col gap-2.5">
+    <ul className="mt-5 flex flex-col gap-3">
       {PARTS.map((id) => {
         const p = report.parts.find((x) => x.id === id)!;
         const pct = p.max ? (p.points / p.max) * 100 : 0;
@@ -347,9 +387,7 @@ function Breakdown({ report }: { report: AtsReport }) {
           <li key={id} className="text-sm">
             <div className="flex justify-between gap-2">
               <span className="font-medium">{t(`ats.part_${id}` as MessageKey)}</span>
-              <span className="tabular-nums text-muted">
-                {Math.round(p.points)}/{p.max}
-              </span>
+              <span className={p.issues ? "text-signal-ink" : "text-muted"}>{p.issues ? t("ats.issues", { n: p.issues }) : t("ats.noIssues")}</span>
             </div>
             <div className="mt-1 h-2 overflow-hidden rounded-full bg-ink-soft">
               <div className={`h-full rounded-full transition-[width] duration-700 ${pct >= 80 ? "bg-ink" : pct >= 50 ? "bg-signal" : "bg-[#b4532a]"}`} style={{ width: `${Math.max(3, pct)}%` }} />
@@ -362,14 +400,33 @@ function Breakdown({ report }: { report: AtsReport }) {
 }
 
 function Keywords({ report, confirmed, onToggle, locked }: { report: AtsReport; confirmed: string[]; onToggle: (k: string) => void; locked: boolean }) {
-  const found = report.keywords.filter((k) => k.inResume > 0);
-  const missing = report.keywords.filter((k) => k.inResume === 0);
+  return (
+    <>
+      {(["hard", "soft"] as const).map((kind) => (
+        <KeywordList
+          key={kind}
+          kind={kind}
+          list={report.keywords.filter((k) => k.kind === kind)}
+          confirmed={confirmed}
+          onToggle={onToggle}
+          locked={locked}
+        />
+      ))}
+    </>
+  );
+}
+
+function KeywordList({ kind, list, confirmed, onToggle, locked }: { kind: "hard" | "soft"; list: AtsKeyword[]; confirmed: string[]; onToggle: (k: string) => void; locked: boolean }) {
+  if (!list.length) return null;
+  const missing = list.filter((k) => k.inResume === 0);
+  const found = list.filter((k) => k.inResume > 0);
   return (
     <div className="mt-6">
-      <h3 className="font-semibold">{t("ats.keywordsTitle", { found: found.length, total: report.keywords.length })}</h3>
+      <h3 className="font-semibold">{t(kind === "hard" ? "ats.hardTitle" : "ats.softTitle", { found: found.length, total: list.length })}</h3>
+      <p className="mt-1 text-xs text-muted">{t("ats.countsLead")}</p>
       {missing.length > 0 && (
         <>
-          <p className="mt-1 text-sm text-muted">{locked ? t("ats.missingAfter") : t("ats.missingLead")}</p>
+          <p className="mt-2 text-sm text-muted">{locked ? t("ats.missingAfter") : t("ats.missingLead")}</p>
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {missing.map((k) => {
               const on = confirmed.includes(k.name);
@@ -381,7 +438,7 @@ function Keywords({ report, confirmed, onToggle, locked }: { report: AtsReport; 
                     <input type="checkbox" className="sr-only" checked={on} disabled={locked} onChange={() => onToggle(k.name)} />
                     {on ? <Check aria-hidden="true" className="size-3.5" /> : <X aria-hidden="true" className="size-3.5 text-[#b4532a]" />}
                     {k.name}
-                    {k.inJob > 1 && <span className="text-xs opacity-70">×{k.inJob}</span>}
+                    <span className="text-xs tabular-nums opacity-70">0/{k.inJob}</span>
                   </label>
                 </li>
               );
@@ -395,6 +452,9 @@ function Keywords({ report, confirmed, onToggle, locked }: { report: AtsReport; 
             <li key={k.name} className="inline-flex items-center gap-1 rounded-full bg-ink-soft px-2.5 py-1 text-xs font-medium">
               <Check aria-hidden="true" className="size-3.5" />
               {k.name}
+              <span className="tabular-nums text-muted">
+                {k.inResume}/{k.inJob}
+              </span>
             </li>
           ))}
         </ul>
@@ -403,17 +463,17 @@ function Keywords({ report, confirmed, onToggle, locked }: { report: AtsReport; 
   );
 }
 
-function Checks({ checks, jobTitle, report }: { checks: AtsCheck[]; jobTitle: string; report: AtsReport }) {
+function Checks({ part, checks, jobTitle, report }: { part: AtsPartId; checks: AtsCheck[]; jobTitle: string; report: AtsReport }) {
+  if (!checks.length) return null;
   const sorted = [...checks].sort((a, b) => Number(a.ok) - Number(b.ok));
   const text = (c: AtsCheck) => {
-    const [n, total] = c.detail.split("/");
-    const vars = { title: jobTitle, have: report.resumeYears, need: report.requiredYears, n, total, words: c.detail, level: t(`ats.degree_${c.detail}` as MessageKey) };
-    const key = c.id === "title" ? `ats.check_title_${c.detail}` : `ats.check_${c.id}_${c.ok ? "ok" : "fail"}`;
-    return t(key as MessageKey, vars);
+    const [a, b] = c.detail.split("/");
+    const vars = { title: jobTitle, have: report.resumeYears, need: report.requiredYears, a, b: b ?? "", d: c.detail, level: t(`ats.degree_${c.detail}` as MessageKey) };
+    return t(`ats.check_${c.id}_${c.ok ? "ok" : "fail"}` as MessageKey, vars);
   };
   return (
     <div className="mt-6">
-      <h3 className="font-semibold">{t("ats.checksTitle")}</h3>
+      <h3 className="font-semibold">{t(`ats.part_${part}` as MessageKey)}</h3>
       <ul className="mt-2 flex flex-col gap-2">
         {sorted.map((c) => (
           <li key={c.id} className="flex gap-2.5 text-sm leading-snug">
@@ -428,7 +488,7 @@ function Checks({ checks, jobTitle, report }: { checks: AtsCheck[]; jobTitle: st
   );
 }
 
-function Improved({ better, source, onDownload, onSave, downloading, saving }: { better: Better; source: Source; onDownload: () => void; onSave: () => void; downloading: boolean; saving: boolean }) {
+function Improved({ better, source, onDownload, onSave, downloading, saving }: { better: Better; source: Source; onDownload: (format: Format) => void; onSave: () => void; downloading: boolean; saving: boolean }) {
   const [all, setAll] = useState(false);
   const changes = all ? better.changes : better.changes.slice(0, 4);
   return (
@@ -467,15 +527,21 @@ function Improved({ better, source, onDownload, onSave, downloading, saving }: {
         </div>
       )}
       <div className="mt-4 flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={onDownload}
-          disabled={downloading}
-          className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper hover:bg-ink-hover disabled:opacity-60"
-        >
-          {downloading ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <Download aria-hidden="true" className="size-4" />}
-          {t("ats.download")}
-        </button>
+        <p className="text-sm font-medium">{t("ats.download")}</p>
+        <div className="grid grid-cols-2 gap-2">
+          {(["pdf", "docx"] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              onClick={() => onDownload(f)}
+              disabled={downloading}
+              className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-ink px-4 font-medium text-paper hover:bg-ink-hover disabled:opacity-60"
+            >
+              {downloading ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <Download aria-hidden="true" className="size-4" />}
+              {f === "pdf" ? t("ats.downloadPdf") : t("ats.downloadWord")}
+            </button>
+          ))}
+        </div>
         {source === "profile" && (
           <button
             type="button"
@@ -489,6 +555,43 @@ function Improved({ better, source, onDownload, onSave, downloading, saving }: {
         )}
       </div>
       <p className="mt-3 text-xs text-muted">{t("ats.reviewNote")}</p>
+    </div>
+  );
+}
+
+/** A cover letter for this job, written from the (tailored, if they tailored it) resume. */
+function CoverLetter({ target, resume, contact, onError }: { target: AtsTarget; resume: AtsDoc; contact: { email: string; phone: string }; onError: (m: string) => void }) {
+  const [text, setText] = useState("");
+  const [busy, start] = useTransition();
+  const make = (format: Format) =>
+    start(async () => {
+      const res = await coverLetter(target, resume, contact, format);
+      if (!res.ok) return onError(res.message);
+      save(res);
+      setText(res.text ?? "");
+    });
+  return (
+    <div className="mt-5 rounded-2xl border border-line p-4">
+      <p className="flex items-center gap-2 font-semibold">
+        <FileText aria-hidden="true" className="size-4 text-signal-ink" />
+        {t("ats.letterTitle")}
+      </p>
+      <p className="mt-1 text-sm text-muted">{t("ats.letterLead")}</p>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {(["pdf", "docx"] as const).map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => make(f)}
+            disabled={busy}
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-ink px-4 text-sm font-medium hover:bg-ink hover:text-paper disabled:opacity-60"
+          >
+            {busy ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <Download aria-hidden="true" className="size-4" />}
+            {f === "pdf" ? t("ats.downloadPdf") : t("ats.downloadWord")}
+          </button>
+        ))}
+      </div>
+      {text && <p className="mt-3 whitespace-pre-line rounded-xl bg-ink-soft p-3 text-sm leading-relaxed">{text}</p>}
     </div>
   );
 }

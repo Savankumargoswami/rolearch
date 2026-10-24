@@ -1,88 +1,83 @@
-// Builds an ATS-friendly Word resume: one column, standard section headings, real bullet lists,
-// plain text dates, no tables, text boxes, headers or images (all of which parsers misread).
+// Builds an ATS-friendly Word resume from the shared layout: one column, standard section headings,
+// real bullet lists, plain text dates, no tables, text boxes, headers or images (all of which parsers misread).
 import "server-only";
-import { AlignmentType, BorderStyle, Document, Packer, Paragraph, TabStopType, TextRun } from "docx";
-import type { ProfileData } from "./profile-schema";
+import { AlignmentType, BorderStyle, Document, LevelFormat, Packer, Paragraph, TabStopType, TextRun } from "docx";
+import type { AtsDoc } from "./ats-doc";
+import { COLOR, SIZE, letterBlocks, resumeBlocks, type Block } from "./resume-layout";
 
 const FONT = "Calibri";
-const fmtMonth = (ym: string) => {
-  const m = /^(\d{4})-(\d{2})$/.exec(ym);
-  return m ? new Intl.DateTimeFormat("en", { month: "short", year: "numeric", timeZone: "UTC" }).format(Date.UTC(+m[1], +m[2] - 1)) : ym;
-};
+// Letter page, 0.75" side margins: the right tab stop sits at the right margin.
+const PAGE = { width: 12240, margin: { top: 1000, bottom: 1000, left: 1080, right: 1080 } };
+const RIGHT = PAGE.width - PAGE.margin.left - PAGE.margin.right;
 
-const run = (text: string, opts: { bold?: boolean; size?: number; color?: string; italics?: boolean } = {}) =>
-  new TextRun({ text, font: FONT, size: opts.size ?? 21, bold: opts.bold, italics: opts.italics, color: opts.color });
+const run = (text: string, size: number, color: string, opts: { bold?: boolean; italics?: boolean } = {}) =>
+  new TextRun({ text, font: FONT, size, color, bold: opts.bold, italics: opts.italics });
 
-const heading = (text: string) =>
-  new Paragraph({
-    spacing: { before: 220, after: 80 },
-    border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "0E1F2F", space: 2 } },
-    children: [run(text.toUpperCase(), { bold: true, size: 22, color: "0E1F2F" })],
-  });
+const rule = (color: string, size: number) => ({ bottom: { style: BorderStyle.SINGLE, size, color, space: 2 } });
 
-/** Text with a right-aligned part on the same line (dates), using a tab stop rather than a table. */
-const line = (left: TextRun[], right: string, after = 0) =>
-  new Paragraph({
-    spacing: { after },
-    tabStops: [{ type: TabStopType.RIGHT, position: 10466 }],
-    children: [...left, ...(right ? [run(`\t${right}`, { color: "4B5A6E" })] : [])],
-  });
-
-const bullet = (text: string) => new Paragraph({ bullet: { level: 0 }, spacing: { after: 40 }, children: [run(text)] });
-
-export async function resumeDocx(p: ProfileData, contact: { email: string; phone: string }): Promise<Buffer> {
-  const r = p.resume;
-  const children: Paragraph[] = [];
-
-  children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 40 }, children: [run(p.full_name || "Your Name", { bold: true, size: 36 })] }));
-  const contactLine = [contact.email, contact.phone, p.location, ...p.links.filter((l) => l.url).map((l) => l.url.replace(/^https?:\/\/(www\.)?/, ""))].filter(Boolean).join("  |  ");
-  if (contactLine) children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [run(contactLine, { size: 19 })] }));
-  if (p.headline) children.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 }, children: [run(p.headline, { italics: true })] }));
-
-  if (r.skills.length) {
-    children.push(heading("Skills"));
-    children.push(new Paragraph({ children: [run(r.skills.join(", "))] }));
+function paragraph(b: Block): Paragraph {
+  switch (b.t) {
+    case "name":
+      return new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [run(b.text, SIZE.name, COLOR.ink, { bold: true })] });
+    case "center":
+      return new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: b.rule ? 100 : b.size === "headline" ? 60 : 40 },
+        border: b.rule ? rule("444444", 5) : undefined,
+        children: [run(b.text, b.size === "headline" ? SIZE.headline : SIZE.contact, b.size === "headline" ? COLOR.body : COLOR.muted)],
+      });
+    case "heading":
+      return new Paragraph({ spacing: { before: 220, after: 80 }, border: rule(COLOR.rule, 6), children: [run(b.text.toUpperCase(), SIZE.heading, COLOR.ink, { bold: true })] });
+    case "para":
+      return new Paragraph({ spacing: { before: 40, after: 40 }, children: [run(b.text, SIZE.body, COLOR.body)] });
+    case "labeled":
+      return new Paragraph({ spacing: { before: 44, after: 44 }, children: [run(`${b.label}: `, SIZE.body, COLOR.ink), run(b.text, SIZE.body, COLOR.body)] });
+    case "role":
+      return new Paragraph({
+        spacing: { before: 120, after: 55 },
+        tabStops: [{ type: TabStopType.RIGHT, position: RIGHT }],
+        children: [
+          run(b.bold, SIZE.role, COLOR.ink, { bold: !b.plain, italics: b.plain }),
+          ...(b.rest ? [run(` | ${b.rest}`, SIZE.role - 1, COLOR.body)] : []),
+          ...(b.right ? [run(`\t${b.right}`, SIZE.date, COLOR.muted, { italics: true })] : []),
+        ],
+      });
+    case "sub":
+      return new Paragraph({
+        spacing: { after: 60 },
+        tabStops: [{ type: TabStopType.RIGHT, position: RIGHT }],
+        children: [run(b.text, SIZE.sub, COLOR.body), ...(b.right ? [run(`\t${b.right}`, SIZE.date, COLOR.muted, { italics: true })] : [])],
+      });
+    case "bullet":
+      return new Paragraph({ numbering: { reference: "bullets", level: 0 }, spacing: { before: 44, after: 44 }, children: [run(b.text, SIZE.body, COLOR.body)] });
+    case "small":
+      return new Paragraph({ spacing: { before: 30, after: 40 }, children: [run(b.text, SIZE.small, COLOR.muted)] });
+    case "letter":
+      return new Paragraph({ spacing: { before: 0, after: 220, line: 300 }, children: [run(b.text, 22, COLOR.body)] });
+    case "gap":
+      return new Paragraph({ spacing: { before: 0, after: 0 }, children: [] });
   }
+}
 
-  if (r.experience.length) {
-    children.push(heading("Experience"));
-    for (const e of r.experience) {
-      const dates = [fmtMonth(e.start), e.current ? "Present" : fmtMonth(e.end)].filter(Boolean).join(" – ");
-      children.push(line([run(e.title, { bold: true }), ...(e.company ? [run(` | ${e.company}`)] : [])], dates));
-      if (e.location) children.push(new Paragraph({ spacing: { after: 40 }, children: [run(e.location, { color: "4B5A6E", size: 19 })] }));
-      for (const b of e.bullets) children.push(bullet(b));
-      children.push(new Paragraph({ spacing: { after: 80 }, children: [] }));
-    }
-  }
+export const resumeDocx = (d: AtsDoc, contact: { email: string; phone: string }) => render(resumeBlocks(d, contact), `${d.full_name || "Resume"} - Resume`);
 
-  if (r.projects.length) {
-    children.push(heading("Projects"));
-    for (const pr of r.projects) {
-      children.push(new Paragraph({ children: [run(pr.name, { bold: true }), ...(pr.url ? [run(` | ${pr.url}`, { size: 19 })] : [])] }));
-      if (pr.summary) children.push(bullet(pr.summary));
-      if (pr.skills.length) children.push(new Paragraph({ spacing: { after: 80 }, children: [run(`Tools: ${pr.skills.join(", ")}`, { size: 19, color: "4B5A6E" })] }));
-    }
-  }
+export const coverLetterDocx = (d: AtsDoc, contact: { email: string; phone: string }, paragraphs: string[]) =>
+  render(letterBlocks(d, contact, paragraphs), `${d.full_name || "Cover letter"} - Cover letter`);
 
-  if (r.education.length) {
-    children.push(heading("Education"));
-    for (const e of r.education) {
-      children.push(line([run([e.degree, e.field].filter(Boolean).join(", "), { bold: true }), ...(e.school ? [run(` | ${e.school}`)] : [])], [e.start, e.end].filter(Boolean).join(" – "), 60));
-    }
-  }
-
-  if (r.certifications.length) {
-    children.push(heading("Certifications"));
-    for (const c of r.certifications) {
-      children.push(line([run(c.name, { bold: true }), ...(c.issuer ? [run(` | ${c.issuer}`)] : [])], fmtMonth(c.issued), 40));
-    }
-  }
-
+async function render(blocks: Block[], title: string): Promise<Buffer> {
   const doc = new Document({
     creator: "Rolearch",
-    title: `${p.full_name || "Resume"} – Resume`,
-    styles: { default: { document: { run: { font: FONT, size: 21 } } } },
-    sections: [{ properties: { page: { margin: { top: 720, bottom: 720, left: 720, right: 720 } } }, children }],
+    title,
+    styles: { default: { document: { run: { font: FONT, size: SIZE.body } } } },
+    numbering: {
+      config: [
+        {
+          reference: "bullets",
+          levels: [{ level: 0, format: LevelFormat.BULLET, text: "●", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 360, hanging: 240 } }, run: { size: 14 } } }],
+        },
+      ],
+    },
+    sections: [{ properties: { page: { size: { width: PAGE.width, height: 15840 }, margin: PAGE.margin } }, children: blocks.map(paragraph) }],
   });
   return Packer.toBuffer(doc);
 }

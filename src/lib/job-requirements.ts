@@ -19,8 +19,8 @@ const MODEL = "claude-haiku-5-5";
 const EDUCATION: Education[] = ["none", "high_school", "associate", "bachelor", "master", "doctorate"];
 
 const SYSTEM = `You read job descriptions and list what the employer asks candidates to have. Any kind of job: office, technical, healthcare, retail, warehouse, driving, trades.
-- required: skills, tools, software, licenses and experience areas the posting says are required or expected. Short names a resume would use, 1-4 words each ("B2B sales", "Salesforce", "Forklift operation", "Patient care", "Python"). At most 12, most important first.
-- preferred: the same for things described as preferred, a plus or nice to have. At most 8.
+- required: skills, tools, software, licenses and experience areas the posting says are required or expected, written as the keywords an applicant tracking system would search a resume for: 1-3 words each, in the posting's own wording ("B2B sales", "Salesforce", "Forklift operation", "Patient care", "Python", "Data migration"). Never add filler like "experience", "skills", "workflows" or "platform experience"; split combined items ("QA and testing" -> "QA", "Testing"). At most 12, most important first.
+- preferred: the same kind of short keywords for things described as preferred, a plus or nice to have. At most 8.
 - certifications: named licenses or certifications ("CDL Class A", "RN license", "PMP", "ServSafe"). Leave out ones already listed above.
 - years: the minimum years of experience asked for, as a whole number; 0 if not stated.
 - education: the minimum education asked for, as one of: none, high_school, associate, bachelor, master, doctorate. Use none if it isn't stated.

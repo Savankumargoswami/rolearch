@@ -1,15 +1,20 @@
 "use server";
 
+import { createHash } from "node:crypto";
 import { getJob, getJobText } from "@/data/db";
 import { t } from "@/i18n";
-import { scoreAts, type AtsReport } from "@/lib/ats";
-import { readRequirements } from "@/lib/job-requirements";
-import { signShare } from "@/lib/share-card";
-import { ProfileSaveSchema, type ProfileData } from "@/lib/profile-schema";
+import { scoreAts, type AtsFile, type AtsJob, type AtsReport } from "@/lib/ats";
+import { AtsDocSchema, fromProfile, type AtsDoc } from "@/lib/ats-doc";
+import { jobAtsKeywords } from "@/lib/ats-keywords-cached";
+import { writeCoverLetter } from "@/lib/cover-letter";
+import { docxFacts } from "@/lib/docx-format";
+import { jobRequirements, readRequirements } from "@/lib/job-requirements";
 import { loadAccount } from "@/lib/profile";
-import { resumeDocx } from "@/lib/resume-docx";
-import { optimizeResume, type Change } from "@/lib/resume-optimizer";
+import { coverLetterDocx, resumeDocx } from "@/lib/resume-docx";
+import { optimizeResume, type Change, type TailorMode } from "@/lib/resume-optimizer";
+import { coverLetterPdf, resumePdf } from "@/lib/resume-pdf";
 import { readResume, type Contact } from "@/lib/resume-reader";
+import { signShare } from "@/lib/share-card";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -17,11 +22,13 @@ const TYPES = {
   "application/pdf": "pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
 } as const;
+const DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-export type Checked = { ok: true; report: AtsReport; resume: ProfileData; contact: Contact } | { ok: false; message: string };
+export type Checked = { ok: true; report: AtsReport; resume: AtsDoc; contact: Contact; file: AtsFile | null } | { ok: false; message: string };
 export type OptimizedResult =
-  | { ok: true; before: number; report: AtsReport; resume: ProfileData; changes: Change[]; skipped: { keyword: string; reason: string }[] }
+  | { ok: true; before: number; report: AtsReport; resume: AtsDoc; changes: Change[]; skipped: { keyword: string; reason: string }[] }
   | { ok: false; message: string };
+type FileResult = { ok: true; filename: string; base64: string; type: string } | { ok: false; message: string };
 
 async function signedIn() {
   const supabase = await createClient();
@@ -31,80 +38,131 @@ async function signedIn() {
   return user;
 }
 
-/** A Rolearch job by ID, or a job someone pasted into the free ATS check. */
-export type AtsTarget = string | { title: string; description: string; company?: string };
+/** A Rolearch job by ID, or a job someone pasted into the free ATS check (with its link, if they have it). */
+export type AtsTarget = string | { title: string; description: string; company?: string; url?: string };
 
 const MIN_PASTED = 200;
 const MAX_PASTED = 20000;
+// Shorter than this, a saved posting is only a summary: too little to scan honestly.
+const MIN_SAVED = 600;
 
-async function jobFor(target: AtsTarget) {
+/** The applicant tracking system behind a job link, from its host. */
+function systemFromUrl(url: string): string {
+  let host = "";
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+  const known: [RegExp, string][] = [
+    [/myworkdayjobs\.com|workday\.com$/, "Workday"], [/icims\.com$/, "iCIMS"], [/greenhouse\.io$/, "Greenhouse"], [/lever\.co$/, "Lever"],
+    [/taleo\.net$/, "Taleo"], [/successfactors\.(com|eu)$|sapsf\.(com|eu)$/, "SuccessFactors"], [/smartrecruiters\.com$/, "SmartRecruiters"],
+    [/ashbyhq\.com$/, "Ashby"], [/jobvite\.com$/, "Jobvite"], [/oraclecloud\.com$/, "Oracle"], [/bamboohr\.com$/, "BambooHR"],
+    [/workable\.com$/, "Workable"], [/adp\.com$/, "ADP"], [/paylocity\.com$/, "Paylocity"], [/ultipro\.com|ukg\.(com|net)$/, "UKG"],
+    [/eightfold\.ai$/, "Eightfold"], [/avature\.net$/, "Avature"], [/rippling\.com$/, "Rippling"],
+  ];
+  return known.find(([re]) => re.test(host))?.[1] ?? "";
+}
+
+type Found = { job: AtsJob & { company: string }; description: string } | { error: string };
+
+async function jobFor(target: AtsTarget): Promise<Found> {
   if (typeof target === "string") {
     const job = await getJob(target);
-    if (!job) return null;
-    return { job, description: await getJobText(target) };
+    if (!job) return { error: t("ats.errJob") };
+    const description = await getJobText(target);
+    if (description.trim().length < MIN_SAVED) return { error: t("ats.errShort") };
+    // The job's own requirements (read once per job and stored) back up the scanner keywords.
+    const [req, keywords] = await Promise.all([jobRequirements(job, description), jobAtsKeywords(job.id, job.title, description)]);
+    const skills = [...new Set([...job.skills, ...(req?.required ?? []), ...(req?.certifications ?? [])])];
+    const system = job.source && !/careers page|employer feed|adzuna|usajobs/i.test(job.source) ? job.source : "";
+    return { job: { title: job.title, company: job.company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years || job.years, system }, description };
   }
   const title = String(target?.title ?? "").trim().slice(0, 200);
   const description = String(target?.description ?? "").trim().slice(0, MAX_PASTED);
-  if (!title || description.length < MIN_PASTED) return null;
-  // Pasted jobs have no stored skills, so read them now (not stored); the scorer falls back to the description alone.
-  const req = await readRequirements(title, description);
+  if (!title || description.length < MIN_PASTED) return { error: t("ats.errPasted") };
+  // Pasted jobs: requirements are read now and not kept; keywords are kept by a hash of the text, so scanning
+  // the same posting twice gives the same report.
+  const key = `pasted-${createHash("sha256").update(`${title}\n${description}`).digest("hex").slice(0, 32)}`;
+  const [req, keywords] = await Promise.all([readRequirements(title, description), jobAtsKeywords(key, title, description)]);
   const skills = req ? [...req.required, ...req.certifications] : [];
-  return { job: { title, company: String(target.company ?? "").trim().slice(0, 120), skills, years: req?.years ?? 0 }, description };
+  const company = String(target.company ?? "").trim().slice(0, 120);
+  return { job: { title, company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years ?? 0, system: systemFromUrl(String(target.url ?? "")) }, description };
 }
 
 const sanitizeContact = (c: Contact): Contact => ({ email: String(c.email ?? "").slice(0, 200), phone: String(c.phone ?? "").slice(0, 40) });
 
-/** Scores the signed-in member's saved profile against a job. Free and instant: no AI involved. */
+/** The layout facts of a file as the browser hands them back (it only ever sends what we sent it). */
+function sanitizeFile(f: AtsFile | null | undefined): AtsFile | undefined {
+  if (!f || (f.kind !== "pdf" && f.kind !== "docx")) return undefined;
+  return { name: String(f.name ?? "").slice(0, 200), kind: f.kind, facts: f.facts && typeof f.facts === "object" ? f.facts : null };
+}
+
+const slug = (s: string) => s.replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_|_$/g, "").slice(0, 40);
+const resumeName = (d: AtsDoc, company: string) => `${slug(d.full_name || "Resume")}${company ? `_${slug(company)}` : ""}_Resume`;
+
+/** Scores the signed-in member's saved profile against a job. */
 export async function checkProfile(target: AtsTarget, phone: string): Promise<Checked> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
   const found = await jobFor(target);
-  if (!found) return { ok: false, message: t(typeof target === "string" ? "ats.errJob" : "ats.errPasted") };
+  if ("error" in found) return { ok: false, message: found.error };
   const account = await loadAccount();
-  const resume = account.profile;
+  const resume = fromProfile(account.profile);
   if (resume.resume.experience.length + resume.resume.skills.length === 0) return { ok: false, message: t("ats.errEmptyProfile") };
   const contact = sanitizeContact({ email: account.email, phone });
-  const { job, description } = found;
-  return { ok: true, resume, contact, report: scoreAts({ title: job.title, description, skills: job.skills, years: job.years }, resume, contact) };
+  return { ok: true, resume, contact, file: null, report: scoreAts(found.job, resume, contact) };
 }
 
-/** Reads an uploaded resume (not stored) and scores it against a job. */
+/** Reads an uploaded resume (not stored) and scores it against a job, layout included for Word files. */
 export async function checkUpload(target: AtsTarget, form: FormData): Promise<Checked> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
-  const file = form.get("resume");
-  if (!(file instanceof File) || file.size === 0) return { ok: false, message: t("profile.errNoFile") };
-  if (file.size > MAX_BYTES) return { ok: false, message: t("profile.errTooBig") };
-  const kind = TYPES[file.type as keyof typeof TYPES];
+  const upload = form.get("resume");
+  if (!(upload instanceof File) || upload.size === 0) return { ok: false, message: t("profile.errNoFile") };
+  if (upload.size > MAX_BYTES) return { ok: false, message: t("profile.errTooBig") };
+  const kind = TYPES[upload.type as keyof typeof TYPES];
   if (!kind) return { ok: false, message: t("profile.errType") };
-  const found = await jobFor(target);
-  if (!found) return { ok: false, message: t(typeof target === "string" ? "ats.errJob" : "ats.errPasted") };
-
-  const read = await readResume({ bytes: Buffer.from(await file.arrayBuffer()), kind });
+  const bytes = Buffer.from(await upload.arrayBuffer());
+  const [found, read, facts] = await Promise.all([jobFor(target), readResume({ bytes, kind }), kind === "docx" ? docxFacts(bytes) : Promise.resolve(null)]);
+  if ("error" in found) return { ok: false, message: found.error };
   if ("error" in read) {
     const key = { unavailable: "profile.errReaderOff", refused: "profile.errUnreadable", unreadable: "profile.errUnreadable", too_long: "profile.errTooLong" } as const;
     return { ok: false, message: t(key[read.error]) };
   }
   const contact = sanitizeContact(read.contact);
-  const { job, description } = found;
-  return { ok: true, resume: read.draft, contact, report: scoreAts({ title: job.title, description, skills: job.skills, years: job.years }, read.draft, contact) };
+  const file: AtsFile = { name: upload.name.slice(0, 200), kind, facts };
+  return { ok: true, resume: read.draft, contact, file, report: scoreAts(found.job, read.draft, contact, file) };
 }
 
-/** Tailors a resume to the job with Claude, then re-scores it with the same scorer. */
-export async function optimizeForJob(target: AtsTarget, resume: ProfileData, contact: Contact, confirmed: string[]): Promise<OptimizedResult> {
+/** Tailors a resume to the job, then re-scores it, layout included, as the Word file we'd hand back. */
+export async function optimizeForJob(
+  target: AtsTarget,
+  resume: AtsDoc,
+  contact: Contact,
+  confirmed: string[],
+  original: AtsFile | null,
+  mode: TailorMode = "deep",
+): Promise<OptimizedResult> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
-  const parsed = ProfileSaveSchema.safeParse(resume);
+  const parsed = AtsDocSchema.safeParse(resume);
   if (!parsed.success) return { ok: false, message: t("profile.errInvalid") };
   const found = await jobFor(target);
-  if (!found) return { ok: false, message: t(typeof target === "string" ? "ats.errJob" : "ats.errPasted") };
+  if ("error" in found) return { ok: false, message: found.error };
   const { job, description } = found;
   const safeContact = sanitizeContact(contact);
-  const atsJob = { title: job.title, description, skills: job.skills, years: job.years };
-  const before = scoreAts(atsJob, parsed.data, safeContact);
+  const before = scoreAts(job, parsed.data, safeContact, sanitizeFile(original));
   const missing = before.keywords.filter((k) => k.inResume === 0).map((k) => k.name);
   const confirmedOk = confirmed.filter((s) => missing.includes(s)).slice(0, 30);
 
-  const out = await optimizeResume({ resume: parsed.data, job: { title: job.title, company: job.company, description }, missing, confirmed: confirmedOk });
+  const out = await optimizeResume({
+    resume: parsed.data,
+    job: { title: job.title, company: job.company, description },
+    missing,
+    confirmed: confirmedOk,
+    mode: mode === "onepage" ? "onepage" : "deep",
+  });
   if ("error" in out) return { ok: false, message: out.error === "unavailable" ? t("ats.errOff") : t("ats.errOptimize") };
-  let report = scoreAts(atsJob, out.resume, safeContact);
+  const ours = async (d: AtsDoc): Promise<AtsFile> => ({ name: `${resumeName(d, job.company)}.docx`, kind: "docx", facts: await docxFacts(await resumeDocx(d, safeContact)) });
+  let report = scoreAts(job, out.resume, safeContact, await ours(out.resume));
   let improved = out.resume;
   // Never hand back something that scores worse than what came in.
   if (report.score < before.score) {
@@ -114,14 +172,35 @@ export async function optimizeForJob(target: AtsTarget, resume: ProfileData, con
   return { ok: true, before: before.score, report, resume: improved, changes: out.changes.slice(0, 25), skipped: out.skipped.slice(0, 20) };
 }
 
-/** An ATS-friendly .docx of a resume, as base64 for the browser to save. */
-export async function downloadDocx(resume: ProfileData, contact: Contact, company: string): Promise<{ ok: true; filename: string; base64: string } | { ok: false; message: string }> {
+/** An ATS-friendly resume as a Word (.docx) or PDF file, as base64 for the browser to save. */
+export async function downloadResume(resume: AtsDoc, contact: Contact, company: string, format: "docx" | "pdf"): Promise<FileResult> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
-  const parsed = ProfileSaveSchema.safeParse(resume);
+  const parsed = AtsDocSchema.safeParse(resume);
   if (!parsed.success) return { ok: false, message: t("profile.errInvalid") };
-  const buf = await resumeDocx(parsed.data, sanitizeContact(contact));
-  const slug = (s: string) => s.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 40);
-  return { ok: true, filename: `${slug(parsed.data.full_name || "Resume")}-Resume${company ? `-${slug(company)}` : ""}.docx`, base64: buf.toString("base64") };
+  const safe = sanitizeContact(contact);
+  const buf = format === "pdf" ? await resumePdf(parsed.data, safe) : await resumeDocx(parsed.data, safe);
+  return { ok: true, filename: `${resumeName(parsed.data, String(company))}.${format}`, base64: buf.toString("base64"), type: format === "pdf" ? "application/pdf" : DOCX };
+}
+
+/** A cover letter for this job written from the resume's facts, as a Word or PDF file. */
+export async function coverLetter(target: AtsTarget, resume: AtsDoc, contact: Contact, format: "docx" | "pdf"): Promise<FileResult & { text?: string }> {
+  if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
+  const parsed = AtsDocSchema.safeParse(resume);
+  if (!parsed.success) return { ok: false, message: t("profile.errInvalid") };
+  const found = await jobFor(target);
+  if ("error" in found) return { ok: false, message: found.error };
+  const letter = await writeCoverLetter({ resume: parsed.data, job: { title: found.job.title, company: found.job.company, description: found.description } });
+  if ("error" in letter) return { ok: false, message: letter.error === "unavailable" ? t("ats.errOff") : t("ats.errLetter") };
+  const safe = sanitizeContact(contact);
+  const buf = format === "pdf" ? await coverLetterPdf(parsed.data, safe, letter.paragraphs) : await coverLetterDocx(parsed.data, safe, letter.paragraphs);
+  const company = found.job.company;
+  return {
+    ok: true,
+    filename: `${slug(parsed.data.full_name || "Cover")}${company ? `_${slug(company)}` : ""}_Cover_Letter.${format}`,
+    base64: buf.toString("base64"),
+    type: format === "pdf" ? "application/pdf" : DOCX,
+    text: letter.paragraphs.join("\n\n"),
+  };
 }
 
 /** A link to a public score card, for members to share after a check. */

@@ -69,7 +69,10 @@ export async function readResumeAction(_: ReadState, form: FormData): Promise<Re
     } as const;
     return { message: t(key[result.error]) };
   }
-  return { draft: result.draft };
+  // The profile keeps only profile fields; the resume-only parts (summary, grouped skills) are for the ATS check.
+  const { summary, skill_groups, extra, ...draft } = result.draft;
+  void [summary, skill_groups, extra];
+  return { draft };
 }
 
 const PHOTO_MAX_BYTES = 2 * 1024 * 1024;

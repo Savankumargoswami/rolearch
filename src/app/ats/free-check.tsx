@@ -11,6 +11,7 @@ const MIN = 200;
 export function FreeCheck({ signedIn, hasProfile }: { signedIn: boolean; hasProfile: boolean }) {
   const [title, setTitle] = useState("");
   const [company, setCompany] = useState("");
+  const [url, setUrl] = useState("");
   const [description, setDescription] = useState("");
   const ready = title.trim().length > 1 && description.trim().length >= MIN;
 
@@ -18,6 +19,7 @@ export function FreeCheck({ signedIn, hasProfile }: { signedIn: boolean; hasProf
     if (typeof target === "string") return;
     setTitle(target.title);
     setCompany(target.company ?? "");
+    setUrl(target.url ?? "");
     setDescription(target.description);
   }
 
@@ -41,6 +43,11 @@ export function FreeCheck({ signedIn, hasProfile }: { signedIn: boolean; hasProf
           </label>
         </div>
         <label className="mt-3 flex flex-col gap-1.5 text-sm">
+          <span className="font-medium">{t("atsFree.urlLabel")}</span>
+          <input value={url} onChange={(e) => setUrl(e.target.value)} type="url" maxLength={500} placeholder="https://" className={`h-11 ${field}`} />
+          <span className="text-muted">{t("atsFree.urlHint")}</span>
+        </label>
+        <label className="mt-3 flex flex-col gap-1.5 text-sm">
           <span className="font-medium">{t("atsFree.descLabel")}</span>
           <textarea
             value={description}
@@ -57,7 +64,7 @@ export function FreeCheck({ signedIn, hasProfile }: { signedIn: boolean; hasProf
       </section>
       <div className="lg:sticky lg:top-24">
         <AtsPanel
-          target={{ title: title.trim(), company: company.trim(), description: description.trim() }}
+          target={{ title: title.trim(), company: company.trim(), description: description.trim(), url: url.trim() }}
           jobTitle={title.trim()}
           company={company.trim()}
           signedIn={signedIn}

@@ -103,19 +103,19 @@ const HARD: Record<string, string> = {
 };
 
 const SOFT: Record<string, string> = {
-  Communication: String.raw`\bcommunicat(e|ion|ing)\b`,
-  Collaboration: String.raw`\bcollaborat(e|ion|ive|ing)\b|\bteamwork\b`,
+  Communication: String.raw`\bcommunicat(e|es|ed|ion|ions|ing|or|ors)\b`,
+  Collaboration: String.raw`\bcollaborat(e|es|ed|ion|ive|ively|ing|or|ors)\b|\bteamwork\b|\bteam player\b`,
   "Cross-functional": String.raw`\bcross[- ]functional\b`,
   Leadership: String.raw`\blead(ership)?\b|\bled\b`,
-  Mentoring: String.raw`\bmentor(ing|ed)?\b|\bcoach(ing|ed)?\b`,
+  Mentoring: String.raw`\bmentor(s|ing|ed|ship)?\b|\bcoach(es|ing|ed)?\b`,
   "Stakeholder management": String.raw`\bstakeholders?\b`,
-  "Problem solving": String.raw`\bproblem[- ]solving\b|\bsolve (complex )?problems\b`,
+  "Problem solving": String.raw`\bproblem[- ]solv(ing|er|ers)\b|\bsolv(e|ed|ing) (complex |technical |business )?problems\b|\btroubleshoot(ing|ed)?\b`,
   Ownership: String.raw`\bownership\b|\bowned\b|\bend[- ]to[- ]end\b`,
   "Attention to detail": String.raw`\battention to detail\b|\bdetail[- ]oriented\b`,
-  "Time management": String.raw`\btime management\b|\bprioriti[sz](e|ation)\b`,
+  "Time management": String.raw`\btime management\b|\bprioriti[sz](e|es|ed|ing|ation)\b`,
   Presentation: String.raw`\bpresent(ed|ing|ation)s?\b`,
   Documentation: String.raw`\bdocument(ation|ed|ing)\b`,
-  Adaptability: String.raw`\badaptab(le|ility)\b|\bfast[- ]paced\b`,
+  Adaptability: String.raw`\badapt(able|ability|ed|ing)\b|\bfast[- ]paced\b`,
 };
 
 /** Splits a pattern at its top-level "|" and runs (?-i:...) alternatives case-sensitively (JS regex has no inline flags). */
@@ -184,15 +184,38 @@ const softByName = new Map(softCounters);
 export function mentions(name: string, text: string): number {
   const counter = hardByName.get(name) ?? softByName.get(name);
   if (counter) return counter(text);
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return text.match(new RegExp(`(^|[^a-z0-9])${escaped}(?![a-z0-9])`, "gi"))?.length ?? 0;
+  const words = name
+    .toLowerCase()
+    .replace(/\s*&\s*/g, " and ")
+    .split(/[\s\-/]+/)
+    .filter(Boolean)
+    .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  if (!words.length) return 0;
+  const last = words.length - 1;
+  const body = words.map((w, i) => (i === last && /[a-z]$/.test(w) ? `${w}(?:s|es)?` : w === "and" ? "(?:and|&)" : w)).join("[\\s\\-/]+");
+  const exact = text.match(new RegExp(`(^|[^a-z0-9+#])${body}(?![a-z0-9+#])`, "gi"))?.length ?? 0;
+  if (exact) return exact;
+  const content = words.filter((w) => !FILLER.has(w)).map(stem);
+  if (content.length < 2) return 0;
+  const near = text.split(/[\n.;•●▪]+/).filter((s) => {
+    const have = new Set((s.toLowerCase().match(/[a-z0-9+#]+/g) ?? []).map(stem));
+    return content.every((w) => have.has(w));
+  });
+  return near.length;
 }
 
-/** Canonical name for a skill if the dictionary knows it ("pyspark" -> "Spark"), else the input. */
+/** Canonical name for a skill if the dictionaries know it ("pyspark" -> "Spark", "Problem-solving" -> "Problem solving"), else the input. */
 export function canonical(skill: string): string {
-  for (const [name, count] of hardCounters) if (name.toLowerCase() === skill.toLowerCase() || count(skill) > 0) return name;
+  for (const [name, count] of [...hardCounters, ...softCounters]) if (name.toLowerCase() === skill.toLowerCase() || count(skill) > 0) return name;
   return skill;
 }
+
+/** True for a skill that's in the soft-skills list. */
+export const isSoft = (name: string) => softByName.has(name);
+
+const FILLER = new Set(["and", "or", "of", "the", "a", "an", "in", "for", "with", "to", "on", "experience", "skills", "knowledge", "proficiency", "strong", "using"]);
+/** A crude stem so "validation", "validated" and "validating" meet ("valid"), as do "models" and "modeling". */
+const stem = (w: string) => w.replace(/(ations?|ings?|ed|es|s|ers?|ment|ments)$/, "").slice(0, 7);
 
 /** 0 none · 1 associate/diploma · 2 bachelor's · 3 master's · 4 doctorate. */
 export function degreeLevel(text: string): number {
