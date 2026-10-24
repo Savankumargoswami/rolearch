@@ -21,7 +21,7 @@ from ..http import USER_AGENT, Fetcher
 from ..models import Company, RawJob
 from .jsonld import _postings, _to_raw
 
-DETAILS_PER_RUN = int(os.environ.get("SITEMAP_DETAILS_PER_RUN", "300"))
+DETAILS_PER_RUN = int(os.environ.get("SITEMAP_DETAILS_PER_RUN", "1500"))
 MAX_SITEMAPS = 40
 _LOC = re.compile(r"<loc>\s*([^<\s]+)\s*</loc>", re.I)
 _JOB_URL = re.compile(r"/(jobs?|job-details|jobdetail|careers?/jobs?|positions?|requisitions?|opening)/", re.I)

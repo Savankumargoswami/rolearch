@@ -8,6 +8,7 @@ career site (which hands off to iCIMS when the person applies).
 from __future__ import annotations
 
 import asyncio
+import os
 from datetime import datetime
 
 from ..http import Fetcher
@@ -15,7 +16,7 @@ from ..models import Company, RawJob
 from ..text import html_to_text
 
 PAGE = 100
-MAX_JOBS = 15000
+MAX_JOBS = int(os.environ.get("JIBE_MAX_JOBS", "50000"))
 
 
 def _date(s: str | None) -> datetime | None:

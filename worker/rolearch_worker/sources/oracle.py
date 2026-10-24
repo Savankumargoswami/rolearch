@@ -16,7 +16,7 @@ from ..models import Company, RawJob
 from ..text import html_to_text
 
 PAGE = 50
-MAX_JOBS = 6000
+MAX_JOBS = int(os.environ.get("ORACLE_MAX_JOBS", "100000"))
 DETAILS_PER_RUN = int(os.environ.get("ORACLE_DETAILS_PER_RUN", "300"))
 _ORACLE = asyncio.Semaphore(int(os.environ.get("ORACLE_CONCURRENCY", "6")))
 

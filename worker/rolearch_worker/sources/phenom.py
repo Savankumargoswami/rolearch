@@ -19,7 +19,7 @@ from ..text import html_to_text
 from ._util import parse_time
 
 PAGE = 100
-MAX_JOBS = int(os.environ.get("PHENOM_MAX_JOBS", "10000"))
+MAX_JOBS = int(os.environ.get("PHENOM_MAX_JOBS", "50000"))
 DETAILS_PER_RUN = int(os.environ.get("PHENOM_DETAILS_PER_RUN", "300"))
 _PHENOM = asyncio.Semaphore(int(os.environ.get("PHENOM_CONCURRENCY", "4")))
 _DESC = re.compile(r'"jobDetail"\s*:\s*\{.*?"description"\s*:\s*("(?:[^"\\]|\\.)*")', re.S)
@@ -41,6 +41,16 @@ def _body(ref: str, locale: str, start: int) -> dict:
 async def _search(http: Fetcher, host: str, ref: str, locale: str, start: int) -> dict:
     async with _PHENOM:
         return (await http.post_json(f"https://{host}/widgets", _body(ref, locale, start))).get("refineSearch") or {}
+
+
+def _workplace(flag, is_remote, location: str) -> str | None:
+    """Phenom sends the work type as text ("On-Site", "Remote", "Remote/Hybrid") or as a true/false flag."""
+    if isinstance(flag, str) and flag.strip():
+        v = flag.lower()
+        return "hybrid" if "hybrid" in v else "remote" if "remote" in v else "onsite" if "site" in v or "office" in v else None
+    if flag is True or is_remote is True:
+        return "remote"
+    return "remote" if "remote" in location.lower() else None
 
 
 async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
@@ -71,7 +81,7 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
             return None
         seen.add(jid)
         url = f"https://{host}/{prefix}/job/{jid}/{_slug(title)}"
-        remote = bool(j.get("remote") or j.get("isRemote")) or "remote" in str(j.get("location", "")).lower()
+        workplace = _workplace(j.get("remote"), j.get("isRemote"), str(j.get("location", "")))
         skills = ", ".join(j.get("ml_skills") or [])
         raw = RawJob(
             external_id=jid,
@@ -80,7 +90,7 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
             apply_url=url,
             location_text=j.get("cityStateCountry") or j.get("location") or "",
             city_hint=j.get("city") or None,
-            workplace_hint="remote" if remote else None,
+            workplace_hint=workplace,
             posted_at=parse_time(j.get("postedDate") or j.get("dateCreated")),
             description="\n\n".join(x for x in (j.get("descriptionTeaser") or "", f"Skills: {skills}" if skills else "") if x),
             department=j.get("department") or j.get("category") or "",

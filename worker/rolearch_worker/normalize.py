@@ -88,7 +88,13 @@ def normalize(company: Company, raw: RawJob, now: datetime | None = None) -> dic
     salary = raw.salary
     return {
         "id": job_id(company, raw),
-        "dedupeKey": dedupe_key(Company(employer, company.country, company.ats, company.token), title, f"{display_city}|{display_country}"),
+        # Same title at the same place posted twice -> one job. The full location text is part of "place", so different
+        # stores of a chain ("Shift Supervisor" at 2,000 addresses) never collapse when their town isn't recognised.
+        "dedupeKey": dedupe_key(
+            Company(employer, company.country, company.ats, company.token),
+            title,
+            f"{display_city}|{display_country}|{re.sub(r'[^a-z0-9]+', ' ', (raw.location_text or '').lower()).strip()}",
+        ),
         "companyKey": company.key,
         "title": title,
         "company": employer,

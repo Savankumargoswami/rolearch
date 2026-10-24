@@ -16,7 +16,7 @@ from ..http import Fetcher
 from ..models import Company, RawJob
 from ..text import html_to_text
 
-MAX_JOBS = int(os.environ.get("EIGHTFOLD_MAX_JOBS", "5000"))
+MAX_JOBS = int(os.environ.get("EIGHTFOLD_MAX_JOBS", "50000"))
 DETAILS_PER_RUN = int(os.environ.get("EIGHTFOLD_DETAILS_PER_RUN", "300"))
 _EIGHTFOLD = asyncio.Semaphore(int(os.environ.get("EIGHTFOLD_CONCURRENCY", "4")))
 

@@ -211,6 +211,10 @@ _not_city = re.compile(
 )
 
 
+# A street address part: starts with a house number, or carries a unit/suite marker.
+_STREET = re.compile(r"^\d|#|\b(suite|ste\.?|unit|floor|po box)\b", re.I)
+
+
 def parse_location(text: str | None, default_country: str | None = None) -> Place:
     """Best-effort parse of an ATS location string."""
     if not text:
@@ -250,9 +254,13 @@ def parse_location(text: str | None, default_country: str | None = None) -> Plac
                 country = cc
             break
     if not city and not remote and tokens:
-        first = tokens[0].strip()
-        if not country_code(first) and len(first) <= 40:
-            city = first
+        # Unknown town: take the first part that isn't a street address ("220 South FM 1626"), a state or a country.
+        for tok in tokens:
+            t = tok.strip()
+            if _STREET.match(t) or country_code(t) or (t.upper() in US_STATES and len(t) == 2) or _fold(t) in US_STATE_NAMES or len(t) > 40:
+                continue
+            city = t
+            break
     if not country and not remote:
         country = default_country
     return Place(city, country, lat, lon, remote)

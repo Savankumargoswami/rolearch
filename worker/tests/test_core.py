@@ -61,6 +61,12 @@ class Geo(unittest.TestCase):
     def test_remote_without_country_has_none(self):
         self.assertIsNone(parse_location("Remote", default_country="US").country)
 
+    def test_street_address_town(self):
+        # Store chains give the street address first; the town is the part after it.
+        p = parse_location("220 SOUTH FM 1626, Buda, Texas,United States")
+        self.assertEqual((p.city, p.country), ("Buda", "US"))
+        self.assertEqual(parse_location("Suite 200, 55 Main St, Frisco, TX").city, "Frisco")
+
 
 class Text(unittest.TestCase):
     def test_greenhouse_escaped_html(self):
@@ -176,6 +182,13 @@ class Normalize(unittest.TestCase):
         self.assertTrue(j["launchField"])
         # Same posting -> same id every run
         self.assertEqual(j["id"], normalize(Company("Acme Corp", "US", "greenhouse", "acme"), raw, now)["id"])
+
+    def test_stores_in_unknown_towns_stay_separate(self):
+        # Two stores' "Shift Supervisor" openings are two jobs, even when the towns aren't in the gazetteer.
+        co = Company("Pharmacy Co", "US", "phenom", "x")
+        a = normalize(co, RawJob("1", "Shift Supervisor", "https://x/1", "https://x/1", location_text="12 Elm St, Smalltown, Texas, United States"))
+        b = normalize(co, RawJob("2", "Shift Supervisor", "https://x/2", "https://x/2", location_text="9 Oak Rd, Othertown, Texas, United States"))
+        self.assertNotEqual(a["dedupeKey"], b["dedupeKey"])
 
     def test_remote_worldwide(self):
         raw = RawJob("1", "Data Analyst", "https://x/1", "https://x/1", location_text="Remote")
