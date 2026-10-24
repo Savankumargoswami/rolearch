@@ -2,6 +2,7 @@
 
 import { createHash } from "node:crypto";
 import { getJob, getJobText } from "@/data/db";
+import { liveDescription } from "@/lib/live-description";
 import { t } from "@/i18n";
 import { resumeText, scoreAts, type AtsFile, type AtsJob, type AtsReport } from "@/lib/ats";
 import { AtsDocSchema, fit, fromProfile, MAX_WORDS, type AtsDoc } from "@/lib/ats-doc";
@@ -71,7 +72,9 @@ async function jobFor(target: AtsTarget): Promise<Found> {
   if (typeof target === "string") {
     const job = await getJob(target);
     if (!job) return { error: t("ats.errJob") };
-    const description = await getJobText(target);
+    let description = await getJobText(target);
+    // Not stored yet: read it from the employer's own posting.
+    if (description.trim().length < MIN_SAVED && job.jobUrl) description = (await liveDescription(job.id, job.jobUrl)) || description;
     if (description.trim().length < MIN_SAVED) return { error: t("ats.errShort") };
     // The job's own requirements (read once per job and stored) back up the scanner keywords.
     const [req, keywords] = await Promise.all([jobRequirements(job, description), jobAtsKeywords(job.id, job.title, description)]);
