@@ -76,12 +76,16 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
     setChecked(goal);
     startCheck(async () => {
       let res: Checked;
-      if (source === "profile") res = await checkProfile(goal, phone);
-      else {
-        if (!upload) return setError(t("profile.errNoFile"));
-        const data = new FormData();
-        data.set("resume", upload);
-        res = await checkUpload(goal, data);
+      try {
+        if (source === "profile") res = await checkProfile(goal, phone);
+        else {
+          if (!upload) return setError(t("profile.errNoFile"));
+          const data = new FormData();
+          data.set("resume", upload);
+          res = await checkUpload(goal, data);
+        }
+      } catch {
+        return setError(t("ats.errUnexpected"));
       }
       if (res.ok) setResult({ ...res, source, contact: { ...res.contact, phone: res.contact.phone || phone } });
       else setError(res.message);
@@ -116,7 +120,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
     if (!result) return;
     setError("");
     startOptimize(async () => {
-      const res = await optimizeForJob(checked, result.resume, result.contact, confirmed, result.file, mode);
+      const res = await optimizeForJob(checked, result.resume, result.contact, confirmed, result.file, mode).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
       if (res.ok) setBetter(res);
       else setError(res.message);
     });
@@ -125,7 +129,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
   function download(resume: AtsDoc, format: Format) {
     if (!result) return;
     startDownload(async () => {
-      const res = await downloadResume(resume, result.contact, company, format);
+      const res = await downloadResume(resume, result.contact, company, format).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
       if (res.ok) save(res);
       else setError(res.message);
     });
@@ -134,7 +138,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
   function saveToProfile() {
     if (!better) return;
     startSave(async () => {
-      const res = await saveProfile(toProfile(better.resume));
+      const res = await saveProfile(toProfile(better.resume)).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
       if (res.ok) setNote(t("ats.savedToProfile"));
       else setError(res.message);
     });
@@ -565,7 +569,7 @@ function CoverLetter({ target, resume, contact, onError }: { target: AtsTarget; 
   const [busy, start] = useTransition();
   const make = (format: Format) =>
     start(async () => {
-      const res = await coverLetter(target, resume, contact, format);
+      const res = await coverLetter(target, resume, contact, format).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
       if (!res.ok) return onError(res.message);
       save(res);
       setText(res.text ?? "");

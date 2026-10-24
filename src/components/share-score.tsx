@@ -14,7 +14,7 @@ export function ShareScore({ before, after, title }: { before: number | null; af
 
   function make() {
     start(async () => {
-      const path = await shareLink(before, after, title);
+      const path = await shareLink(before, after, title).catch(() => null);
       if (!path) return;
       const full = new URL(path, window.location.origin).toString();
       setUrl(full);

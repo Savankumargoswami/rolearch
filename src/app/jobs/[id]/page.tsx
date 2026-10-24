@@ -22,6 +22,9 @@ import { loadViewer } from "@/lib/profile";
 import { matchProfile } from "@/lib/role-match";
 import { createClient } from "@/lib/supabase/server";
 
+// The ATS check's actions run here: reading a resume and tailoring it take 20-40 seconds each.
+export const maxDuration = 120;
+
 // Pages for current jobs are built ahead; a job added later is rendered on its first visit.
 // The personal parts (match, missing skills, ATS check) stream in per visitor.
 export async function generateStaticParams() {

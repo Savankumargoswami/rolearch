@@ -102,7 +102,7 @@ const slug = (s: string) => s.replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_|_$/g,
 const resumeName = (d: AtsDoc, company: string) => `${slug(d.full_name || "Resume")}${company ? `_${slug(company)}` : ""}_Resume`;
 
 /** Scores the signed-in member's saved profile against a job. */
-export async function checkProfile(target: AtsTarget, phone: string): Promise<Checked> {
+async function checkProfileInner(target: AtsTarget, phone: string): Promise<Checked> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
   const found = await jobFor(target);
   if ("error" in found) return { ok: false, message: found.error };
@@ -114,7 +114,7 @@ export async function checkProfile(target: AtsTarget, phone: string): Promise<Ch
 }
 
 /** Reads an uploaded resume (not stored) and scores it against a job, layout included for Word files. */
-export async function checkUpload(target: AtsTarget, form: FormData): Promise<Checked> {
+async function checkUploadInner(target: AtsTarget, form: FormData): Promise<Checked> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
   const upload = form.get("resume");
   if (!(upload instanceof File) || upload.size === 0) return { ok: false, message: t("profile.errNoFile") };
@@ -134,7 +134,7 @@ export async function checkUpload(target: AtsTarget, form: FormData): Promise<Ch
 }
 
 /** Tailors a resume to the job, then re-scores it, layout included, as the Word file we'd hand back. */
-export async function optimizeForJob(
+async function optimizeForJobInner(
   target: AtsTarget,
   resume: AtsDoc,
   contact: Contact,
@@ -173,7 +173,7 @@ export async function optimizeForJob(
 }
 
 /** An ATS-friendly resume as a Word (.docx) or PDF file, as base64 for the browser to save. */
-export async function downloadResume(resume: AtsDoc, contact: Contact, company: string, format: "docx" | "pdf"): Promise<FileResult> {
+async function downloadResumeInner(resume: AtsDoc, contact: Contact, company: string, format: "docx" | "pdf"): Promise<FileResult> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
   const parsed = AtsDocSchema.safeParse(resume);
   if (!parsed.success) return { ok: false, message: t("profile.errInvalid") };
@@ -183,7 +183,7 @@ export async function downloadResume(resume: AtsDoc, contact: Contact, company: 
 }
 
 /** A cover letter for this job written from the resume's facts, as a Word or PDF file. */
-export async function coverLetter(target: AtsTarget, resume: AtsDoc, contact: Contact, format: "docx" | "pdf"): Promise<FileResult & { text?: string }> {
+async function coverLetterInner(target: AtsTarget, resume: AtsDoc, contact: Contact, format: "docx" | "pdf"): Promise<FileResult & { text?: string }> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
   const parsed = AtsDocSchema.safeParse(resume);
   if (!parsed.success) return { ok: false, message: t("profile.errInvalid") };
@@ -208,4 +208,32 @@ export async function shareLink(before: number | null, after: number, title: str
   if (!(await signedIn())) return null;
   const n = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
   return `/s/${signShare({ before: before === null ? null : n(before), after: n(after), title: String(title).trim() })}`;
+}
+
+/** Any unexpected failure (a timeout upstream, an API error) comes back as a message instead of breaking the page. */
+function guarded<A extends unknown[], R>(name: string, fn: (...args: A) => Promise<R>) {
+  return async (...args: A): Promise<R | { ok: false; message: string }> => {
+    try {
+      return await fn(...args);
+    } catch (e) {
+      console.error(`[ats] ${name} failed:`, e instanceof Error ? e.stack ?? e.message : e);
+      return { ok: false, message: t("ats.errUnexpected") };
+    }
+  };
+}
+
+export async function checkProfile(target: AtsTarget, phone: string): Promise<Checked> {
+  return (await guarded("checkProfile", checkProfileInner)(target, phone)) as Checked;
+}
+export async function checkUpload(target: AtsTarget, form: FormData): Promise<Checked> {
+  return (await guarded("checkUpload", checkUploadInner)(target, form)) as Checked;
+}
+export async function optimizeForJob(target: AtsTarget, resume: AtsDoc, contact: Contact, confirmed: string[], original: AtsFile | null, mode: TailorMode = "deep"): Promise<OptimizedResult> {
+  return (await guarded("optimizeForJob", optimizeForJobInner)(target, resume, contact, confirmed, original, mode)) as OptimizedResult;
+}
+export async function downloadResume(resume: AtsDoc, contact: Contact, company: string, format: "docx" | "pdf"): Promise<FileResult> {
+  return (await guarded("downloadResume", downloadResumeInner)(resume, contact, company, format)) as FileResult;
+}
+export async function coverLetter(target: AtsTarget, resume: AtsDoc, contact: Contact, format: "docx" | "pdf"): Promise<FileResult & { text?: string }> {
+  return (await guarded("coverLetter", coverLetterInner)(target, resume, contact, format)) as FileResult & { text?: string };
 }

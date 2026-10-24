@@ -514,6 +514,7 @@ const en = {
     visitorNote: "Create a free account to see your score. Your resume stays in this browser until then, and we never store it.",
     haveAccount: "Already a member?",
     errOptimize: "We couldn't tailor your resume just now. Try again in a minute.",
+    errUnexpected: "Something went wrong on our side. Try again in a minute.",
   },
   atsFree: {
     metaTitle: "Free ATS resume checker: score your resume against any job",

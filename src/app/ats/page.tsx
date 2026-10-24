@@ -4,6 +4,9 @@ import { m, t } from "@/i18n";
 import { loadViewer } from "@/lib/profile";
 import { FreeCheck } from "./free-check";
 
+// The ATS check's actions run here: reading a resume and tailoring it take 20-40 seconds each.
+export const maxDuration = 120;
+
 export const metadata: Metadata = {
   title: t("atsFree.metaTitle"),
   description: t("atsFree.metaDescription"),
