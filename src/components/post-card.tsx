@@ -1,4 +1,4 @@
-import { ArrowUpRight, BookOpen, ChartColumn, FolderGit2 } from "lucide-react";
+import { ArrowUpRight, BookOpen, BriefcaseBusiness, ChartColumn, FolderGit2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { t } from "@/i18n";
@@ -10,6 +10,7 @@ const KIND = {
   project: { icon: FolderGit2, label: "posts.kindProject" },
   output: { icon: ChartColumn, label: "posts.kindOutput" },
   resource: { icon: BookOpen, label: "posts.kindResource" },
+  jobs: { icon: BriefcaseBusiness, label: "posts.kindJobs" },
 } as const;
 
 const host = (url: string) => {
@@ -20,18 +21,33 @@ const host = (url: string) => {
   }
 };
 
+/** Official posts link their picks as [label](/jobs/id); only links to job pages on this site are made. */
+function withJobLinks(body: string) {
+  return body.split(/(\[[^\]\n]+\]\(\/jobs\/[^)\s]+\))/).map((part, i) => {
+    const m = /^\[([^\]\n]+)\]\((\/jobs\/[^)\s]+)\)$/.exec(part);
+    return m ? (
+      <Link key={i} href={m[2]} className="font-medium underline decoration-line underline-offset-4 hover:decoration-ink">
+        {m[1]}
+      </Link>
+    ) : (
+      part
+    );
+  });
+}
+
 export function PostCard({ post, viewerId, index = 0 }: { post: Post; viewerId: string; index?: number }) {
   const kind = KIND[post.kind];
   const Icon = kind.icon;
   const n = post.images.length;
+  const profile = post.author.id ? `/u/${post.author.id}` : "/jobs";
   return (
     <article className="rise rounded-2xl border border-line bg-surface p-4 sm:p-5" style={{ "--delay": `${Math.min(index, 6) * 60}ms` } as React.CSSProperties}>
       <header className="flex items-start gap-3">
-        <Link href={`/u/${post.author.id}`} className="shrink-0 rounded-full">
+        <Link href={profile} className="shrink-0 rounded-full">
           <Avatar url={post.author.avatarUrl} name={post.author.name} size={44} />
         </Link>
         <div className="min-w-0 flex-1">
-          <Link href={`/u/${post.author.id}`} className="font-semibold hover:underline">
+          <Link href={profile} className="font-semibold hover:underline">
             {post.author.name}
           </Link>
           <p className="truncate text-sm text-muted">
@@ -44,7 +60,7 @@ export function PostCard({ post, viewerId, index = 0 }: { post: Post; viewerId: 
         </span>
       </header>
 
-      <p className="mt-3 leading-relaxed whitespace-pre-line break-words">{post.body}</p>
+      <p className="mt-3 leading-relaxed whitespace-pre-line break-words">{post.kind === "jobs" ? withJobLinks(post.body) : post.body}</p>
 
       {n > 0 && (
         <div className={`mt-3 grid gap-1.5 overflow-hidden rounded-xl ${n === 1 ? "" : "grid-cols-2"}`}>
@@ -77,7 +93,7 @@ export function PostCard({ post, viewerId, index = 0 }: { post: Post; viewerId: 
         </a>
       )}
 
-      {post.author.id === viewerId && (
+      {post.author.id && post.author.id === viewerId && (
         <footer className="mt-2 flex justify-end">
           <DeletePostButton id={post.id} />
         </footer>

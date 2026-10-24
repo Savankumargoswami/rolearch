@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { FeedbackPrompt } from "@/components/feedback-prompt";
+import { NewsletterCard } from "@/components/newsletter-card";
 import { ProfileView } from "@/components/profile-view";
 import { t } from "@/i18n";
 import { postReviewEnabled } from "@/lib/post-review";
@@ -28,5 +29,10 @@ async function Account() {
   const account = await loadAccount();
   const supabase = await createClient();
   const [social, posts] = await Promise.all([loadSocial(supabase, account.id, account.id), listPosts(supabase, { authorId: account.id }, 20)]);
-  return <ProfileView account={account} mode="own" social={social} posts={posts} viewerId={account.id} canPost={postReviewEnabled} />;
+  return (
+    <>
+      <ProfileView account={account} mode="own" social={social} posts={posts} viewerId={account.id} canPost={postReviewEnabled} />
+      <NewsletterCard userId={account.id} />
+    </>
+  );
 }

@@ -9,7 +9,8 @@ export type Social = { followers: number; following: number; posts: number; isFo
 
 export type Post = {
   id: string;
-  kind: PostKind;
+  /** "jobs": an official Rolearch post (no member author). */
+  kind: PostKind | "jobs";
   body: string;
   link: string;
   images: string[];
@@ -37,7 +38,7 @@ const POST_COLUMNS = "id, kind, body, link, images, created_at, author:profiles!
 
 type PostRow = {
   id: string;
-  kind: PostKind;
+  kind: PostKind | "jobs";
   body: string;
   link: string;
   images: string[] | null;
@@ -71,7 +72,9 @@ function toPost(r: PostRow, now: number): Post {
     images: (r.images ?? []).map(postImageUrl),
     createdAt: r.created_at,
     ago: ago(r.created_at, now),
-    author: { id: r.author?.id ?? "", name: r.author?.full_name || "Rolearch member", headline: r.author?.headline ?? "", avatarUrl: r.author?.avatar_url ?? "" },
+    author: r.author
+      ? { id: r.author.id, name: r.author.full_name || "Rolearch member", headline: r.author.headline ?? "", avatarUrl: r.author.avatar_url ?? "" }
+      : { id: "", name: "Rolearch", headline: "Official", avatarUrl: "" },
   };
 }
 
@@ -81,7 +84,8 @@ export async function listPosts(supabase: Supabase, filter: { authorId?: string;
   if (filter.authorId) query = query.eq("author_id", filter.authorId);
   if (filter.followedBy) {
     const { data } = await supabase.from("follows").select("following_id").eq("follower_id", filter.followedBy).limit(1000);
-    query = query.in("author_id", [filter.followedBy, ...(data ?? []).map((f) => f.following_id as string)]);
+    // Official Rolearch posts (no author) show in everyone's Following tab too.
+    query = query.or(`author_id.in.(${[filter.followedBy, ...(data ?? []).map((f) => f.following_id as string)].join(",")}),author_id.is.null`);
   }
   const { data, error } = await query;
   if (error) {
