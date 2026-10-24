@@ -15,6 +15,7 @@ export function SiteFooter() {
           <h2 className="text-sm font-semibold">{t("footer.product")}</h2>
           <ul className="mt-3 space-y-2 text-muted">
             <li><Link className="hover:text-ink" href="/jobs">{t("nav.jobs")}</Link></li>
+            <li><Link className="hover:text-ink" href="/ats">{t("nav.ats")}</Link></li>
             <li><Link className="hover:text-ink" href="/#companies">{t("nav.companies")}</Link></li>
             <li><Link className="hover:text-ink" href="/signup">{t("nav.signUp")}</Link></li>
           </ul>

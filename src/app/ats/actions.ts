@@ -3,6 +3,8 @@
 import { getJob, getJobText } from "@/data/db";
 import { t } from "@/i18n";
 import { scoreAts, type AtsReport } from "@/lib/ats";
+import { readRequirements } from "@/lib/job-requirements";
+import { signShare } from "@/lib/share-card";
 import { ProfileSaveSchema, type ProfileData } from "@/lib/profile-schema";
 import { loadAccount } from "@/lib/profile";
 import { resumeDocx } from "@/lib/resume-docx";
@@ -29,19 +31,34 @@ async function signedIn() {
   return user;
 }
 
-async function jobFor(jobId: string) {
-  const job = await getJob(jobId);
-  if (!job) return null;
-  return { job, description: await getJobText(jobId) };
+/** A Rolearch job by ID, or a job someone pasted into the free ATS check. */
+export type AtsTarget = string | { title: string; description: string; company?: string };
+
+const MIN_PASTED = 200;
+const MAX_PASTED = 20000;
+
+async function jobFor(target: AtsTarget) {
+  if (typeof target === "string") {
+    const job = await getJob(target);
+    if (!job) return null;
+    return { job, description: await getJobText(target) };
+  }
+  const title = String(target?.title ?? "").trim().slice(0, 200);
+  const description = String(target?.description ?? "").trim().slice(0, MAX_PASTED);
+  if (!title || description.length < MIN_PASTED) return null;
+  // Pasted jobs have no stored skills, so read them now (not stored); the scorer falls back to the description alone.
+  const req = await readRequirements(title, description);
+  const skills = req ? [...req.required, ...req.certifications] : [];
+  return { job: { title, company: String(target.company ?? "").trim().slice(0, 120), skills, years: req?.years ?? 0 }, description };
 }
 
 const sanitizeContact = (c: Contact): Contact => ({ email: String(c.email ?? "").slice(0, 200), phone: String(c.phone ?? "").slice(0, 40) });
 
 /** Scores the signed-in member's saved profile against a job. Free and instant: no AI involved. */
-export async function checkProfile(jobId: string, phone: string): Promise<Checked> {
+export async function checkProfile(target: AtsTarget, phone: string): Promise<Checked> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
-  const found = await jobFor(jobId);
-  if (!found) return { ok: false, message: t("ats.errJob") };
+  const found = await jobFor(target);
+  if (!found) return { ok: false, message: t(typeof target === "string" ? "ats.errJob" : "ats.errPasted") };
   const account = await loadAccount();
   const resume = account.profile;
   if (resume.resume.experience.length + resume.resume.skills.length === 0) return { ok: false, message: t("ats.errEmptyProfile") };
@@ -51,15 +68,15 @@ export async function checkProfile(jobId: string, phone: string): Promise<Checke
 }
 
 /** Reads an uploaded resume (not stored) and scores it against a job. */
-export async function checkUpload(jobId: string, form: FormData): Promise<Checked> {
+export async function checkUpload(target: AtsTarget, form: FormData): Promise<Checked> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
   const file = form.get("resume");
   if (!(file instanceof File) || file.size === 0) return { ok: false, message: t("profile.errNoFile") };
   if (file.size > MAX_BYTES) return { ok: false, message: t("profile.errTooBig") };
   const kind = TYPES[file.type as keyof typeof TYPES];
   if (!kind) return { ok: false, message: t("profile.errType") };
-  const found = await jobFor(jobId);
-  if (!found) return { ok: false, message: t("ats.errJob") };
+  const found = await jobFor(target);
+  if (!found) return { ok: false, message: t(typeof target === "string" ? "ats.errJob" : "ats.errPasted") };
 
   const read = await readResume({ bytes: Buffer.from(await file.arrayBuffer()), kind });
   if ("error" in read) {
@@ -72,12 +89,12 @@ export async function checkUpload(jobId: string, form: FormData): Promise<Checke
 }
 
 /** Tailors a resume to the job with Claude, then re-scores it with the same scorer. */
-export async function optimizeForJob(jobId: string, resume: ProfileData, contact: Contact, confirmed: string[]): Promise<OptimizedResult> {
+export async function optimizeForJob(target: AtsTarget, resume: ProfileData, contact: Contact, confirmed: string[]): Promise<OptimizedResult> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
   const parsed = ProfileSaveSchema.safeParse(resume);
   if (!parsed.success) return { ok: false, message: t("profile.errInvalid") };
-  const found = await jobFor(jobId);
-  if (!found) return { ok: false, message: t("ats.errJob") };
+  const found = await jobFor(target);
+  if (!found) return { ok: false, message: t(typeof target === "string" ? "ats.errJob" : "ats.errPasted") };
   const { job, description } = found;
   const safeContact = sanitizeContact(contact);
   const atsJob = { title: job.title, description, skills: job.skills, years: job.years };
@@ -105,4 +122,11 @@ export async function downloadDocx(resume: ProfileData, contact: Contact, compan
   const buf = await resumeDocx(parsed.data, sanitizeContact(contact));
   const slug = (s: string) => s.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 40);
   return { ok: true, filename: `${slug(parsed.data.full_name || "Resume")}-Resume${company ? `-${slug(company)}` : ""}.docx`, base64: buf.toString("base64") };
+}
+
+/** A link to a public score card, for members to share after a check. */
+export async function shareLink(before: number | null, after: number, title: string): Promise<string | null> {
+  if (!(await signedIn())) return null;
+  const n = (v: number) => Math.max(0, Math.min(100, Math.round(v)));
+  return `/s/${signShare({ before: before === null ? null : n(before), after: n(after), title: String(title).trim() })}`;
 }

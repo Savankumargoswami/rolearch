@@ -69,6 +69,13 @@ async function save(id: string, req: JobRequirements) {
 export async function jobRequirements(job: { id: string; title: string }, description: string): Promise<JobRequirements | null> {
   const have = await stored(job.id);
   if (have) return have;
+  const req = await readRequirements(job.title, description);
+  if (req) await save(job.id, req);
+  return req;
+}
+
+/** Reads what a job asks for from any description (e.g. one pasted into the free ATS check), without storing it. */
+export async function readRequirements(title: string, description: string): Promise<JobRequirements | null> {
   if (description.trim().length < 200 || !process.env.ANTHROPIC_API_KEY) return null;
   try {
     const client = new Anthropic();
@@ -77,7 +84,7 @@ export async function jobRequirements(job: { id: string; title: string }, descri
       max_tokens: 1500,
       system: SYSTEM,
       output_config: { effort: "low", format: zodOutputFormat(Schema) },
-      messages: [{ role: "user", content: `<job title="${job.title.replace(/"/g, "'")}">\n${description.slice(0, 15000)}\n</job>` }],
+      messages: [{ role: "user", content: `<job title="${title.replace(/"/g, "'")}">\n${description.slice(0, 15000)}\n</job>` }],
     });
     const out = response.parsed_output;
     if (!out || response.stop_reason === "refusal") return null;
@@ -89,7 +96,6 @@ export async function jobRequirements(job: { id: string; title: string }, descri
       years: Math.max(0, Math.min(30, Math.round(out.years || 0))),
       education,
     };
-    await save(job.id, req);
     return req;
   } catch (e) {
     console.error("[jobs] requirements failed:", e instanceof Error ? e.message : e);

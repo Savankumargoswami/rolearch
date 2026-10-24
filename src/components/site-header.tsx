@@ -32,6 +32,9 @@ export function SiteHeader() {
             <BriefcaseBusiness aria-hidden="true" className="size-[1.1rem]" />
             {t("nav.jobs")}
           </NavLink>
+          <Link href="/ats" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
+            {t("nav.ats")}
+          </Link>
           <Link href="/#companies" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
             {t("nav.companies")}
           </Link>

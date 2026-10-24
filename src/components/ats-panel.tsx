@@ -1,9 +1,12 @@
 "use client";
 
-import { Check, Download, FileUp, Loader2, Save, ScanSearch, Sparkles, UserRound, X } from "lucide-react";
+import { Check, Download, FileUp, Loader2, Lock, Save, ScanSearch, Sparkles, UserRound, X } from "lucide-react";
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { checkProfile, checkUpload, downloadDocx, optimizeForJob, type Checked, type OptimizedResult } from "@/app/ats/actions";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { checkProfile, checkUpload, downloadDocx, optimizeForJob, type AtsTarget, type Checked, type OptimizedResult } from "@/app/ats/actions";
+import { ShareScore } from "@/components/share-score";
+import { savePending, takePending } from "@/lib/pending-scan";
 import { saveProfile } from "@/app/account/profile/actions";
 import { t, type MessageKey } from "@/i18n";
 import type { AtsCheck, AtsPartId, AtsReport } from "@/lib/ats";
@@ -15,7 +18,24 @@ type Better = Extract<OptimizedResult, { ok: true }>;
 
 const PARTS: AtsPartId[] = ["hard", "title", "experience", "education", "soft", "parsing", "impact"];
 
-export function AtsPanel({ jobId, jobTitle, company, signedIn, hasProfile }: { jobId: string; jobTitle: string; company: string; signedIn: boolean; hasProfile: boolean }) {
+type Props = {
+  target: AtsTarget;
+  jobTitle: string;
+  company: string;
+  signedIn: boolean;
+  hasProfile: boolean;
+  /** Where a visitor comes back to after creating their account; their scan runs there. */
+  next: string;
+  /** False while the job to check against isn't complete (the free check's pasted job). */
+  ready?: boolean;
+  lead?: string;
+  /** Hands back a pasted job restored from a visitor's waiting scan. */
+  onRestore?: (target: AtsTarget) => void;
+};
+
+export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next, ready = true, lead, onRestore }: Props) {
+  const router = useRouter();
+  const pendingKey = typeof target === "string" ? `job:${target}` : "free";
   const [tab, setTab] = useState<Source>(hasProfile ? "profile" : "upload");
   const [phone, setPhone] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -28,23 +48,53 @@ export function AtsPanel({ jobId, jobTitle, company, signedIn, hasProfile }: { j
   const [optimizing, startOptimize] = useTransition();
   const [downloading, startDownload] = useTransition();
   const [saving, startSave] = useTransition();
+  const [checked, setChecked] = useState<AtsTarget>(target);
+  const resumed = useRef(false);
 
-  function run() {
+  function run(over?: { target: AtsTarget; file: File }) {
+    const source: Source = over ? "upload" : tab;
+    const goal = over?.target ?? target;
+    const upload = over?.file ?? file;
     setError("");
     setNote("");
     setBetter(null);
     setConfirmed([]);
+    setChecked(goal);
     startCheck(async () => {
       let res: Checked;
-      if (tab === "profile") res = await checkProfile(jobId, phone);
+      if (source === "profile") res = await checkProfile(goal, phone);
       else {
-        if (!file) return setError(t("profile.errNoFile"));
+        if (!upload) return setError(t("profile.errNoFile"));
         const data = new FormData();
-        data.set("resume", file);
-        res = await checkUpload(jobId, data);
+        data.set("resume", upload);
+        res = await checkUpload(goal, data);
       }
-      if (res.ok) setResult({ ...res, source: tab, contact: { ...res.contact, phone: res.contact.phone || phone } });
+      if (res.ok) setResult({ ...res, source, contact: { ...res.contact, phone: res.contact.phone || phone } });
       else setError(res.message);
+    });
+  }
+
+  // A visitor started a free scan before signing up: run it now that they're in.
+  useEffect(() => {
+    if (!signedIn || resumed.current) return;
+    resumed.current = true;
+    takePending(pendingKey).then((scan) => {
+      if (!scan) return;
+      setTab("upload");
+      setFile(scan.file);
+      if (typeof scan.target !== "string") onRestore?.(scan.target);
+      run({ target: scan.target, file: scan.file });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
+  }, [signedIn]);
+
+  /** Visitors: keep the scan in this browser and create an account to see the result. */
+  function scanAsVisitor() {
+    if (!file) return setError(t("profile.errNoFile"));
+    setError("");
+    startCheck(async () => {
+      await savePending({ key: pendingKey, target, file });
+      router.push(`/signup?next=${encodeURIComponent(next)}`);
     });
   }
 
@@ -52,7 +102,7 @@ export function AtsPanel({ jobId, jobTitle, company, signedIn, hasProfile }: { j
     if (!result) return;
     setError("");
     startOptimize(async () => {
-      const res = await optimizeForJob(jobId, result.resume, result.contact, confirmed);
+      const res = await optimizeForJob(checked, result.resume, result.contact, confirmed);
       if (res.ok) setBetter(res);
       else setError(res.message);
     });
@@ -84,11 +134,34 @@ export function AtsPanel({ jobId, jobTitle, company, signedIn, hasProfile }: { j
 
   if (!signedIn) {
     return (
-      <Shell>
-        <p className="mt-3 text-[0.95rem] text-muted">{t("ats.signInLead")}</p>
-        <Link href="/signin" className="mt-4 inline-flex min-h-11 items-center rounded-full bg-ink px-5 font-medium text-paper hover:bg-ink-hover">
-          {t("nav.signIn")}
-        </Link>
+      <Shell lead={lead}>
+        <div className="mt-4 flex flex-col gap-3">
+          <UploadField file={file} onFile={setFile} />
+          <button
+            type="button"
+            onClick={scanAsVisitor}
+            disabled={checking || !file || !ready}
+            className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {checking ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <ScanSearch aria-hidden="true" className="size-4" />}
+            {t("ats.scanFree")}
+          </button>
+          <p className="flex items-start gap-2 text-sm text-muted">
+            <Lock aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+            {t("ats.visitorNote")}
+          </p>
+          <p className="text-sm text-muted">
+            {t("ats.haveAccount")}{" "}
+            <Link href={`/signin?next=${encodeURIComponent(next)}`} className="font-medium text-ink underline underline-offset-4">
+              {t("nav.signIn")}
+            </Link>
+          </p>
+        </div>
+        {error && (
+          <p role="alert" className="mt-3 text-sm font-medium text-signal-ink">
+            {error}
+          </p>
+        )}
       </Shell>
     );
   }
@@ -96,7 +169,7 @@ export function AtsPanel({ jobId, jobTitle, company, signedIn, hasProfile }: { j
   const report = better?.report ?? result?.report ?? null;
 
   return (
-    <Shell>
+    <Shell lead={lead}>
       <div role="tablist" aria-label={t("ats.title")} className="mt-4 grid grid-cols-2 gap-1 rounded-full bg-ink-soft p-1">
         {(["profile", "upload"] as const).map((s) => (
           <button
@@ -136,21 +209,12 @@ export function AtsPanel({ jobId, jobTitle, company, signedIn, hasProfile }: { j
             </p>
           )
         ) : (
-          <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-dashed border-muted/60 px-3 py-2 text-sm hover:border-ink">
-            <FileUp aria-hidden="true" className="size-5 shrink-0 text-muted" />
-            <span className="min-w-0 flex-1 truncate">{file ? file.name : t("ats.uploadLabel")}</span>
-            <input
-              type="file"
-              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="sr-only"
-            />
-          </label>
+          <UploadField file={file} onFile={setFile} />
         )}
         <button
           type="button"
-          onClick={run}
-          disabled={checking || (tab === "profile" ? !hasProfile : !file)}
+          onClick={() => run()}
+          disabled={checking || !ready || (tab === "profile" ? !hasProfile : !file)}
           className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
           {checking ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <ScanSearch aria-hidden="true" className="size-4" />}
@@ -175,6 +239,7 @@ export function AtsPanel({ jobId, jobTitle, company, signedIn, hasProfile }: { j
             locked={Boolean(better)}
           />
           <Checks checks={report.checks} jobTitle={jobTitle} report={report} />
+          <ShareScore before={better?.before ?? null} after={report.score} title={jobTitle} />
 
           {!better ? (
             <div className="mt-5 rounded-2xl bg-ink p-4 text-paper">
@@ -214,14 +279,29 @@ export function AtsPanel({ jobId, jobTitle, company, signedIn, hasProfile }: { j
   );
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function UploadField({ file, onFile }: { file: File | null; onFile: (f: File | null) => void }) {
+  return (
+    <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-dashed border-muted/60 px-3 py-2 text-sm hover:border-ink">
+      <FileUp aria-hidden="true" className="size-5 shrink-0 text-muted" />
+      <span className="min-w-0 flex-1 truncate">{file ? file.name : t("ats.uploadLabel")}</span>
+      <input
+        type="file"
+        accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+        className="sr-only"
+      />
+    </label>
+  );
+}
+
+function Shell({ children, lead }: { children: React.ReactNode; lead?: string }) {
   return (
     <section aria-labelledby="ats-h" className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
       <h2 id="ats-h" className="flex items-center gap-2 font-display text-xl font-semibold">
         <ScanSearch aria-hidden="true" className="size-5 text-signal-ink" />
         {t("ats.title")}
       </h2>
-      <p className="mt-1 text-sm text-muted">{t("ats.lead")}</p>
+      <p className="mt-1 text-sm text-muted">{lead ?? t("ats.lead")}</p>
       {children}
     </section>
   );

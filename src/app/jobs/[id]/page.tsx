@@ -238,7 +238,7 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
                 </Suspense>
               </div>
             </div>
-            <Suspense fallback={<AtsPanel jobId={job.id} jobTitle={job.title} company={job.company} signedIn={false} hasProfile={false} />}>
+            <Suspense fallback={<AtsPanel target={job.id} next={`/jobs/${job.id}#ats-h`} jobTitle={job.title} company={job.company} signedIn={false} hasProfile={false} />}>
               <PersonalAts job={job} />
             </Suspense>
           </aside>
@@ -338,7 +338,7 @@ async function PersonalMatch({ job }: { job: Job }) {
 
 async function PersonalAts({ job }: { job: Job }) {
   const { signedIn, hasProfile } = await viewerMatch(job.id);
-  return <AtsPanel jobId={job.id} jobTitle={job.title} company={job.company} signedIn={signedIn} hasProfile={hasProfile} />;
+  return <AtsPanel target={job.id} next={`/jobs/${job.id}#ats-h`} jobTitle={job.title} company={job.company} signedIn={signedIn} hasProfile={hasProfile} />;
 }
 
 async function PersonalRequirements({ job }: { job: Job }) {

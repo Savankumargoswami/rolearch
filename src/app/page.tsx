@@ -1,3 +1,4 @@
+import { ArrowRight, Check, ScanSearch } from "lucide-react";
 import Link from "next/link";
 import { Suspense, ViewTransition } from "react";
 import { HeroSearch } from "@/components/hero-search";
@@ -46,6 +47,14 @@ export default async function Home() {
           </p>
           <div className="rise mt-8 max-w-4xl" style={{ "--delay": "180ms" } as React.CSSProperties}>
             <HeroSearch />
+            <Link
+              href="/ats"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-signal bg-signal/15 px-4 text-sm font-medium transition-colors duration-200 hover:bg-signal/30"
+            >
+              <span className="rounded-full bg-signal px-2 py-0.5 text-xs font-semibold">{t("home.atsHeroTag")}</span>
+              {t("home.atsHero")}
+              <ArrowRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
+            </Link>
             <div className="rail -mx-4 mt-4 flex items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
               <span className="shrink-0 text-sm text-muted">{t("hero.quick")}</span>
               {quick.map((q) => (
@@ -61,6 +70,83 @@ export default async function Home() {
           </div>
           <div className="mt-14 sm:mt-16">
             <MeridianMap pins={pins} />
+          </div>
+        </section>
+
+        {/* Free ATS check: the front door. Anyone can start a scan; the result comes with a free account. */}
+        <section aria-labelledby="ats-home" className="mt-20 bg-ink text-paper">
+          <div className="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 md:py-24 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+            <div>
+              <p className="inline-flex items-center gap-2 rounded-full bg-signal px-3 py-1 text-sm font-semibold text-ink">
+                <ScanSearch aria-hidden="true" className="size-4" />
+                {t("home.atsKicker")}
+              </p>
+              <h2 id="ats-home" className="mt-5 max-w-[16ch] font-display text-4xl font-semibold leading-[1.02] tracking-[-0.035em] text-balance sm:text-6xl">
+                {t("home.atsTitle")}
+              </h2>
+              <p className="mt-5 max-w-[50ch] text-lg text-[#c9d2de] text-pretty">{t("home.atsBody")}</p>
+              <ul className="mt-7 grid gap-3 sm:grid-cols-2">
+                {copy.atsPoints.map((p) => (
+                  <li key={p.title} className="flex gap-3">
+                    <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-signal text-ink">
+                      <Check aria-hidden="true" className="size-3.5" strokeWidth={3} />
+                    </span>
+                    <span>
+                      <span className="block font-semibold">{p.title}</span>
+                      <span className="block text-sm text-[#c9d2de]">{p.body}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
+                <Link
+                  href="/ats"
+                  className="inline-flex min-h-14 items-center gap-2 rounded-full bg-signal px-7 text-lg font-semibold text-ink shadow-[0_8px_30px_rgba(217,163,91,0.35)] transition-colors duration-200 hover:bg-[#ebb877]"
+                >
+                  {t("home.atsCta")}
+                  <ArrowRight aria-hidden="true" className="size-5 rtl:-scale-x-100" />
+                </Link>
+                <Link href="/tracker" className="font-medium text-[#dfe5ec] underline decoration-[#dfe5ec]/40 underline-offset-4 hover:text-paper">
+                  {t("home.atsTracker")}
+                </Link>
+              </div>
+              <p className="mt-4 text-sm text-[#9fb0c3]">{t("home.atsFine")}</p>
+            </div>
+
+            {/* Example before/after, so visitors see what they get */}
+            <div className="rounded-3xl bg-paper p-5 text-ink shadow-2xl sm:p-7">
+              <p className="text-sm text-muted">{copy.atsSample.label}</p>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-2xl bg-ink-soft p-4">
+                  <p className="text-sm font-medium text-muted">{t("home.atsBefore")}</p>
+                  <p className="mt-1 font-display text-6xl font-semibold leading-none tabular-nums text-[#b4532a]">54</p>
+                </div>
+                <div className="rounded-2xl bg-signal/25 p-4">
+                  <p className="text-sm font-medium text-muted">{t("home.atsAfter")}</p>
+                  <p className="mt-1 font-display text-6xl font-semibold leading-none tabular-nums">87</p>
+                </div>
+              </div>
+              <dl className="mt-6 space-y-3">
+                {copy.atsSample.parts.map((p) => (
+                  <div key={p.name} className="grid grid-cols-[8.5rem_1fr_2.5rem] items-center gap-3 text-sm">
+                    <dt>{p.name}</dt>
+                    <dd aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-ink-soft">
+                      <span className="block h-full rounded-full bg-ink" style={{ width: `${p.score}%` }} />
+                    </dd>
+                    <dd className="text-end tabular-nums text-muted">{p.score}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-6 text-sm font-medium">{copy.atsSample.missing}</p>
+              <ul className="mt-2 flex flex-wrap gap-1.5">
+                {copy.atsSample.keywords.map((k) => (
+                  <li key={k} className="inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-1 text-sm text-paper">
+                    <Check aria-hidden="true" className="size-3.5" />
+                    {k}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 
@@ -144,58 +230,6 @@ export default async function Home() {
                 </div>
               ))}
             </dl>
-          </div>
-        </section>
-
-        {/* ATS check: lives on every job page; shown here so visitors know it exists */}
-        <section aria-labelledby="ats-h" className="mx-auto mt-24 grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.2fr_1fr] lg:items-center">
-          <div className="order-last rounded-3xl border border-line bg-surface p-5 sm:p-7 lg:order-first">
-            <p className="text-sm text-muted">{copy.atsSample.label}</p>
-            <div className="mt-3 flex items-end gap-3">
-              <span className="font-display text-6xl font-semibold leading-none tabular-nums">82</span>
-              <span className="pb-1 text-muted">/ 100</span>
-              <span className="ms-auto rounded-full bg-signal/30 px-3 py-1.5 text-sm font-medium">{t("ats.band_good")}</span>
-            </div>
-            <dl className="mt-6 space-y-3">
-              {copy.atsSample.parts.map((p) => (
-                <div key={p.name} className="grid grid-cols-[8.5rem_1fr_2.5rem] items-center gap-3 text-sm">
-                  <dt>{p.name}</dt>
-                  <dd aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-ink-soft">
-                    <span className="block h-full rounded-full bg-ink" style={{ width: `${p.score}%` }} />
-                  </dd>
-                  <dd className="text-end tabular-nums text-muted">{p.score}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-6 text-sm font-medium">{copy.atsSample.missing}</p>
-            <ul className="mt-2 flex flex-wrap gap-1.5">
-              {copy.atsSample.keywords.map((k) => (
-                <li key={k} className="rounded-full border border-dashed border-[#b4532a]/60 px-2.5 py-1 text-sm">
-                  {k}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h2 id="ats-h" className="max-w-[14ch] font-display text-3xl font-semibold leading-[1.05] tracking-[-0.025em] text-balance sm:text-5xl">
-              {t("home.atsTitle")}
-            </h2>
-            <p className="mt-4 max-w-[48ch] text-lg text-muted text-pretty">{t("home.atsBody")}</p>
-            <dl className="mt-6 divide-y divide-line border-y border-line">
-              {copy.atsPoints.map((p) => (
-                <div key={p.title} className="py-4">
-                  <dt className="font-semibold">{p.title}</dt>
-                  <dd className="mt-1 text-muted text-pretty">{p.body}</dd>
-                </div>
-              ))}
-            </dl>
-            <Link
-              href="/jobs"
-              className="mt-6 inline-flex min-h-12 items-center rounded-full bg-ink px-6 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
-            >
-              {t("home.atsCta")}
-            </Link>
-            <p className="mt-3 max-w-[48ch] text-sm text-muted text-pretty">{t("ats.disclaimer")}</p>
           </div>
         </section>
 
