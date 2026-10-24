@@ -50,7 +50,7 @@ export function fit<T>(schema: z.ZodType<T>, input: unknown): T {
 /** Just the profile fields, for saving a tailored resume back to the member's profile. */
 export function toProfile(d: AtsDoc): ProfileData {
   // Profile education dates are years: "Jan 2022" or "2022-01" become "2022".
-  const year = (v: string) => /(19|20)\d{2}/.exec(v)?.[0] ?? "";
+  const year = (v: string) => /\b(?:19|20)\d{2}\b/.exec(v)?.[0] ?? "";
   const education = d.resume.education.map((e) => ({ ...e, start: year(e.start), end: year(e.end) }));
   return fit(ProfileSaveSchema, { ...d, resume: { ...d.resume, education } });
 }
