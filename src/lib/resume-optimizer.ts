@@ -64,7 +64,7 @@ export async function optimizeResume(input: {
   try {
     const response = await client.messages.parse({
       model: MODEL,
-      max_tokens: 8000,
+      max_tokens: 16000,
       system: SYSTEM,
       output_config: { effort: "medium", format: zodOutputFormat(OutputSchema) },
       messages: [
@@ -74,7 +74,7 @@ export async function optimizeResume(input: {
             {
               type: "text",
               text: [
-                `<job title="${input.job.title.replace(/"/g, "'")}" company="${input.job.company.replace(/"/g, "'")}">\n${input.job.description.slice(0, 15000)}\n</job>`,
+                `<job title="${input.job.title.replace(/"/g, "'")}" company="${input.job.company.replace(/"/g, "'")}">\n${input.job.description.slice(0, 50000)}\n</job>`,
                 `<resume>\n${JSON.stringify({ headline: resume.headline, summary: resume.summary, skill_groups: resume.skill_groups, experience: resume.resume.experience, projects: resume.resume.projects, skills: resume.resume.skills, education: resume.resume.education, certifications: resume.resume.certifications })}\n</resume>`,
                 `<missing_keywords>${input.missing.join(", ") || "none"}</missing_keywords>`,
                 `<confirmed_skills>${input.confirmed.join(", ") || "none"}</confirmed_skills>`,

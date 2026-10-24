@@ -63,11 +63,11 @@ export async function readResume(file: { bytes: Buffer; kind: "pdf" | "docx" }):
     const { contact, ...draft } = response.parsed_output;
     const status = draft.status.trim().toLowerCase() === "student" ? "student" : "professional";
     const skill_groups = draft.skill_groups
-      .map((g) => ({ label: g.label.trim().slice(0, 60), items: g.items.map((i) => i.trim().slice(0, 80)).filter(Boolean).slice(0, 30) }))
+      .map((g) => ({ label: g.label.trim().slice(0, 100), items: g.items.map((i) => i.trim().slice(0, 120)).filter(Boolean).slice(0, 40) }))
       .filter((g) => g.items.length)
       .slice(0, 12);
-    const education_notes = draft.resume.education.map((_, i) => (draft.education_notes[i] ?? "").trim().slice(0, 400));
-    const header_lines = draft.header_lines.map((l) => l.trim().slice(0, 200)).filter(Boolean).slice(0, 4);
+    const education_notes = draft.resume.education.map((_, i) => (draft.education_notes[i] ?? "").trim().slice(0, 2000));
+    const header_lines = draft.header_lines.map((l) => l.trim().slice(0, 1000)).filter(Boolean).slice(0, 8);
     const doc = { ...draft, status, summary: draft.summary.trim(), skill_groups, extra: draft.extra.trim(), education_notes, header_lines };
     // An unusually long resume is shortened to the check's limits here, so nothing later refuses it.
     return { draft: fit(AtsDocSchema, doc), contact };

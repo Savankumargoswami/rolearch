@@ -6,22 +6,24 @@ import { ProfileSaveSchema, shapes, type ProfileData } from "./profile-schema";
 
 export const SkillGroupSchema = z.object({ label: z.string().trim().max(100), items: z.array(z.string().trim().max(120)).max(40) });
 
-// Real resumes run longer than profile fields (a bullet can be a whole paragraph), so the ATS check accepts
-// several times the profile's limits; what it can't accept is unbounded input.
+// Real resumes run longer than profile fields (a bullet can be a whole paragraph). The ATS check takes any
+// resume up to 3,000 words, so a single field may hold up to that much text; lists allow three times the profile's.
+export const MAX_WORDS = 3000;
+const MAX_FIELD = 20000; // about 3,000 words
 export const AtsDocSchema = z.object(
   shapes(
-    (max) => z.string().trim().max(max * 4),
+    () => z.string().trim().max(MAX_FIELD),
     (item, max) => z.array(item).max(max * 3),
     z.enum(["student", "professional"]),
   ),
 ).extend({
-  summary: z.string().trim().max(2000).default(""),
+  summary: z.string().trim().max(MAX_FIELD).default(""),
   skill_groups: z.array(SkillGroupSchema).max(12).default([]),
-  extra: z.string().trim().max(3000).default(""),
+  extra: z.string().trim().max(MAX_FIELD).default(""),
   /** One details line per degree, same order as resume.education (GPA, coursework, honours). */
-  education_notes: z.array(z.string().trim().max(400)).max(10).default([]),
+  education_notes: z.array(z.string().trim().max(2000)).max(30).default([]),
   /** Extra lines in the resume's header under the contact details (work authorisation, credentials). */
-  header_lines: z.array(z.string().trim().max(200)).max(4).default([]),
+  header_lines: z.array(z.string().trim().max(1000)).max(8).default([]),
 });
 
 export type AtsDoc = z.infer<typeof AtsDocSchema>;

@@ -74,7 +74,7 @@ export function FreeCheck({ viewer }: { viewer: Promise<Viewer> }) {
             {...noAssist}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            maxLength={20000}
+            maxLength={50000}
             rows={12}
             placeholder={t("atsFree.descPlaceholder")}
             className={`py-2.5 leading-relaxed ${field}`}

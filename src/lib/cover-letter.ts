@@ -32,7 +32,7 @@ export async function writeCoverLetter(input: { resume: AtsDoc; job: { title: st
         {
           role: "user",
           content: [
-            `<job title="${job.title.replace(/"/g, "'")}" company="${job.company.replace(/"/g, "'")}">\n${job.description.slice(0, 12000)}\n</job>`,
+            `<job title="${job.title.replace(/"/g, "'")}" company="${job.company.replace(/"/g, "'")}">\n${job.description.slice(0, 50000)}\n</job>`,
             `<resume>\n${JSON.stringify({ name: resume.full_name, headline: resume.headline, summary: resume.summary, experience: resume.resume.experience, projects: resume.resume.projects, education: resume.resume.education, certifications: resume.resume.certifications, skills: resume.skill_groups.length ? resume.skill_groups : resume.resume.skills })}\n</resume>`,
             "Write the cover letter, one paragraph per item.",
           ].join("\n\n"),

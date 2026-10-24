@@ -514,6 +514,7 @@ const en = {
     errEmptyProfile: "Add your experience and skills to your profile first, or upload a resume.",
     errOff: "Resume tailoring isn't switched on yet.",
     errPasted: "Add the job title and the full job description (at least 200 characters).",
+    errResumeTooLong: "Your resume is over {n} words. Trim it to {n} words or fewer and upload it again.",
     errLetter: "We couldn't write the cover letter just now. Try again in a minute.",
     scanFree: "Scan my resume free",
     visitorNote: "Create a free account to see your score. Your resume stays in this browser until then, and we never store it.",

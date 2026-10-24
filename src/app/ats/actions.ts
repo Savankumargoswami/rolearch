@@ -3,8 +3,8 @@
 import { createHash } from "node:crypto";
 import { getJob, getJobText } from "@/data/db";
 import { t } from "@/i18n";
-import { scoreAts, type AtsFile, type AtsJob, type AtsReport } from "@/lib/ats";
-import { AtsDocSchema, fit, fromProfile, type AtsDoc } from "@/lib/ats-doc";
+import { resumeText, scoreAts, type AtsFile, type AtsJob, type AtsReport } from "@/lib/ats";
+import { AtsDocSchema, fit, fromProfile, MAX_WORDS, type AtsDoc } from "@/lib/ats-doc";
 import { jobAtsKeywords } from "@/lib/ats-keywords-cached";
 import { writeCoverLetter } from "@/lib/cover-letter";
 import { docxFacts } from "@/lib/docx-format";
@@ -42,7 +42,8 @@ async function signedIn() {
 export type AtsTarget = string | { title: string; description: string; company?: string; url?: string };
 
 const MIN_PASTED = 200;
-const MAX_PASTED = 20000;
+const MAX_PASTED = 50000; // characters: generous, just not unbounded
+const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 // Shorter than this, a saved posting is only a summary: too little to scan honestly.
 const MIN_SAVED = 600;
 
@@ -137,6 +138,7 @@ async function checkUploadInner(target: AtsTarget, form: FormData): Promise<Chec
     const key = { unavailable: "profile.errReaderOff", refused: "profile.errUnreadable", unreadable: "profile.errUnreadable", too_long: "profile.errTooLong" } as const;
     return { ok: false, message: t(key[read.error]) };
   }
+  if (words(resumeText(read.draft)) > MAX_WORDS) return { ok: false, message: t("ats.errResumeTooLong", { n: MAX_WORDS.toLocaleString("en") }) };
   const contact = sanitizeContact(read.contact);
   const file: AtsFile = { name: upload.name.slice(0, 200), kind, facts };
   return { ok: true, resume: read.draft, contact, file, report: scoreAts(found.job, read.draft, contact, file) };

@@ -51,7 +51,7 @@ export async function readAtsKeywords(title: string, description: string): Promi
       max_tokens: 2000,
       system: SYSTEM,
       output_config: { effort: "low", format: zodOutputFormat(Schema) },
-      messages: [{ role: "user", content: `<job title="${title.replace(/"/g, "'")}">\n${description.slice(0, 15000)}\n</job>` }],
+      messages: [{ role: "user", content: `<job title="${title.replace(/"/g, "'")}">\n${description.slice(0, 50000)}\n</job>` }],
     });
     const out = response.parsed_output;
     if (!out || response.stop_reason === "refusal") return null;
