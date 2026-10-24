@@ -18,7 +18,7 @@ const rule = (color: string, size: number) => ({ bottom: { style: BorderStyle.SI
 function paragraph(b: Block): Paragraph {
   switch (b.t) {
     case "name":
-      return new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [run(b.text, SIZE.name, COLOR.ink, { bold: true })] });
+      return new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 60 }, children: [run(b.text, SIZE.name, COLOR.name, { bold: true })] });
     case "center":
       return new Paragraph({
         alignment: AlignmentType.CENTER,
@@ -31,14 +31,14 @@ function paragraph(b: Block): Paragraph {
     case "para":
       return new Paragraph({ spacing: { before: 40, after: 40 }, children: [run(b.text, SIZE.body, COLOR.body)] });
     case "labeled":
-      return new Paragraph({ spacing: { before: 44, after: 44 }, children: [run(`${b.label}: `, SIZE.body, COLOR.ink), run(b.text, SIZE.body, COLOR.body)] });
+      return new Paragraph({ spacing: { before: 44, after: 44 }, children: [run(`${b.label}: `, SIZE.body, COLOR.ink, { bold: true }), run(b.text, SIZE.body, COLOR.body)] });
     case "role":
       return new Paragraph({
         spacing: { before: 120, after: 55 },
         tabStops: [{ type: TabStopType.RIGHT, position: RIGHT }],
         children: [
           run(b.bold, SIZE.role, COLOR.ink, { bold: !b.plain, italics: b.plain }),
-          ...(b.rest ? [run(` | ${b.rest}`, SIZE.role - 1, COLOR.body)] : []),
+          ...(b.rest ? [run(` | ${b.rest}`, SIZE.role - 1, COLOR.ink)] : []),
           ...(b.right ? [run(`\t${b.right}`, SIZE.date, COLOR.muted, { italics: true })] : []),
         ],
       });
@@ -51,7 +51,9 @@ function paragraph(b: Block): Paragraph {
     case "bullet":
       return new Paragraph({ numbering: { reference: "bullets", level: 0 }, spacing: { before: 44, after: 44 }, children: [run(b.text, SIZE.body, COLOR.body)] });
     case "small":
-      return new Paragraph({ spacing: { before: 30, after: 40 }, children: [run(b.text, SIZE.small, COLOR.muted)] });
+      return b.rule
+        ? new Paragraph({ spacing: { before: 120, after: 40 }, border: { top: { style: BorderStyle.SINGLE, size: 4, color: "999999", space: 4 } }, children: [run(b.text, SIZE.fine, COLOR.muted)] })
+        : new Paragraph({ spacing: { before: 10, after: 60 }, children: [run(b.text, SIZE.small, COLOR.muted)] });
     case "letter":
       return new Paragraph({ spacing: { before: 0, after: 220, line: 300 }, children: [run(b.text, 22, COLOR.body)] });
     case "gap":
@@ -73,7 +75,7 @@ async function render(blocks: Block[], title: string): Promise<Buffer> {
       config: [
         {
           reference: "bullets",
-          levels: [{ level: 0, format: LevelFormat.BULLET, text: "●", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 360, hanging: 240 } }, run: { size: 14 } } }],
+          levels: [{ level: 0, format: LevelFormat.BULLET, text: "-", alignment: AlignmentType.LEFT, style: { paragraph: { indent: { left: 540, hanging: 270 } } } }],
         },
       ],
     },

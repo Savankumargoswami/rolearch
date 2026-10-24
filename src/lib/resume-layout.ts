@@ -1,7 +1,7 @@
 // The layout of a downloaded resume, shared by the Word and PDF files so both read the same.
-// Modelled on resumes that score well in Jobscan-style scanners: one column, centred contact block,
-// standard upper-case headings with a rule, "Title | Company | Location" lines with dates on the right,
-// real bullets, plain text dates. No tables, columns, text boxes, headers, footers or images.
+// One column, centred contact block, upper-case headings with a rule, "Title | Company" lines with
+// "dates | location" on the right in italics, dash bullets, bold skill labels, a details line under each degree,
+// and the keywords line in small type at the end. No tables, columns, text boxes, headers, footers or images.
 import type { AtsDoc } from "./ats-doc";
 
 export type Block =
@@ -13,15 +13,14 @@ export type Block =
   | { t: "role"; bold: string; rest: string; right: string; plain?: boolean }
   | { t: "sub"; text: string; right: string }
   | { t: "bullet"; text: string }
-  | { t: "small"; text: string }
+  | { t: "small"; text: string; rule?: boolean }
   | { t: "letter"; text: string }
   | { t: "gap" };
 
-/** Sizes in half-points (Word's unit): 20pt name, 12pt headings, 10.5pt body. */
-export const SIZE = { name: 40, headline: 23, contact: 20, heading: 24, role: 22, sub: 21, body: 21, small: 20, date: 20 } as const;
-// Black and near-black only: scanners flag coloured or grey text as hard to read. Bold is kept to the name,
-// headings and job titles (also a scanner check).
-export const COLOR = { ink: "000000", body: "111111", muted: "333333", rule: "000000" } as const;
+/** Sizes in half-points (Word's unit): 20pt name, 11.5pt headings, 10pt body. */
+export const SIZE = { name: 40, headline: 23, contact: 19, heading: 23, role: 22, sub: 20, body: 20, small: 18, date: 19, fine: 15 } as const;
+// Dark colours only: scanners flag light grey or coloured text as hard to read. The name is a near-black navy.
+export const COLOR = { name: "1B2A3A", ink: "000000", body: "111111", muted: "333333", rule: "000000" } as const;
 
 const month = (ym: string) => {
   const m = /^(\d{4})-(\d{2})$/.exec(ym);
@@ -52,7 +51,7 @@ export function resumeBlocks(d: AtsDoc, contact: { email: string; phone: string 
   const reach = join([d.location, contact.email, contact.phone]);
   const links = join(d.links.filter((l) => l.url).map((l) => bare(l.url)));
   out.push(...lines.map((text) => ({ t: "center" as const, text, size: "headline" as const })));
-  const contactLines = [reach, links].filter(Boolean);
+  const contactLines = [reach, links, ...d.header_lines].filter(Boolean);
   contactLines.forEach((text, i) => out.push({ t: "center", text, size: "contact", rule: i === contactLines.length - 1 }));
 
   if (d.summary) {
@@ -71,7 +70,7 @@ export function resumeBlocks(d: AtsDoc, contact: { email: string; phone: string 
     r.experience.forEach((e, i) => {
       if (i > 0) out.push({ t: "gap" });
       const dates = join([month(e.start), e.current ? "Present" : month(e.end)], " - ");
-      out.push({ t: "role", bold: e.title, rest: join([e.company, e.location]), right: dates });
+      out.push({ t: "role", bold: e.title, rest: e.company, right: join([dates, e.location]) });
       for (const b of e.bullets) out.push({ t: "bullet", text: b });
     });
   }
@@ -80,18 +79,19 @@ export function resumeBlocks(d: AtsDoc, contact: { email: string; phone: string 
     out.push({ t: "heading", text: "Key Projects" });
     r.projects.forEach((p, i) => {
       if (i > 0) out.push({ t: "gap" });
-      out.push({ t: "role", bold: p.name, rest: p.url ? bare(p.url) : "", right: "", plain: true });
-      if (p.summary) out.push({ t: "bullet", text: p.summary });
-      if (p.skills.length) out.push({ t: "small", text: `Tools: ${p.skills.join(", ")}` });
+      out.push({ t: "role", bold: p.name, rest: "", right: "", plain: true });
+      if (p.summary) out.push({ t: "bullet", text: p.url ? `${p.summary.replace(/\.\s*$/, "")} - ${bare(p.url)}` : p.summary });
     });
   }
 
   if (r.education.length) {
     out.push({ t: "heading", text: "Education" });
-    for (const e of r.education) {
+    r.education.forEach((e, i) => {
       out.push({ t: "role", bold: join([e.degree, e.field], ", "), rest: "", right: "", plain: true });
       out.push({ t: "sub", text: e.school, right: join([e.start, e.end], " - ") });
-    }
+      const notes = d.education_notes[i];
+      if (notes) out.push({ t: "small", text: notes });
+    });
   }
 
   if (r.certifications.length) {
@@ -102,8 +102,7 @@ export function resumeBlocks(d: AtsDoc, contact: { email: string; phone: string 
     }
   }
 
-  if (d.extra) {
-    out.push({ t: "heading", text: "Additional Information" }, { t: "small", text: d.extra });
-  }
+  // Anything else on the resume (a keywords line, languages, awards) closes it in small type under a thin rule.
+  if (d.extra) out.push({ t: "small", text: d.extra.replace(/\s*\n+\s*/g, " | "), rule: true });
   return out;
 }

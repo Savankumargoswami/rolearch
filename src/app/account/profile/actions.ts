@@ -70,8 +70,8 @@ export async function readResumeAction(_: ReadState, form: FormData): Promise<Re
     return { message: t(key[result.error]) };
   }
   // The profile keeps only profile fields; the resume-only parts (summary, grouped skills) are for the ATS check.
-  const { summary, skill_groups, extra, ...draft } = result.draft;
-  void [summary, skill_groups, extra];
+  const { summary, skill_groups, extra, education_notes, header_lines, ...draft } = result.draft;
+  void [summary, skill_groups, extra, education_notes, header_lines];
   return { draft };
 }
 

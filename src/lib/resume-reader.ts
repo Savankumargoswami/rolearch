@@ -16,14 +16,18 @@ const SYSTEM = `You turn a resume into structured profile data for Rolearch, a j
 Copy facts from the resume; never invent employers, dates, numbers, links or skills that aren't in it.
 Write dates as YYYY-MM (or YYYY for education); use "" when the resume doesn't say.
 Keep bullet text as written, only fixing obvious formatting. For each role, list the skills, tools and languages the role's own text mentions.
+Copy degree names as written ("Master of Science", not "MS"). If the resume has a headline under the name, copy it exactly as written; only write one when it has none.
+Lines in the header under the name and contact details that aren't contact details or links (work authorisation, a credentials line) go in header_lines, verbatim.
 A certification, license or degree the resume marks as in progress, pending, planned or expected keeps that status in its name, e.g. "AWS Certified Data Engineer - Associate (in progress, target Aug 2026)"; never list it as if it were earned.
 Write a short headline from the most recent role and focus, in the style "Data Engineer · streaming pipelines".
-Also copy, word for word: the resume's summary or profile paragraph (summary); its skills exactly as grouped on the page, with each group's label (skill_groups; one group labelled "Skills" if they aren't grouped); and any other text that doesn't fit the fields above, such as a keywords line, coursework, GPA and other details under education, awards, languages or publications (extra), copied as it appears with no labels of your own, and never repeating text already captured in another field (name, headline, contact details, roles, education, certifications). Leave these empty when the resume has none.`;
+Also copy, word for word: the resume's summary or profile paragraph (summary); its skills exactly as grouped on the page, with each group's label (skill_groups; one group labelled "Skills" if they aren't grouped); and any other text that doesn't fit the fields above, such as a keywords line, awards, languages or publications (extra; education details go in education_notes instead), copied as it appears with no labels of your own, and never repeating text already captured in another field (name, headline, contact details, roles, education, certifications). Leave these empty when the resume has none.`;
 
 /** Contact details aren't part of the public profile, but the ATS check needs them. */
 const ReadSchema = ResumeDraftSchema.extend({
   summary: z.string().describe('The summary / profile paragraph, verbatim, or ""'),
   skill_groups: z.array(z.object({ label: z.string(), items: z.array(z.string()) })).describe("Skills as grouped on the resume"),
+  header_lines: z.array(z.string()).describe("Other lines in the header under the contact details, verbatim"),
+  education_notes: z.array(z.string()).describe("For each education entry, in the same order: the details line under it (GPA, coursework, honours), verbatim, or \"\""),
   extra: z.string().describe('Other text not captured elsewhere (keywords line, education details and coursework, awards, languages), verbatim, or ""'),
   contact: z.object({ email: z.string().describe('Email address, or ""'), phone: z.string().describe('Phone number as written, or ""') }),
 });
@@ -62,7 +66,9 @@ export async function readResume(file: { bytes: Buffer; kind: "pdf" | "docx" }):
       .map((g) => ({ label: g.label.trim().slice(0, 60), items: g.items.map((i) => i.trim().slice(0, 80)).filter(Boolean).slice(0, 30) }))
       .filter((g) => g.items.length)
       .slice(0, 12);
-    return { draft: { ...draft, status, summary: draft.summary.trim().slice(0, 2000), skill_groups, extra: draft.extra.trim().slice(0, 3000) }, contact };
+    const education_notes = draft.resume.education.map((_, i) => (draft.education_notes[i] ?? "").trim().slice(0, 400));
+    const header_lines = draft.header_lines.map((l) => l.trim().slice(0, 200)).filter(Boolean).slice(0, 4);
+    return { draft: { ...draft, status, summary: draft.summary.trim().slice(0, 2000), skill_groups, extra: draft.extra.trim().slice(0, 3000), education_notes, header_lines }, contact };
   } catch (e) {
     if (e instanceof Anthropic.BadRequestError) return { error: "unreadable" }; // e.g. a corrupt or encrypted PDF
     throw e;

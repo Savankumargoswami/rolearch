@@ -38,7 +38,7 @@ export type AtsJob = {
 /** The uploaded file, when there is one: its name, type and (for Word files) its layout. */
 export type AtsFile = { name: string; kind: "pdf" | "docx"; facts: DocxFacts | null };
 /** A profile, plus the resume-only parts when the scan has them (summary, grouped skills, other text). */
-type Resume = ProfileData & { summary?: string; skill_groups?: SkillGroup[]; extra?: string };
+type Resume = ProfileData & { summary?: string; skill_groups?: SkillGroup[]; extra?: string; education_notes?: string[]; header_lines?: string[] };
 export type AtsContact = { email: string; phone: string };
 
 const WEIGHTS: Record<AtsPartId, number> = { hard: 72, soft: 8, searchability: 10, recruiter: 5, formatting: 5 };
@@ -55,6 +55,7 @@ export function resumeText(p: Resume): string {
     p.full_name,
     p.headline,
     p.location,
+    ...(p.header_lines ?? []),
     p.summary,
     ...(p.skill_groups ?? []).map((g) => `${g.label}: ${g.items.join(", ")}`),
     ...r.experience.flatMap((e) => [e.title, e.company, e.location, ...e.bullets]),
@@ -62,6 +63,7 @@ export function resumeText(p: Resume): string {
     ...r.certifications.map((c) => `${c.name} ${c.issuer}`),
     ...r.education.map((e) => `${e.degree} ${e.field} ${e.school}`),
     grouped ? "" : r.skills.join(", "),
+    ...(p.education_notes ?? []),
     p.extra,
   ]
     .filter(Boolean)

@@ -134,7 +134,7 @@ async function render(blocks: Block[], d: AtsDoc, title: string): Promise<Buffer
   for (const b of blocks) {
     switch (b.t) {
       case "name":
-        write([{ text: b.text, font: bold, size: pt(SIZE.name), color: COLOR.ink }], { center: true, lead: 1.15 });
+        write([{ text: b.text, font: bold, size: pt(SIZE.name), color: COLOR.name }], { center: true, lead: 1.15 });
         y -= 3;
         break;
       case "center":
@@ -160,7 +160,7 @@ async function render(blocks: Block[], d: AtsDoc, title: string): Promise<Buffer
       case "labeled":
         write(
           [
-            { text: `${b.label}: `, font: regular, size: pt(SIZE.body), color: COLOR.ink },
+            { text: `${b.label}: `, font: bold, size: pt(SIZE.body), color: COLOR.ink },
             { text: b.text, font: regular, size: pt(SIZE.body), color: COLOR.body },
           ],
           { lead: 1.3 },
@@ -173,7 +173,7 @@ async function render(blocks: Block[], d: AtsDoc, title: string): Promise<Buffer
         split(
           [
             { text: b.bold, font: b.plain ? italic : bold, size: pt(SIZE.role), color: COLOR.ink },
-            ...(b.rest ? [{ text: ` | ${b.rest}`, font: regular, size: pt(SIZE.role - 1), color: COLOR.body }] : []),
+            ...(b.rest ? [{ text: ` | ${b.rest}`, font: regular, size: pt(SIZE.role - 1), color: COLOR.ink }] : []),
           ],
           b.right,
         );
@@ -186,14 +186,22 @@ async function render(blocks: Block[], d: AtsDoc, title: string): Promise<Buffer
       case "bullet": {
         const size = pt(SIZE.body);
         need(size * 1.3);
-        page.drawCircle({ x: M.x + 9, y: y - size * 0.62, size: 1.6, color: hex(COLOR.body) });
-        write([{ text: b.text, font: regular, size, color: COLOR.body }], { indent: 18, lead: 1.3 });
+        page.drawText("-", { x: M.x + 14, y: y - size, size, font: regular, color: hex(COLOR.body) });
+        write([{ text: b.text, font: regular, size, color: COLOR.body }], { indent: 27, lead: 1.3 });
         y -= 1.5;
         break;
       }
       case "small":
-        write([{ text: b.text, font: regular, size: pt(SIZE.small), color: COLOR.muted }], { lead: 1.3 });
-        y -= 2;
+        if (b.rule) {
+          y -= 8;
+          need(30);
+          page.drawLine({ start: { x: M.x, y }, end: { x: W - M.x, y }, thickness: 0.4, color: hex("999999") });
+          y -= 4;
+          write([{ text: b.text, font: regular, size: pt(SIZE.fine), color: COLOR.muted }], { lead: 1.3 });
+        } else {
+          write([{ text: b.text, font: regular, size: pt(SIZE.small), color: COLOR.muted }], { lead: 1.3 });
+          y -= 2;
+        }
         break;
       case "letter":
         write([{ text: b.text, font: regular, size: 11, color: COLOR.body }], { lead: 1.45 });
