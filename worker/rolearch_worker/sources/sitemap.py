@@ -11,9 +11,10 @@ from __future__ import annotations
 
 import asyncio
 import gzip
+import json
 import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlsplit
 from urllib.robotparser import RobotFileParser
 
@@ -26,6 +27,45 @@ MAX_SITEMAPS = 40
 _LOC = re.compile(r"<loc>\s*([^<\s]+)\s*</loc>", re.I)
 _JOB_URL = re.compile(r"/(jobs?|job-details|jobdetail|careers?/jobs?|positions?|requisitions?|opening)/", re.I)
 _SKIP = re.compile(r"/(search|category|categories|location|locations|teams?|benefits|blog|events?)(/|$)|\.(pdf|jpg|png)$", re.I)
+
+
+_NEXT = re.compile(r"<script id=[\"']?__NEXT_DATA__[\"']?[^>]*>(.*?)</script>", re.S)
+_PERIOD = {"hourly": "HOUR", "annual": "YEAR", "yearly": "YEAR", "salaried": "YEAR", "monthly": "MONTH"}
+
+
+def _next_posting(html: str) -> dict | None:
+    """Walmart's job pages carry no schema.org data; the same job is in the page's Next.js data as jobDetails.
+    Returns it shaped as a JobPosting, or None (also for requisitions that aren't open)."""
+    m = _NEXT.search(html)
+    if not m:
+        return None
+    try:
+        job = json.loads(m.group(1)).get("props", {}).get("pageProps", {}).get("jobDetails")
+    except (json.JSONDecodeError, AttributeError):
+        return None
+    if not isinstance(job, dict) or not (job.get("jobPostingTitle") or job.get("title")):
+        return None
+    if ((job.get("requisitionStatus") or {}).get("id") or "OPEN").upper() != "OPEN":
+        return None
+    loc = job.get("primaryLocation") or {}
+    post = {
+        "title": job.get("jobPostingTitle") or job.get("title"),
+        "description": job.get("jobPostingDescription") or job.get("description") or "",
+        "datePosted": job.get("jobPostingStartDate") or job.get("createdAt"),
+        "identifier": job.get("jobId"),
+        "jobLocation": {"address": {"addressLocality": (loc.get("city") or "").title(), "addressRegion": loc.get("stateCode") or loc.get("state"),
+                                    "addressCountry": loc.get("countryCode") or loc.get("country")}},
+    }
+    pay = (job.get("payRange") or [{}])[0]
+    currency = (((job.get("payPlanData") or {}).get("currencyReference") or {}).get("currencyId"))
+    unit = _PERIOD.get(str(job.get("payFrequency") or "").lower())
+    try:
+        lo, hi = float(pay.get("min") or 0), float(pay.get("max") or 0)
+    except (TypeError, ValueError):
+        lo = hi = 0
+    if lo > 0 and hi >= lo and currency and unit:
+        post["baseSalary"] = {"currency": currency, "value": {"minValue": lo, "maxValue": hi, "unitText": unit}}
+    return post
 
 
 def _text(r) -> str:
@@ -124,12 +164,17 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
             if r is None or r.status_code != 200:
                 return None
             posts = _postings(r.text)
+            if not posts and (nxt := _next_posting(r.text)):
+                posts = [nxt]
             if not posts:
                 return None
             valid = str(posts[0].get("validThrough") or "")[:10]
             if valid and valid < datetime.now(timezone.utc).strftime("%Y-%m-%d"):
                 return None  # the sitemap still lists a posting that has expired
             raw = _to_raw(posts[0], url)
+            # A template date years old (Home Depot's pages all say 2016) isn't the posting date: use first seen.
+            if raw.posted_at and raw.posted_at < datetime.now(timezone.utc) - timedelta(days=730):
+                raw.posted_at = None
             raw.external_id = urlsplit(url).path
             raw.job_url = raw.apply_url = url
             raw.description = raw.description[:20000]

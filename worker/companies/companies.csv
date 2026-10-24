@@ -3397,7 +3397,6 @@ Allied Universal,US,icims,securitycareers-aus,,aus.com
 Securitas Canada,CA,oracle,ekaw|us2|CX_1001,,securitas.ca
 GoodLife Fitness,CA,workday,goodlifefitness|wd3|Careers,,goodlifefitness.com
 Toyota Canada,CA,workday,toyota|wd503|Toyota_CA,,toyota.ca
-Walmart,US,workday,walmart|wd504|WalmartExternal,,walmart.com
 City of Mississauga,CA,successfactors,jobs.mississauga.ca,,mississauga.ca
 City of Edmonton,CA,taleo,edmonton|2|101381138,,edmonton.ca
 Saskatchewan Health Authority,CA,oracle,emqk|ca3|CX_1001,,saskhealthauthority.ca
@@ -7195,3 +7194,6 @@ Guthrie Clinic,US,oracle,elfw|us2|CX_1001,,guthrie.org
 American Tower,US,oracle,hdsn|us6|CX_1,,americantower.com
 Integrity Marketing Group,US,workday,integritymarketing|wd1|Integrity,,integrity.com
 Comfort Systems USA Ohio,US,workday,comfortsystemsusa|wd1|Ohio,,comfortsystemsusaohio.com
+Walmart,US,sitemap,careers.walmart.com,,walmart.com
+The Home Depot,US,sitemap,careers.homedepot.com,,homedepot.com
+Meijer,US,sitemap,jobs.meijer.com,,meijer.com
