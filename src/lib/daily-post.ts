@@ -55,6 +55,15 @@ export function pay(j: DigestJob) {
   return j.salary_period === "hour" ? `${range.replaceAll("k", "")}/hr` : range;
 }
 
+/** jobs_digest reads at most this many jobs; past it, the employer count covers only those. */
+const CAP = 20000;
+const NOT_CITIES = new Set(["united states", "usa", "us", "remote", "anywhere", "multiple locations"]);
+const realCities = (d: Digest) => d.cities.filter((c) => !NOT_CITIES.has(c.toLowerCase()));
+
+/** "1,240 remote US jobs from 380 employers", or "20,000+ new US jobs" when the digest hit its cap. */
+const howMany = (topic: Topic, d: Digest) =>
+  d.total >= CAP ? `${nf.format(CAP)}+ ${topic.noun}` : `${nf.format(d.total)} ${topic.noun} from ${nf.format(d.companies)} employers`;
+
 const where = (j: DigestJob) => (j.workplace === "remote" ? "Remote" : j.city ? titleCase(j.city) : "");
 const titleCase = (s: string) => (s === s.toUpperCase() ? s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) : s);
 
@@ -63,13 +72,14 @@ export function dailyPost(topic: Topic, d: Digest, since: "24 hours" | "week"): 
   if (d.total < 5 || d.jobs.length < 3) return null;
   const lines = [
     `${topic.title}`,
-    `${nf.format(d.total)}${d.total >= 20000 ? "+" : ""} ${topic.noun} posted in the last ${since} by ${nf.format(d.companies)} employers, straight from their own career sites. No staffing agencies, no reposts.`,
+    `${howMany(topic, d)}, posted on employers' own career sites in the last ${since}. No staffing agencies, no reposts.`,
     "",
     "Picks:",
     ...d.jobs.slice(0, 5).map((j) => `• [${[j.title, j.company, where(j), pay(j)].filter(Boolean).join(" · ")}](/jobs/${j.id})`),
   ];
   if (d.skills.length >= 3) lines.push("", `Most requested skills: ${d.skills.slice(0, 6).join(", ")}`);
-  if (d.cities.length >= 3 && topic.key !== "remote") lines.push(`Hiring most in: ${d.cities.slice(0, 4).join(", ")}`);
+  const cities = realCities(d);
+  if (cities.length >= 3 && topic.key !== "remote") lines.push(`Hiring most in: ${cities.slice(0, 4).join(", ")}`);
   lines.push("", "Check your resume against any of them with the free ATS scan.");
   let body = lines.join("\n");
   while (body.length > 2000) body = body.slice(0, body.lastIndexOf("\n•"));
@@ -93,7 +103,7 @@ export function newsletterHtml(sections: Section[], skills: string[], unsubscrib
         })
         .join("");
       return `<h2 style="font-size:17px;margin:28px 0 4px">${esc(topic.title)} this week</h2>
-<p style="margin:0 0 6px;color:#555;font-size:13px">${nf.format(digest.total)}${digest.total >= 20000 ? "+" : ""} ${esc(topic.noun)} from ${nf.format(digest.companies)} employers</p>
+<p style="margin:0 0 6px;color:#555;font-size:13px">${esc(howMany(topic, digest))}</p>
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows}</table>
 <p style="margin:8px 0 0"><a href="${searchUrl(topic)}" style="color:#1B2A3A">See all ${esc(topic.noun)} →</a></p>`;
     })
