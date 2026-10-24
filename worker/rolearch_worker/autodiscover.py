@@ -66,6 +66,13 @@ async def _count(http: Fetcher, ats: str, token: str) -> int:
                     "selected_fields": {}, "refNum": ref}
             d = await http.post_json(f"https://{host}/widgets", body)
             return int((d.get("refineSearch") or {}).get("totalHits") or 0)
+        if ats == "workable":
+            d = await http.json(f"https://apply.workable.com/api/v1/widget/accounts/{token}")
+            return len(d.get("jobs") or [])
+        if ats == "breezy":
+            from .sources.breezy import positions
+
+            return len(await positions(http, token))
         if ats == "successfactors-host":
             r = await http.get(f"https://{token}/search/", params={"q": "", "startrow": 0})
             m = re.search(r"of\s*<b>\s*([\d,]+)\s*</b>", r.text)
