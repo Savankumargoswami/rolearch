@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import random
+import time
 import json
 import logging
 import re
@@ -106,9 +107,10 @@ async def pull_all(companies: list[Company], store: Store, concurrency: int = 8)
 
         async def task(c: Company) -> Result:
             async with sem:
+                t0 = time.monotonic()
                 r = await pull_one(http, store, c)
                 status = f"ERROR {r.error}" if r.error else f"{r.total} jobs ({r.launch} data/ML), +{r.added} new, {r.closed} closed"
-                log.info("%-28s %-15s %s", c.name[:28], c.ats, status)
+                log.info("%-28s %-15s %s [%ds]", c.name[:28], c.ats, status, time.monotonic() - t0)
                 return r
 
         return await asyncio.gather(*(task(c) for c in companies))

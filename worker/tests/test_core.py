@@ -7,6 +7,7 @@ from pathlib import Path
 from rolearch_worker.geo import parse_location
 from rolearch_worker.models import Company, RawJob, Salary
 from rolearch_worker.normalize import normalize
+from rolearch_worker import shards
 from rolearch_worker.run import pull_one
 from rolearch_worker.sources import ashby, greenhouse, lever, workable
 from rolearch_worker.store import JsonStore
@@ -243,3 +244,14 @@ class StoreAndGuard(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Shards(unittest.TestCase):
+    def test_every_company_in_exactly_one_shard(self):
+        cos = [Company(f"C{i}", "US", "greenhouse", f"c{i}") for i in range(300)]
+        weights = {cos[0].key: 90000, cos[1].key: 50000, cos[2].key: 40000}
+        picked = [c.key for i in range(24) for c in cos if shards.assign(cos, 24, weights)[c.key] == i]
+        self.assertEqual(sorted(picked), sorted(c.key for c in cos))
+        # The giants land in different shards.
+        a = shards.assign(cos, 24, weights)
+        self.assertEqual(len({a[cos[0].key], a[cos[1].key], a[cos[2].key]}), 3)

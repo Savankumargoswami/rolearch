@@ -17,7 +17,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from . import companies as company_file
+from . import companies as company_file, shards
 from .run import discover, export_feed, pull_all
 from .store import JsonStore, open_store
 
@@ -101,8 +101,8 @@ def main(argv: list[str] | None = None) -> int:
     companies = company_file.load(args.companies)
     if getattr(args, "shard", None):
         i, n = (int(x) for x in args.shard.split("/"))
-        # Stable slices: a company stays in the same shard when others are added or removed.
-        companies = [c for c in companies if int(hashlib.sha1(c.key.encode()).hexdigest(), 16) % n == i]
+        # Balanced slices: giants are spread by recent job count, the rest by a stable hash (see shards.py).
+        companies = shards.pick(companies, i, n)
     if args.only:
         needle = args.only.lower()
         companies = [c for c in companies if needle in c.name.lower() or needle in c.token.lower()]
