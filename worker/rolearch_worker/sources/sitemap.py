@@ -12,7 +12,9 @@ from __future__ import annotations
 import asyncio
 import gzip
 import json
+import logging
 import os
+from collections import Counter
 import re
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlsplit
@@ -21,6 +23,8 @@ from urllib.robotparser import RobotFileParser
 from ..http import USER_AGENT, Fetcher
 from ..models import Company, RawJob
 from .jsonld import _postings, _to_raw
+
+log = logging.getLogger(__name__)
 
 DETAILS_PER_RUN = int(os.environ.get("SITEMAP_DETAILS_PER_RUN", "1500"))
 MAX_SITEMAPS = 40
@@ -144,12 +148,14 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
             else:
                 async with sem:
                     r = await http.client.get(url)
+            statuses[r.status_code] += 1
             if r.status_code != 429:
                 return r
             pause = min(max(pause * 2, 2.0), 30.0)
         return r
 
     known = company.known_urls or {}
+    statuses: Counter[int] = Counter()
 
     async def one(url: str) -> RawJob | None:
         nonlocal budget
@@ -184,4 +190,7 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
         except Exception:
             return None
 
-    return [r for r in await asyncio.gather(*(one(u) for u in urls)) if r]
+    out = [r for r in await asyncio.gather(*(one(u) for u in urls)) if r]
+    # One line per board, so a host that blocks or throttles us shows up in the run log (e.g. {403: 1500}).
+    log.info("sitemap %s: %d job pages listed, %d new read, responses %s", origin, len(urls), sum(1 for r in out if not r.touch_only), dict(statuses))
+    return out
