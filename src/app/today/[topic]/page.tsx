@@ -7,10 +7,6 @@ import { howMany, jobPlace, pay, searchUrl, SITE, todayDigest, TOPICS } from "@/
 
 // Public pages for the daily Rolearch posts, so they can be shared anywhere (the members' feed is private).
 
-export function generateStaticParams() {
-  return TOPICS.slice(0, 1).map((t) => ({ topic: t.key }));
-}
-
 export async function generateMetadata({ params }: PageProps<"/today/[topic]">): Promise<Metadata> {
   const { topic: key } = await params;
   const topic = TOPICS.find((t) => t.key === key);

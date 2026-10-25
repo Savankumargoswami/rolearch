@@ -1,11 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { findRole, ROLES } from "@/lib/seo-pages";
+import { findRole } from "@/lib/seo-pages";
 import { RolePage, roleMetadata } from "../role-page";
-
-export function generateStaticParams() {
-  return ROLES.slice(0, 1).map((r) => ({ role: r.slug }));
-}
 
 export async function generateMetadata({ params }: PageProps<"/roles/[role]">) {
   return roleMetadata((await params).role);
