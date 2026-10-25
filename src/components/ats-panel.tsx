@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Download, FileText, FileUp, Loader2, Lock, Save, ScanSearch, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
+import { CircleAlert, CircleHelp, Check, Download, FileText, FileUp, Loader2, Lock, Save, ScanSearch, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -11,6 +11,7 @@ import { t, type MessageKey } from "@/i18n";
 import type { AtsCheck, AtsKeyword, AtsPartId, AtsReport } from "@/lib/ats";
 import { toProfile, type AtsDoc } from "@/lib/ats-doc";
 import { savePending, takePending } from "@/lib/pending-scan";
+import type { ScreenItem, ScreenStatus, Screening } from "@/lib/screening";
 
 type Source = "profile" | "upload";
 type Ready = Extract<Checked, { ok: true }> & { source: Source };
@@ -248,6 +249,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
       {report && result && (
         <div className="mt-6 border-t border-line pt-5" aria-live="polite">
           <ScoreHeader score={report.score} before={better?.before} system={report.system} />
+          {result.screening && result.screening.items.length + (result.screening.sponsorship === "unknown" ? 0 : 1) > 0 && <ScreeningCheck screening={result.screening} />}
           <Breakdown report={report} />
           <Keywords
             report={report}
@@ -392,6 +394,94 @@ function ScoreHeader({ score, before, system }: { score: number; before?: number
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+const SPONSOR_KEY = "rolearch.needsSponsorship";
+const DEGREES = ["ats.degree_0", "ats.degree_1", "ats.degree_2", "ats.degree_3", "ats.degree_4"] as const;
+
+/** The job's knock-out requirements against the resume: blockers, things to confirm, and passes. */
+function ScreeningCheck({ screening }: { screening: Screening }) {
+  const [sponsor, setSponsor] = useState<"" | "yes" | "no">("");
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem(SPONSOR_KEY);
+      if (v === "yes" || v === "no") setSponsor(v);
+    } catch {}
+  }, []);
+  const answer = (v: "yes" | "no") => {
+    setSponsor(v);
+    try {
+      localStorage.setItem(SPONSOR_KEY, v);
+    } catch {}
+  };
+
+  const items: ScreenItem[] = [...screening.items];
+  if (screening.sponsorship !== "unknown") {
+    const status: ScreenStatus = screening.sponsorship === "offered" || sponsor === "no" ? "pass" : sponsor === "yes" ? "blocker" : "check";
+    items.push({ id: `sponsor_${screening.sponsorship}`, status, values: {} });
+  }
+  const order: Record<ScreenStatus, number> = { blocker: 0, check: 1, pass: 2 };
+  items.sort((a, b) => order[a.status] - order[b.status]);
+  const blockers = items.filter((i) => i.status === "blocker").length;
+  const checks = items.filter((i) => i.status === "check").length;
+
+  const text = (i: ScreenItem) => {
+    const v = { ...i.values };
+    if (i.id === "degree") {
+      // "a bachelor's degree", "an associate degree", "no degree".
+      const phrase = (n: number) => (n ? t(n === 1 ? "screen.degreeAn" : "screen.degreeA", { level: t(DEGREES[n] ?? DEGREES[2]) }) : t("screen.noDegree"));
+      v.need = phrase(Number(i.values.need));
+      v.have = phrase(Number(i.values.have));
+    }
+    return t(`screen.${i.id}_${i.status}` as MessageKey, v);
+  };
+
+  return (
+    <div className="mt-5 rounded-2xl border border-line p-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="font-semibold">{t("screen.title")}</h3>
+        <span className={`text-sm font-medium ${blockers ? "text-[#b4532a]" : checks ? "text-signal-ink" : "text-muted"}`}>
+          {blockers ? t("screen.blockers", { n: blockers }) : checks ? t("screen.toConfirm", { n: checks }) : t("screen.allClear")}
+        </span>
+      </div>
+      <p className="mt-1 text-xs text-muted">{t("screen.lead")}</p>
+      {screening.sponsorship !== "unknown" && (
+        <fieldset className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+          <legend className="sr-only">{t("screen.sponsorQuestion")}</legend>
+          <span className="font-medium">{t("screen.sponsorQuestion")}</span>
+          {(["yes", "no"] as const).map((v) => (
+            <label key={v} className="inline-flex min-h-9 cursor-pointer items-center gap-1.5">
+              <input type="radio" name="needs-sponsorship" checked={sponsor === v} onChange={() => answer(v)} className="accent-ink" />
+              {t(v === "yes" ? "screen.yes" : "screen.no")}
+            </label>
+          ))}
+        </fieldset>
+      )}
+      <ul className="mt-3 flex flex-col gap-2">
+        {items.map((i, n) => (
+          <li key={`${i.id}-${n}`} className="flex gap-2.5 text-sm leading-snug">
+            <span
+              className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full ${
+                i.status === "pass" ? "bg-ink text-paper" : i.status === "blocker" ? "bg-[#b4532a]/15 text-[#b4532a]" : "bg-signal/20 text-signal-ink"
+              }`}
+            >
+              {i.status === "pass" ? (
+                <Check aria-hidden="true" className="size-3" strokeWidth={3} />
+              ) : i.status === "blocker" ? (
+                <CircleAlert aria-hidden="true" className="size-3.5" strokeWidth={2.5} />
+              ) : (
+                <CircleHelp aria-hidden="true" className="size-3.5" strokeWidth={2.5} />
+              )}
+            </span>
+            <span className={i.status === "pass" ? "text-muted" : ""}>
+              <span className="sr-only">{t(`screen.status_${i.status}` as MessageKey)}: </span>
+              {text(i)}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

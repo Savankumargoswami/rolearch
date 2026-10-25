@@ -15,6 +15,7 @@ import { coverLetterDocx, resumeDocx } from "@/lib/resume-docx";
 import { optimizeResume, type Change, type TailorMode } from "@/lib/resume-optimizer";
 import { coverLetterPdf, resumePdf } from "@/lib/resume-pdf";
 import { readResume, type Contact } from "@/lib/resume-reader";
+import { jobScreening, screen, type JobScreening, type Screening } from "@/lib/screening";
 import { signShare } from "@/lib/share-card";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,7 +26,9 @@ const TYPES = {
 } as const;
 const DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-export type Checked = { ok: true; report: AtsReport; resume: AtsDoc; contact: Contact; file: AtsFile | null } | { ok: false; message: string };
+export type Checked =
+  | { ok: true; report: AtsReport; resume: AtsDoc; contact: Contact; file: AtsFile | null; screening: Screening | null }
+  | { ok: false; message: string };
 export type OptimizedResult =
   | { ok: true; before: number; report: AtsReport; resume: AtsDoc; changes: Change[]; skipped: { keyword: string; reason: string }[] }
   | { ok: false; message: string };
@@ -66,7 +69,8 @@ function systemFromUrl(url: string): string {
   return known.find(([re]) => re.test(host))?.[1] ?? "";
 }
 
-type Found = { job: AtsJob & { company: string }; description: string } | { error: string };
+/** where: the stored job's city and workplace, a fallback when the posting doesn't say. */
+type Found = { job: AtsJob & { company: string }; description: string; screening: JobScreening | null; where: { city?: string; workplace?: string } } | { error: string };
 
 async function jobFor(target: AtsTarget): Promise<Found> {
   if (typeof target === "string") {
@@ -77,10 +81,15 @@ async function jobFor(target: AtsTarget): Promise<Found> {
     if (description.trim().length < MIN_SAVED && job.jobUrl) description = (await liveDescription(job.id, job.jobUrl)) || description;
     if (description.trim().length < MIN_SAVED) return { error: t("ats.errShort") };
     // The job's own requirements (read once per job and stored) back up the scanner keywords.
-    const [req, keywords] = await Promise.all([jobRequirements(job, description), jobAtsKeywords(job.id, job.title, description)]);
+    const [req, keywords, screening] = await Promise.all([jobRequirements(job, description), jobAtsKeywords(job.id, job.title, description), jobScreening(job.id, job.title, description)]);
     const skills = [...new Set([...job.skills, ...(req?.required ?? []), ...(req?.certifications ?? [])])];
     const system = job.source && !/careers page|employer feed|adzuna|usajobs/i.test(job.source) ? job.source : "";
-    return { job: { title: job.title, company: job.company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years || job.years, system }, description };
+    return {
+      job: { title: job.title, company: job.company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years || job.years, system },
+      description,
+      screening,
+      where: { city: job.city, workplace: job.workplace },
+    };
   }
   const title = String(target?.title ?? "").trim().slice(0, 200);
   const description = String(target?.description ?? "").trim().slice(0, MAX_PASTED);
@@ -88,10 +97,10 @@ async function jobFor(target: AtsTarget): Promise<Found> {
   // Pasted jobs: requirements are read now and not kept; keywords are kept by a hash of the text, so scanning
   // the same posting twice gives the same report.
   const key = `pasted-${createHash("sha256").update(`${title}\n${description}`).digest("hex").slice(0, 32)}`;
-  const [req, keywords] = await Promise.all([readRequirements(title, description), jobAtsKeywords(key, title, description)]);
+  const [req, keywords, screening] = await Promise.all([readRequirements(title, description), jobAtsKeywords(key, title, description), jobScreening(key, title, description)]);
   const skills = req ? [...req.required, ...req.certifications] : [];
   const company = String(target.company ?? "").trim().slice(0, 120);
-  return { job: { title, company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years ?? 0, system: systemFromUrl(String(target.url ?? "")) }, description };
+  return { job: { title, company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years ?? 0, system: systemFromUrl(String(target.url ?? "")) }, description, screening, where: {} };
 }
 
 /** The resume as sent back by the browser, with anything over the limits shortened (null if it isn't a resume). */
@@ -114,6 +123,10 @@ function sanitizeFile(f: AtsFile | null | undefined): AtsFile | undefined {
 const slug = (s: string) => s.replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_|_$/g, "").slice(0, 40);
 const resumeName = (d: AtsDoc, company: string) => `${slug(d.full_name || "Resume")}${company ? `_${slug(company)}` : ""}_Resume`;
 
+function screeningFor(found: Extract<Found, { job: unknown }>, resume: AtsDoc): Screening | null {
+  return found.screening ? screen(found.screening, resume, resumeText(resume), { years: found.job.years, ...found.where }) : null;
+}
+
 /** Scores the signed-in member's saved profile against a job. */
 async function checkProfileInner(target: AtsTarget, phone: string): Promise<Checked> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
@@ -123,7 +136,7 @@ async function checkProfileInner(target: AtsTarget, phone: string): Promise<Chec
   const resume = fromProfile(account.profile);
   if (resume.resume.experience.length + resume.resume.skills.length === 0) return { ok: false, message: t("ats.errEmptyProfile") };
   const contact = sanitizeContact({ email: account.email, phone });
-  return { ok: true, resume, contact, file: null, report: scoreAts(found.job, resume, contact) };
+  return { ok: true, resume, contact, file: null, report: scoreAts(found.job, resume, contact), screening: screeningFor(found, resume) };
 }
 
 /** Reads an uploaded resume (not stored) and scores it against a job, layout included for Word files. */
@@ -144,7 +157,7 @@ async function checkUploadInner(target: AtsTarget, form: FormData): Promise<Chec
   if (words(resumeText(read.draft)) > MAX_WORDS) return { ok: false, message: t("ats.errResumeTooLong", { n: MAX_WORDS.toLocaleString("en") }) };
   const contact = sanitizeContact(read.contact);
   const file: AtsFile = { name: upload.name.slice(0, 200), kind, facts };
-  return { ok: true, resume: read.draft, contact, file, report: scoreAts(found.job, read.draft, contact, file) };
+  return { ok: true, resume: read.draft, contact, file, report: scoreAts(found.job, read.draft, contact, file), screening: screeningFor(found, read.draft) };
 }
 
 /** Tailors a resume to the job, then re-scores it, layout included, as the Word file we'd hand back. */
