@@ -14,7 +14,7 @@ permissions:
   contents: write # the weekly step commits newly found employers to worker/companies/
 
 concurrency:
-  group: refresh-jobs
+  group: refresh-jobs-v2 # renamed once to leave a run stuck after cancelling behind
   cancel-in-progress: false
 
 env:
