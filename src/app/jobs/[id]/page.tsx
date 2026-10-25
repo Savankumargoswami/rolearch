@@ -8,6 +8,7 @@ import { ApplyButton } from "@/components/apply-button";
 import { CompanyLogo } from "@/components/company-logo";
 import { JobDescription } from "@/components/job-description";
 import { AtsPanel } from "@/components/ats-panel";
+import { HiringTeam } from "@/components/hiring-team";
 import { JobRow } from "@/components/job-row";
 import { MatchRing } from "@/components/match-ring";
 import { ExternalApply, TrackButton } from "@/components/track-button";
@@ -241,6 +242,7 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
                 </Suspense>
               </div>
             </div>
+            <HiringTeam title={job.title} company={job.company} />
             <Suspense fallback={<AtsPanel target={job.id} next={`/jobs/${job.id}#ats-h`} jobTitle={job.title} company={job.company} signedIn={false} hasProfile={false} />}>
               <PersonalAts job={job} />
             </Suspense>
