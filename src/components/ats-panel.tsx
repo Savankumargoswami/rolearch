@@ -120,13 +120,19 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
     });
   }
 
-  function optimize() {
+  /** Tailors the scanned resume; or, with `more`, tailors the tailored one again with more confirmed skills. */
+  function optimize(more?: string[]) {
     if (!result) return;
     setActionError("");
+    const again = Boolean(more && better);
+    const skills = more ? [...new Set([...confirmed, ...more])] : confirmed;
+    if (more) setConfirmed(skills);
     startOptimize(async () => {
-      const res = await optimizeForJob(checked, result.resume, result.contact, confirmed, result.file, mode).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
+      const base = again && better ? better.resume : result.resume;
+      const res = await optimizeForJob(checked, base, result.contact, skills, result.file, mode).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
       if (!res.ok) return setActionError(res.message);
-      setBetter(res);
+      // A second round still compares against the resume as first scanned.
+      setBetter(again && better ? { ...res, before: better.before } : res);
       requestAnimationFrame(() => tailoredRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
     });
   }
@@ -284,7 +290,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
               </fieldset>
               <button
                 type="button"
-                onClick={optimize}
+                onClick={() => optimize()}
                 disabled={optimizing}
                 className="mt-3 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-signal px-5 font-medium text-ink transition-colors duration-200 hover:bg-[#ebb877] disabled:cursor-wait disabled:opacity-70"
               >
@@ -312,7 +318,8 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
               ref={tailoredRef}
               added={better.report.keywords.filter((k) => k.inResume > 0).length - result.report.keywords.filter((k) => k.inResume > 0).length}
               better={better}
-              source={result.source} onDownload={(f) => download(better.resume, f)} onSave={saveToProfile} downloading={downloading} saving={saving} />
+              source={result.source} onDownload={(f) => download(better.resume, f)} onSave={saveToProfile} downloading={downloading} saving={saving}
+              onAgain={(more) => optimize(more)} optimizing={optimizing} />
           )}
           {actionError && (
             <p role="alert" className="mt-3 rounded-xl bg-[#b4532a]/10 px-3 py-2 text-sm font-medium text-[#b4532a]">
@@ -623,6 +630,8 @@ function Improved({
   onSave,
   downloading,
   saving,
+  onAgain,
+  optimizing,
 }: {
   ref: React.Ref<HTMLDivElement>;
   added: number;
@@ -632,8 +641,12 @@ function Improved({
   onSave: () => void;
   downloading: boolean;
   saving: boolean;
+  onAgain: (more: string[]) => void;
+  optimizing: boolean;
 }) {
   const [all, setAll] = useState(false);
+  const [have, setHave] = useState<string[]>([]);
+  const reached = better.report.score >= better.goal;
   const changes = all ? better.changes : better.changes.slice(0, 4);
   return (
     <div ref={ref} className="mt-6 scroll-mt-24 rounded-2xl border border-signal/50 bg-signal/10 p-4">
@@ -645,6 +658,39 @@ function Improved({
         {t("ats.tailoredSummary", { before: better.before, after: better.report.score, n: better.changes.length })}{" "}
         {added > 0 ? t("ats.tailoredAdded", { n: added }) : t("ats.tailoredNoneAdded")}
       </p>
+      <p className={`mt-2 text-sm font-medium ${reached ? "" : "text-signal-ink"}`}>
+        {reached ? t("ats.goalReached", { goal: better.goal }) : t("ats.goalShort", { goal: better.goal, score: better.report.score })}
+      </p>
+      {!reached && better.blocking.length > 0 && (
+        <div className="mt-3 rounded-xl bg-surface p-3 text-sm">
+          <p className="font-medium">{t("ats.goalTitle", { goal: better.goal })}</p>
+          <p className="mt-1 text-muted">{t("ats.goalLead")}</p>
+          <ul className="mt-2 flex flex-wrap gap-1.5">
+            {better.blocking.map((k) => {
+              const on = have.includes(k);
+              return (
+                <li key={k}>
+                  <label className={`inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border px-3 transition-colors ${on ? "border-ink bg-ink text-paper" : "border-dashed border-muted/70 hover:border-ink"}`}>
+                    <input type="checkbox" className="sr-only" checked={on} onChange={() => setHave((h) => (on ? h.filter((x) => x !== k) : [...h, k]))} />
+                    {on ? <Check aria-hidden="true" className="size-3.5" /> : <X aria-hidden="true" className="size-3.5 text-[#b4532a]" />}
+                    {k}
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+          <button
+            type="button"
+            onClick={() => onAgain(have)}
+            disabled={optimizing || have.length === 0}
+            className="mt-3 inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {optimizing ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <Sparkles aria-hidden="true" className="size-4" />}
+            {optimizing ? t("ats.optimizing") : t("ats.goalAgain", { n: have.length })}
+          </button>
+          <p className="mt-2 text-xs text-muted">{t("ats.goalHonest")}</p>
+        </div>
+      )}
       {better.changes.length > 0 && (
         <ol className="mt-3 flex flex-col gap-3">
           {changes.map((c, i) => (

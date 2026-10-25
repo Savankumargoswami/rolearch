@@ -12,7 +12,7 @@ import { docxFacts } from "@/lib/docx-format";
 import { jobRequirements, readRequirements } from "@/lib/job-requirements";
 import { loadAccount } from "@/lib/profile";
 import { coverLetterDocx, resumeDocx } from "@/lib/resume-docx";
-import { optimizeResume, type Change, type TailorMode } from "@/lib/resume-optimizer";
+import { optimizeResume, placeKeywords, type Change, type TailorMode } from "@/lib/resume-optimizer";
 import { coverLetterPdf, resumePdf } from "@/lib/resume-pdf";
 import { readResume, type Contact } from "@/lib/resume-reader";
 import { jobScreening, screen, type JobScreening, type Screening } from "@/lib/screening";
@@ -30,7 +30,17 @@ export type Checked =
   | { ok: true; report: AtsReport; resume: AtsDoc; contact: Contact; file: AtsFile | null; screening: Screening | null }
   | { ok: false; message: string };
 export type OptimizedResult =
-  | { ok: true; before: number; report: AtsReport; resume: AtsDoc; changes: Change[]; skipped: { keyword: string; reason: string }[] }
+  | {
+      ok: true;
+      before: number;
+      report: AtsReport;
+      resume: AtsDoc;
+      changes: Change[];
+      skipped: { keyword: string; reason: string }[];
+      /** The score tailoring aims for, and the missing keywords that stand between the resume and it. */
+      goal: number;
+      blocking: string[];
+    }
   | { ok: false; message: string };
 type FileResult = { ok: true; filename: string; base64: string; type: string } | { ok: false; message: string };
 
@@ -160,6 +170,9 @@ async function checkUploadInner(target: AtsTarget, form: FormData): Promise<Chec
   return { ok: true, resume: read.draft, contact, file, report: scoreAts(found.job, read.draft, contact, file), screening: screeningFor(found, read.draft) };
 }
 
+/** Tailoring aims for this score (Jobscan's own guidance is 75-80%), without adding anything untrue. */
+const GOAL = 80;
+
 /** Tailors a resume to the job, then re-scores it, layout included, as the Word file we'd hand back. */
 async function optimizeForJobInner(
   target: AtsTarget,
@@ -170,6 +183,7 @@ async function optimizeForJobInner(
   mode: TailorMode = "deep",
 ): Promise<OptimizedResult> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
+  const started = Date.now();
   const parsed = fitted(resume);
   if (!parsed) return { ok: false, message: t("profile.errInvalid") };
   const found = await jobFor(target);
@@ -191,12 +205,30 @@ async function optimizeForJobInner(
   const ours = async (d: AtsDoc): Promise<AtsFile> => ({ name: `${resumeName(d, job.company)}.docx`, kind: "docx", facts: await docxFacts(await resumeDocx(d, safeContact)) });
   let report = scoreAts(job, out.resume, safeContact, await ours(out.resume));
   let improved = out.resume;
+  let changes = out.changes;
+  let skipped = out.skipped;
+  // Short of the goal: a quick pass on just the keywords still missing, if there's time left in the request.
+  const still = () => report.keywords.filter((k) => k.inResume === 0).map((k) => k.name);
+  if (report.score < GOAL && still().length && Date.now() - started < 60_000) {
+    const more = await placeKeywords({ resume: improved, original: parsed, job: { title: job.title, description }, remaining: still(), confirmed: confirmedOk });
+    if (more) {
+      const next = scoreAts(job, more.resume, safeContact, await ours(more.resume));
+      if (next.score > report.score) {
+        report = next;
+        improved = more.resume;
+        changes = [...changes, ...more.changes];
+        skipped = more.skipped.length ? more.skipped : skipped;
+      }
+    }
+  }
   // Never hand back something that scores worse than what came in.
   if (report.score < before.score) {
     improved = parsed;
     report = before;
   }
-  return { ok: true, before: before.score, report, resume: improved, changes: out.changes.slice(0, 25), skipped: out.skipped.slice(0, 20) };
+  // What's left between the resume and the goal: missing keywords the person hasn't said they have.
+  const blocking = report.score < GOAL ? still().filter((k) => !confirmed.includes(k)).slice(0, 15) : [];
+  return { ok: true, before: before.score, report, resume: improved, changes: changes.slice(0, 25), skipped: skipped.slice(0, 20), goal: GOAL, blocking };
 }
 
 /** An ATS-friendly resume as a Word (.docx) or PDF file, as base64 for the browser to save. */
