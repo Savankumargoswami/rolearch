@@ -16,6 +16,7 @@ export function SiteFooter() {
           <ul className="mt-3 space-y-2 text-muted">
             <li><Link className="hover:text-ink" href="/jobs">{t("nav.jobs")}</Link></li>
             <li><Link className="hover:text-ink" href="/ats">{t("nav.ats")}</Link></li>
+            <li><Link className="hover:text-ink" href="/roles">Jobs by role and city</Link></li>
             <li><Link className="hover:text-ink" href="/#companies">{t("nav.companies")}</Link></li>
             <li><Link className="hover:text-ink" href="/signup">{t("nav.signUp")}</Link></li>
           </ul>

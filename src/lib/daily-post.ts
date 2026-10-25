@@ -1,5 +1,6 @@
 // Daily Rolearch posts and the weekly newsletter: templated from jobs_digest (db/024_daily_posts.sql), no AI.
 import "server-only";
+import { cacheLife, cacheTag } from "next/cache";
 
 export const SITE = "https://www.rolearch.com";
 
@@ -61,6 +62,7 @@ const NOT_CITIES = new Set(["united states", "usa", "us", "remote", "anywhere", 
 const realCities = (d: Digest) => d.cities.filter((c) => !NOT_CITIES.has(c.toLowerCase()));
 
 /** "1,240 remote US jobs from 380 employers", or "20,000+ new US jobs" when the digest hit its cap. */
+export type { Topic };
 const howMany = (topic: Topic, d: Digest) =>
   d.total >= CAP ? `${nf.format(CAP)}+ ${topic.noun}` : `${nf.format(d.total)} ${topic.noun} from ${nf.format(d.companies)} employers`;
 
@@ -83,7 +85,7 @@ export function dailyPost(topic: Topic, d: Digest, since: "24 hours" | "week"): 
   lines.push("", "Check your resume against any of them with the free ATS scan.");
   let body = lines.join("\n");
   while (body.length > 2000) body = body.slice(0, body.lastIndexOf("\n•"));
-  return { body, link: searchUrl(topic) };
+  return { body, link: todayUrl(topic.key) };
 }
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -119,3 +121,28 @@ ${skillLine}
 <p style="margin:28px 0 0;color:#888;font-size:12px">You get this because you turned on the weekly email in your Rolearch account. <a href="${unsubscribe}" style="color:#888">Unsubscribe</a></p>
 </div></body></html>`;
 }
+
+/** Today's digest for one topic (the last 24 hours), for the public /today pages; kept for an hour. */
+export async function todayDigest(topicKey: string): Promise<Digest | null> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("jobs");
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const secret = process.env.POST_REVIEW_SECRET;
+  if (!base || !key || !secret || !TOPICS.some((t) => t.key === topicKey)) return null;
+  // Rounded to the hour so the hour's cache entry and the query agree.
+  const since = new Date(Math.floor(Date.now() / 3_600_000) * 3_600_000 - 86_400_000).toISOString();
+  const res = await fetch(`${base}/rest/v1/rpc/jobs_digest`, {
+    method: "POST",
+    headers: { apikey: key, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_secret: secret, p_topic: topicKey, p_since: since }),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`jobs_digest ${res.status}`);
+  return (await res.json()) as Digest;
+}
+
+/** The public page for a topic's daily digest. */
+export const todayUrl = (topicKey: string) => `${SITE}/today/${topicKey}`;
+export { howMany, where as jobPlace };
