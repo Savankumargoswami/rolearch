@@ -48,13 +48,26 @@ async def _pcsx(http: Fetcher, company: Company, host: str, domain: str) -> list
     total = min(int(data.get("count") or 0), MAX_JOBS)
     positions = list(data.get("positions") or [])
     starts = range(len(positions), total, max(1, len(positions) or 10))
-    pages = await asyncio.gather(
-        *(_get(http, f"https://{host}/api/pcsx/search", {"domain": domain, "start": s, "sort_by": "timestamp"}) for s in starts),
-        return_exceptions=True,
-    )
-    for p in pages:
-        if isinstance(p, dict):
-            positions.extend((p.get("data") or {}).get("positions") or [])
+    # Big boards (Starbucks: 2,000+ pages) throttle some requests; pages that fail or come back empty are retried,
+    # slower, a few times, instead of silently losing their jobs.
+    todo = list(starts)
+    for attempt in range(4):
+        if not todo:
+            break
+        if attempt:
+            await asyncio.sleep(5 * attempt)
+        pages = await asyncio.gather(
+            *(_get(http, f"https://{host}/api/pcsx/search", {"domain": domain, "start": s, "sort_by": "timestamp"}) for s in todo),
+            return_exceptions=True,
+        )
+        failed = []
+        for s, p in zip(todo, pages):
+            found = (p.get("data") or {}).get("positions") if isinstance(p, dict) and isinstance(p.get("data"), dict) else None
+            if found:
+                positions.extend(found)
+            else:
+                failed.append(s)
+        todo = failed
 
     from ..normalize import job_id
 
