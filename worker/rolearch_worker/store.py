@@ -201,13 +201,13 @@ class PostgresStore:
                 if company.ats in AGGREGATORS:
                     # Each run fetches a different slice: close by age, not by absence.
                     cur.execute(
-                        """update jobs set status = 'closed', closed_at = now()
+                        """update jobs set status = 'closed', closed_at = now(), description = ''
                            where company_key = %s and status = 'open' and coalesce(posted_at, first_seen_at) < now() - interval '30 days'""",
                         (company.key,),
                     )
                 else:
                     cur.execute(
-                        """update jobs set status = 'closed', closed_at = now()
+                        """update jobs set status = 'closed', closed_at = now(), description = ''
                            where company_key = %s and status = 'open' and not (id = any(%s))""",
                         (company.key, all_ids),
                     )
@@ -237,7 +237,7 @@ class PostgresStore:
             # Jobs companies post on Rolearch itself ("rolearch:<account>") and jobs from feeds they connected
             # ("feed:<id>") aren't on the list; their companies close them (removing a feed closes its jobs).
             cur.execute(
-                "update jobs set status = 'closed', closed_at = now() "
+                "update jobs set status = 'closed', closed_at = now(), description = '' "
                 "where status = 'open' and not (company_key = any(%s)) and company_key not like 'rolearch:%%' and company_key not like 'feed:%%'",
                 (list(keep),),
             )
