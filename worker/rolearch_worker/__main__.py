@@ -65,6 +65,12 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO, format="%(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
+    # On GitHub Actions the jobs must go to Postgres. Without DATABASE_URL the run would quietly keep everything
+    # in a JSON file that's thrown away when the job ends (that's how three refreshes once stored nothing).
+    if os.environ.get("GITHUB_ACTIONS") == "true" and args.cmd in ("run", "finalize") and not os.environ.get("DATABASE_URL", "").strip():
+        print("DATABASE_URL is empty: set the repository secret DATABASE_URL (Settings > Secrets and variables > Actions).", file=sys.stderr)
+        return 2
+
     if args.cmd == "harvest":
         from .harvest import add_candidates, adzuna_employers
 
