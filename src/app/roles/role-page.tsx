@@ -4,6 +4,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import Link from "next/link";
 import { JobRow } from "@/components/job-row";
 import { searchJobs, type JobQuery } from "@/data/db";
+import type { JobLite } from "@/data/types";
 import { formatJobCount } from "@/lib/job-query";
 import { findPlace, findRole, heading, METROS, ROLES, SPECIAL, stats, type Place, type Role } from "@/lib/seo-pages";
 
@@ -11,8 +12,8 @@ const PER_PAGE = 30;
 // Search matches descriptions too; the page lists jobs whose title names the role, from a wider first pull.
 const PULL = 100;
 
-/** The newest US jobs for a role (and place), kept for an hour. */
-async function listing(roleSlug: string, placeSlug: string) {
+/** The newest US jobs for a role (and place), kept for an hour. A failed search throws, so it isn't kept. */
+async function cachedListing(roleSlug: string, placeSlug: string) {
   "use cache";
   cacheLife("hours");
   cacheTag("jobs");
@@ -20,11 +21,20 @@ async function listing(roleSlug: string, placeSlug: string) {
   const p = placeSlug ? findPlace(placeSlug) : undefined;
   const f: JobQuery = { q: r.q, cat: "all", where: "anywhere", remote: p?.kind === "remote", visa: p?.kind === "visa", pay: false, level: "any", sort: "match", country: "US" };
   const near = p?.kind === "metro" ? { lat: p.lat, lon: p.lon, only: true } : null;
-  const { jobs, total } = await searchJobs(f, 1, PULL, near);
+  const { jobs, total } = await searchJobs(f, 1, PULL, near, true);
   const words = r.q.toLowerCase().split(/\s+/).filter(Boolean);
   // Role words are plain letters ("data engineer", "hvac"), so they're safe inside a pattern.
   const titled = jobs.filter((j) => words.every((w) => new RegExp(`\\b${w}`, "i").test(j.title)));
   return { total, jobs: (titled.length >= 5 ? titled : jobs).slice(0, PER_PAGE) };
+}
+
+/** null when the search failed this time (it's tried again on the next visit). */
+async function listing(roleSlug: string, placeSlug: string): Promise<{ jobs: JobLite[]; total: number } | null> {
+  try {
+    return await cachedListing(roleSlug, placeSlug);
+  } catch {
+    return null;
+  }
 }
 
 const where = (p?: Place) => (!p ? "across the US" : p.kind === "metro" ? `in and around ${p.name}, ${p.state}` : p.kind === "remote" ? "you can do remotely" : "where the employer sponsors visas");
@@ -44,7 +54,8 @@ export async function roleMetadata(roleSlug: string, placeSlug = ""): Promise<Me
   const r = findRole(roleSlug);
   const p = placeSlug ? findPlace(placeSlug) : undefined;
   if (!r || (placeSlug && !p)) return { robots: { index: false } };
-  const { total } = await listing(r.slug, p?.slug ?? "");
+  const found = await listing(r.slug, p?.slug ?? "");
+  const total = found?.total ?? 0;
   const title = heading(r, p);
   return {
     title,
@@ -59,7 +70,16 @@ export async function RolePage({ roleSlug, placeSlug = "" }: { roleSlug: string;
   const r = findRole(roleSlug);
   const p = placeSlug ? findPlace(placeSlug) : undefined;
   if (!r || (placeSlug && !p)) return null;
-  const { jobs, total } = await listing(r.slug, p?.slug ?? "");
+  const found = await listing(r.slug, p?.slug ?? "");
+  if (!found) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
+        <h1 className="font-display text-4xl font-semibold tracking-[-0.03em] text-balance sm:text-5xl">{heading(r, p)}</h1>
+        <p className="mt-3 text-lg text-muted">We couldn&apos;t load these jobs just now. Please try again in a minute.</p>
+      </div>
+    );
+  }
+  const { jobs, total } = found;
   const s = stats(jobs);
   const near = p?.kind === "metro" ? METROS.filter((m) => m.kind === "metro" && m.state === p.state && m.slug !== p.slug) : [];
   const otherPlaces = [...near, ...METROS.filter((m) => !near.includes(m) && m.slug !== p?.slug)].slice(0, 12);

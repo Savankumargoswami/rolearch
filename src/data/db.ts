@@ -205,7 +205,9 @@ export type Near = { lat: number; lon: number; only: boolean } | null;
 type SearchRow = Pick<Row, "id" | "title" | "company" | "city" | "country" | "region" | "workplace" | "visa" | "salary_min" | "salary_max" | "salary_currency" | "salary_period" | "level" | "years" | "skills" | "posted_at" | "category" | "verified" | "source" | "company_domain"> & { total: number };
 
 /** Searches every open job in the database. Cached briefly per query so popular searches are instant. */
-export async function searchJobs(f: JobQuery, page = 1, perPage = 40, near: Near = null): Promise<{ jobs: JobLite[]; total: number }> {
+/** strict: throw when the database search fails (so a cached page never keeps the fallback list) instead of
+ * searching the saved feed. */
+export async function searchJobs(f: JobQuery, page = 1, perPage = 40, near: Near = null, strict = false): Promise<{ jobs: JobLite[]; total: number }> {
   "use cache";
   cacheLife("minutes");
   cacheTag("jobs");
@@ -227,6 +229,7 @@ export async function searchJobs(f: JobQuery, page = 1, perPage = 40, near: Near
     match_any: f.any ?? false,
   });
   if (!rows) {
+    if (strict) throw new Error("search_jobs failed");
     // No database: search the saved feed instead.
     const { filterJobs, emptyFilters } = await import("@/lib/search");
     const all = filterJobs((await getJobFeed()).jobs, { ...emptyFilters, q: f.q });
