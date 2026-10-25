@@ -21,6 +21,7 @@ import { jobRequirements, type JobRequirements } from "@/lib/job-requirements";
 import type { Match, ReqStatus, Requirement } from "@/lib/match";
 import { loadViewer } from "@/lib/profile";
 import { matchProfile } from "@/lib/role-match";
+import { roadmapForTitle } from "@/lib/roadmaps";
 import { createClient } from "@/lib/supabase/server";
 
 // The ATS check's actions run here: reading a resume and tailoring it take 20-40 seconds each.
@@ -43,6 +44,21 @@ export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Pro
     description: [job.summary, `${job.company} · ${where}.`, job.salary ? `${salaryRange(job.salary)}.` : ""].filter(Boolean).join(" "),
     alternates: { canonical: `/jobs/${job.id}` },
   };
+}
+
+/** "Roadmap for this role", when the job's title maps to one of the career roadmaps. */
+async function RoadmapLink({ title }: { title: string }) {
+  const rm = await roadmapForTitle(title);
+  if (!rm) return null;
+  return (
+    <Link href={`/roadmaps/${rm.slug}`} className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-ink">
+      <span>
+        <span className="block font-semibold">Career roadmap: {rm.role}</span>
+        <span className="block text-sm text-muted">What to learn, how to practice and free resources, from beginner to expert.</span>
+      </span>
+      <span aria-hidden="true">→</span>
+    </Link>
+  );
 }
 
 /** Same kind of role: the title's core words, within the same category. */
@@ -242,6 +258,9 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
                 </Suspense>
               </div>
             </div>
+            <Suspense fallback={null}>
+              <RoadmapLink title={job.title} />
+            </Suspense>
             <HiringTeam title={job.title} company={job.company} />
             <Suspense fallback={<AtsPanel target={job.id} next={`/jobs/${job.id}#ats-h`} jobTitle={job.title} company={job.company} signedIn={false} hasProfile={false} />}>
               <PersonalAts job={job} />
