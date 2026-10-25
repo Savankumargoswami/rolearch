@@ -1,16 +1,18 @@
-import { ArrowUpRight, BookOpen, BriefcaseBusiness, ChartColumn, FolderGit2 } from "lucide-react";
+import { ArrowUpRight, BookOpen, BriefcaseBusiness, ChartColumn, FolderGit2, Megaphone, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { t } from "@/i18n";
 import type { Post } from "@/lib/social";
 import { Avatar } from "./avatar";
 import { DeletePostButton } from "./delete-post-button";
+import { InterestButton } from "./interest-button";
 
 const KIND = {
   project: { icon: FolderGit2, label: "posts.kindProject" },
   output: { icon: ChartColumn, label: "posts.kindOutput" },
   resource: { icon: BookOpen, label: "posts.kindResource" },
   jobs: { icon: BriefcaseBusiness, label: "posts.kindJobs" },
+  hiring: { icon: Megaphone, label: "posts.kindHiring" },
 } as const;
 
 const host = (url: string) => {
@@ -60,6 +62,24 @@ export function PostCard({ post, viewerId, index = 0 }: { post: Post; viewerId: 
         </span>
       </header>
 
+      {post.kind === "hiring" && post.hiring && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+          {[post.hiring.role, post.hiring.location, post.hiring.workplace && t(`posts.workplace_${post.hiring.workplace}` as "posts.workplace_remote")]
+            .filter(Boolean)
+            .map((x) => (
+              <span key={x} className="rounded-full bg-ink-soft px-2.5 py-1 font-medium">
+                {x}
+              </span>
+            ))}
+          {post.matches && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-signal/20 px-2.5 py-1 font-medium text-signal-ink">
+              <Sparkles aria-hidden="true" className="size-3.5" />
+              {t("posts.matchesYou")}
+            </span>
+          )}
+        </div>
+      )}
+
       <p className="mt-3 leading-relaxed whitespace-pre-line break-words">{post.kind === "jobs" ? withJobLinks(post.body) : post.body}</p>
 
       {n > 0 && (
@@ -91,6 +111,29 @@ export function PostCard({ post, viewerId, index = 0 }: { post: Post; viewerId: 
           </span>
           <ArrowUpRight aria-hidden="true" className="size-4 shrink-0" />
         </a>
+      )}
+
+      {post.kind === "hiring" && viewerId && post.author.id !== viewerId && (
+        <div className="mt-3">
+          <InterestButton postId={post.id} interested={post.interest?.mine ?? false} />
+        </div>
+      )}
+      {post.kind === "hiring" && post.author.id === viewerId && (
+        <div className="mt-3 rounded-xl bg-ink-soft p-3 text-sm">
+          <p className="font-medium">{post.interest?.count ? t("posts.interestCount", { n: post.interest.count }) : t("posts.interestNone")}</p>
+          {(post.interest?.people.length ?? 0) > 0 && (
+            <ul className="mt-2 flex flex-col gap-1">
+              {post.interest!.people.map((p) => (
+                <li key={p.id}>
+                  <Link href={`/u/${p.id}`} className="font-medium underline underline-offset-4">
+                    {p.name}
+                  </Link>
+                  {p.headline && <span className="text-muted"> · {p.headline}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
 
       {post.author.id && post.author.id === viewerId && (

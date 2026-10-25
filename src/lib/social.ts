@@ -1,6 +1,6 @@
 // Follows and posts, read with the signed-in member's own Supabase session (row-level security applies).
 import "server-only";
-import type { PostKind } from "./post-review";
+import type { Hiring, PostKind } from "./post-review";
 import { createClient, supabaseUrl } from "./supabase/server";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
@@ -18,6 +18,12 @@ export type Post = {
   /** "3 hr. ago", computed when the posts are loaded. */
   ago: string;
   author: { id: string; name: string; headline: string; avatarUrl: string };
+  /** Hiring posts: the role, place and way of working the review read from the post. */
+  hiring?: Hiring | null;
+  /** Hiring posts: whether the viewer said they're interested, and (on the viewer's own posts) who did. */
+  interest?: { mine: boolean; count: number; people: { id: string; name: string; headline: string }[] };
+  /** Hiring posts that match the viewer's profile (role and place). */
+  matches?: boolean;
 };
 
 export const postImageUrl = (path: string) => `${supabaseUrl}/storage/v1/object/public/post-images/${path}`;
@@ -34,7 +40,7 @@ export async function loadSocial(supabase: Supabase, profileId: string, viewerId
   return { followers: followers.count ?? 0, following: following.count ?? 0, posts: posts.count ?? 0, isFollowing: Boolean(mine.data) };
 }
 
-const POST_COLUMNS = "id, kind, body, link, images, created_at, author:profiles!posts_author_id_fkey(id, full_name, headline, avatar_url)";
+const POST_COLUMNS = "id, kind, body, link, images, created_at, review, author:profiles!posts_author_id_fkey(id, full_name, headline, avatar_url)";
 
 type PostRow = {
   id: string;
@@ -43,6 +49,7 @@ type PostRow = {
   link: string;
   images: string[] | null;
   created_at: string;
+  review: { hiring?: Hiring } | null;
   author: { id: string; full_name: string; headline: string; avatar_url: string } | null;
 };
 
@@ -75,13 +82,15 @@ function toPost(r: PostRow, now: number): Post {
     author: r.author
       ? { id: r.author.id, name: r.author.full_name || "Rolearch member", headline: r.author.headline ?? "", avatarUrl: r.author.avatar_url ?? "" }
       : { id: "", name: "Rolearch", headline: "Official", avatarUrl: "" },
+    hiring: r.kind === "hiring" ? (r.review?.hiring ?? null) : null,
   };
 }
 
 /** Newest posts: by one author, by the people someone follows (plus their own), or by everyone. */
-export async function listPosts(supabase: Supabase, filter: { authorId?: string; followedBy?: string }, limit = 30): Promise<Post[]> {
+export async function listPosts(supabase: Supabase, filter: { authorId?: string; followedBy?: string; kind?: string }, limit = 30): Promise<Post[]> {
   let query = supabase.from("posts").select(POST_COLUMNS).order("created_at", { ascending: false }).limit(limit);
   if (filter.authorId) query = query.eq("author_id", filter.authorId);
+  if (filter.kind) query = query.eq("kind", filter.kind);
   if (filter.followedBy) {
     const { data } = await supabase.from("follows").select("following_id").eq("follower_id", filter.followedBy).limit(1000);
     // Official Rolearch posts (no author) show in everyone's Following tab too.
@@ -93,7 +102,27 @@ export async function listPosts(supabase: Supabase, filter: { authorId?: string;
     return [];
   }
   const now = Date.now();
-  return (data as unknown as PostRow[]).map((r) => toPost(r, now));
+  return withInterest(supabase, (data as unknown as PostRow[]).map((r) => toPost(r, now)));
+}
+
+/** Adds who's interested to hiring posts. Row-level security returns the viewer's own interest, plus everyone's on
+ * the viewer's own posts. */
+async function withInterest(supabase: Supabase, posts: Post[]): Promise<Post[]> {
+  const ids = posts.filter((p) => p.kind === "hiring").map((p) => p.id);
+  if (!ids.length) return posts;
+  const me = await viewerId(supabase);
+  const { data } = await supabase
+    .from("post_interest")
+    .select("post_id, user_id, person:profiles!post_interest_user_id_fkey(id, full_name, headline)")
+    .in("post_id", ids)
+    .limit(1000);
+  const rows = (data ?? []) as unknown as { post_id: string; user_id: string; person: { id: string; full_name: string; headline: string } | null }[];
+  return posts.map((p) => {
+    if (p.kind !== "hiring") return p;
+    const mine = rows.filter((r) => r.post_id === p.id);
+    const people = p.author.id === me ? mine.filter((r) => r.person).map((r) => ({ id: r.person!.id, name: r.person!.full_name || "Rolearch member", headline: r.person!.headline ?? "" })) : [];
+    return { ...p, interest: { mine: mine.some((r) => r.user_id === me), count: people.length, people } };
+  });
 }
 
 /** The signed-in member's id, or null. */

@@ -5,7 +5,9 @@ import { Suspense } from "react";
 import { PostList } from "@/components/post-card";
 import { PostComposer } from "@/components/post-composer";
 import { t } from "@/i18n";
+import { matchesProfile } from "@/lib/hiring-match";
 import { postReviewEnabled } from "@/lib/post-review";
+import { loadViewer } from "@/lib/profile";
 import { listPosts, viewerId } from "@/lib/social";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,20 +34,28 @@ async function Feed({ searchParams }: { searchParams: Search }) {
   const supabase = await createClient();
   const me = await viewerId(supabase);
   if (!me) redirect("/signin");
-  const following = (await searchParams).tab === "following";
-  const posts = await listPosts(supabase, following ? { followedBy: me } : {}, 40);
+  const tab = (await searchParams).tab;
+  const following = tab === "following";
+  const hiring = tab === "hiring";
+  const [loaded, viewer] = await Promise.all([listPosts(supabase, following ? { followedBy: me } : hiring ? { kind: "hiring" } : {}, 40), loadViewer()]);
+  // Hiring posts that fit the member's role and place are marked, and come first on the Hiring tab.
+  const marked = loaded.map((p) => (p.kind === "hiring" && p.author.id !== me ? { ...p, matches: matchesProfile(p.hiring, viewer?.profile ?? null) } : p));
+  const posts = hiring ? [...marked].sort((a, b) => Number(b.matches ?? false) - Number(a.matches ?? false)) : marked;
   return (
     <div className="mt-8 flex flex-col gap-5">
       <PostComposer enabled={postReviewEnabled} />
       <nav aria-label={t("posts.feedTitle")} className="flex gap-2">
-        <Link href="/feed" aria-current={following ? undefined : "page"} className={tabClass(!following)}>
+        <Link href="/feed" aria-current={following || hiring ? undefined : "page"} className={tabClass(!following && !hiring)}>
           {t("posts.tabEveryone")}
         </Link>
         <Link href="/feed?tab=following" aria-current={following ? "page" : undefined} className={tabClass(following)}>
           {t("posts.tabFollowing")}
         </Link>
+        <Link href="/feed?tab=hiring" aria-current={hiring ? "page" : undefined} className={tabClass(hiring)}>
+          {t("posts.tabHiring")}
+        </Link>
       </nav>
-      <PostList posts={posts} viewerId={me} empty={following ? t("posts.emptyFollowing") : t("posts.emptyEveryone")} />
+      <PostList posts={posts} viewerId={me} empty={following ? t("posts.emptyFollowing") : hiring ? t("posts.emptyHiring") : t("posts.emptyEveryone")} />
     </div>
   );
 }

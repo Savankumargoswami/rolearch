@@ -126,7 +126,7 @@ const STATES: Record<string, string> = {
 };
 
 /** "Dallas, TX" or "Dallas, Texas, United States" -> { city: "dallas", state: "TX" }. */
-function place(text: string): { city: string; state: string } {
+export function place(text: string): { city: string; state: string } {
   const parts = text.split(/[,|]/).map((s) => s.trim()).filter(Boolean);
   const city = (parts[0] ?? "").toLowerCase();
   let state = "";
