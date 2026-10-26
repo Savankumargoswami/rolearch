@@ -12,6 +12,7 @@ const en = {
   },
   nav: {
     ats: "ATS check",
+    roadmaps: "Roadmaps",
     jobs: "Jobs",
     companies: "For companies",
     signIn: "Sign in",

@@ -35,6 +35,9 @@ export function SiteHeader() {
           <Link href="/ats" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
             {t("nav.ats")}
           </Link>
+          <Link href="/roadmaps" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
+            {t("nav.roadmaps")}
+          </Link>
           <Link href="/#companies" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
             {t("nav.companies")}
           </Link>
