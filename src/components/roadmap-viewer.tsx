@@ -7,10 +7,10 @@ import type { Roadmap, RoadmapSkill } from "@/lib/roadmaps";
 
 // Members-only roadmap, with the protections a web page can offer: it loads after the page (not in the HTML), can't be
 // selected, copied, printed or saved with the usual shortcuts, blurs when the window loses focus or a screenshot key is
-// pressed, and carries a faint watermark with the member's email. A screenshot tool or a phone camera can't be stopped
-// by any website; the watermark makes a shared copy traceable.
+// pressed, and carries a faint Rolearch watermark. A screenshot tool or a phone camera can't be stopped by any website;
+// the watermark marks any shared copy as Rolearch's.
 
-export function RoadmapViewer({ slug, email }: { slug: string; email: string }) {
+export function RoadmapViewer({ slug }: { slug: string }) {
   const [data, setData] = useState<Roadmap | null | undefined>(undefined);
   const [hidden, setHidden] = useState(false);
 
@@ -52,10 +52,9 @@ export function RoadmapViewer({ slug, email }: { slug: string; email: string }) 
   }, []);
 
   const watermark = useMemo(() => {
-    const text = `${email} · Rolearch · ${new Date().toISOString().slice(0, 10)}`.replace(/[<>&"]/g, "");
-    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='420' height='220'><text x='0' y='120' transform='rotate(-24 210 110)' font-family='sans-serif' font-size='15' fill='rgba(16,35,63,0.09)'>${text}</text></svg>`;
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='180'><text x='40' y='100' transform='rotate(-24 150 90)' font-family='sans-serif' font-size='22' font-weight='700' fill='rgba(16,35,63,0.08)'>Rolearch</text></svg>`;
     return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
-  }, [email]);
+  }, []);
 
   if (data === undefined)
     return (

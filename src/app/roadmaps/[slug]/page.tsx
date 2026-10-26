@@ -35,7 +35,7 @@ async function Body({ params }: { params: PageProps<"/roadmaps/[slug]">["params"
       </nav>
       <h1 className="mt-3 font-display text-4xl font-semibold tracking-[-0.03em] text-balance sm:text-5xl">{entry.role} roadmap</h1>
       {viewer ? (
-        <RoadmapViewer slug={slug} email={viewer.email} />
+        <RoadmapViewer slug={slug} />
       ) : (
         <div className="mt-6">
           <p className="max-w-[65ch] text-lg">{entry.summary}</p>
