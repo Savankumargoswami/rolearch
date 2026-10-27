@@ -220,3 +220,81 @@ export function jobStats(apps: ApplicationRow[], views: { day: string; views: nu
 export function daysSince(iso: string | null): number {
   return iso ? Math.max(0, Math.floor((Date.now() - Date.parse(iso)) / DAY)) : 0;
 }
+
+// ---------- Company dashboard ----------
+
+export type JobLine = { views: number; applicants: number; strong: number; avgMatch: number | null; waiting: number };
+export type Overview = {
+  applicants: number;
+  avgMatch: number | null;
+  strong: number;
+  medianFirstReply: number | null;
+  interviews: number;
+  offers: number;
+  hired: number;
+  funnel: { stage: (typeof FUNNEL)[number]; n: number }[];
+  weekly: number[]; // applicants per week, oldest first, last 8 weeks
+  waiting: ApplicationRow[]; // still "new" after 14+ days
+  perJob: Map<string, JobLine>;
+};
+
+/** Strong match: 80% or more, the same line the design and the job pages use. */
+export const STRONG = 80;
+/** After this many days without a reply, an applicant counts as waiting. */
+export const WAITING_DAYS = 14;
+
+/** The company dashboard's numbers for applicants who applied in the last `days` days (per-job lines use everyone). */
+export function overview(apps: ApplicationRow[], history: Map<string, EventRow[]>, views: { jobId: string; views: number }[], days: number, now = Date.now()): Overview {
+  const since = now - days * DAY;
+  const recent = apps.filter((a) => Date.parse(a.createdAt) >= since);
+  const scores = recent.map((a) => a.matchScore).filter((n): n is number => typeof n === "number");
+  const firstReply: number[] = [];
+  const reached = Object.fromEntries(FUNNEL.map((s) => [s, 0])) as Record<(typeof FUNNEL)[number], number>;
+  for (const a of recent) {
+    const evs = history.get(a.id) ?? [];
+    const first = evs.find((e) => e.kind === "stage" || e.kind === "message");
+    if (first) firstReply.push((Date.parse(first.createdAt) - Date.parse(a.createdAt)) / DAY);
+    const steps = new Set<string>(["new", a.stage, ...evs.map((e) => e.toStage ?? "")]);
+    const furthest = Math.max(...FUNNEL.map((s, i) => (steps.has(s) ? i : -1)));
+    FUNNEL.forEach((s, i) => {
+      if (i <= furthest) reached[s] += 1;
+    });
+  }
+  const weekly = Array.from({ length: 8 }, (_, i) => {
+    const end = now - (7 - i) * 7 * DAY;
+    return apps.filter((a) => {
+      const t = Date.parse(a.createdAt);
+      return t > end - 7 * DAY && t <= end;
+    }).length;
+  });
+  const perJob = new Map<string, JobLine>();
+  const line = (id: string) => perJob.get(id) ?? perJob.set(id, { views: 0, applicants: 0, strong: 0, avgMatch: null, waiting: 0 }).get(id)!;
+  for (const v of views) line(v.jobId).views += v.views;
+  const sums = new Map<string, { total: number; n: number }>();
+  for (const a of apps) {
+    const l = line(a.jobId);
+    l.applicants += 1;
+    if ((a.matchScore ?? 0) >= STRONG) l.strong += 1;
+    if (a.stage === "new" && (now - Date.parse(a.createdAt)) / DAY >= WAITING_DAYS) l.waiting += 1;
+    if (typeof a.matchScore === "number") {
+      const s = sums.get(a.jobId) ?? { total: 0, n: 0 };
+      s.total += a.matchScore;
+      s.n += 1;
+      sums.set(a.jobId, s);
+    }
+  }
+  for (const [id, s] of sums) line(id).avgMatch = Math.round(s.total / s.n);
+  return {
+    applicants: recent.length,
+    avgMatch: scores.length ? Math.round(scores.reduce((x, y) => x + y, 0) / scores.length) : null,
+    strong: scores.filter((n) => n >= STRONG).length,
+    medianFirstReply: median(firstReply),
+    interviews: reached.interview,
+    offers: reached.offer,
+    hired: reached.hired,
+    funnel: FUNNEL.map((stage) => ({ stage, n: reached[stage] })),
+    weekly,
+    waiting: apps.filter((a) => a.stage === "new" && (now - Date.parse(a.createdAt)) / DAY >= WAITING_DAYS),
+    perJob,
+  };
+}

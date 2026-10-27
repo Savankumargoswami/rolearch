@@ -13,7 +13,8 @@ const TYPES = ["image/jpeg", "image/png", "image/webp"];
 type Picked = { file: File; url: string };
 
 /** Write a post. Claude checks it on the server; only projects, outputs and resources get published. */
-export function PostComposer({ enabled }: { enabled: boolean }) {
+/** company: worded for an employer's hiring posts instead of a member's work. */
+export function PostComposer({ enabled, company = false }: { enabled: boolean; company?: boolean }) {
   const router = useRouter();
   const id = useId();
   const [body, setBody] = useState("");
@@ -69,11 +70,11 @@ export function PostComposer({ enabled }: { enabled: boolean }) {
   return (
     <form onSubmit={submit} className="rounded-2xl border border-line bg-surface p-4 sm:p-5">
       <label htmlFor={`${id}-body`} className="font-display text-lg font-semibold">
-        {t("posts.composeTitle")}
+        {t(company ? "posts.composeTitleCompany" : "posts.composeTitle")}
       </label>
       <p id={`${id}-rule`} className="mt-1 flex items-start gap-2 text-sm text-muted">
         <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-signal-ink" />
-        {t("posts.rule")}
+        {t(company ? "posts.ruleCompany" : "posts.rule")}
       </p>
       <textarea
         id={`${id}-body`}
@@ -83,7 +84,7 @@ export function PostComposer({ enabled }: { enabled: boolean }) {
         maxLength={2000}
         rows={4}
         disabled={!enabled}
-        placeholder={t("posts.placeholder")}
+        placeholder={t(company ? "posts.placeholderCompany" : "posts.placeholder")}
         className="mt-3 w-full resize-y rounded-xl border border-line bg-paper/40 px-4 py-3 leading-relaxed outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink focus:shadow-[0_0_0_3px_rgba(14,31,47,0.12)] disabled:cursor-not-allowed"
       />
 

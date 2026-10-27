@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { CompanyAccount } from "@/components/company-account";
 import { FeedbackPrompt } from "@/components/feedback-prompt";
 import { NewsletterCard } from "@/components/newsletter-card";
 import { ProfileView } from "@/components/profile-view";
 import { t } from "@/i18n";
+import { applicationsFor, companyJobs, daysSince, WAITING_DAYS } from "@/lib/hiring";
 import { postReviewEnabled } from "@/lib/post-review";
 import { loadAccount } from "@/lib/profile";
 import { listPosts, loadSocial } from "@/lib/social";
@@ -29,6 +31,17 @@ async function Account() {
   const account = await loadAccount();
   const supabase = await createClient();
   const [social, posts] = await Promise.all([loadSocial(supabase, account.id, account.id), listPosts(supabase, { authorId: account.id }, 20)]);
+  // Companies get their own page: who they are, where to hire from and their hiring posts, not a job seeker's profile.
+  if (account.accountType === "company") {
+    const jobs = await companyJobs(supabase, account.id);
+    const apps = await applicationsFor(supabase, account.id, jobs.map((j) => j.id));
+    const stats = {
+      openJobs: jobs.filter((j) => j.status === "open").length,
+      applicants: apps.length,
+      waiting: apps.filter((a) => a.stage === "new" && daysSince(a.createdAt) >= WAITING_DAYS).length,
+    };
+    return <CompanyAccount account={account} social={social} posts={posts} stats={stats} canPost={postReviewEnabled} />;
+  }
   return (
     <>
       <ProfileView account={account} mode="own" social={social} posts={posts} viewerId={account.id} canPost={postReviewEnabled} />

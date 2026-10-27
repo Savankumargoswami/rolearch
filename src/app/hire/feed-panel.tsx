@@ -14,7 +14,7 @@ export function FeedPanel({ feeds, verified }: { feeds: FeedRow[]; verified: boo
   const [state, action, pending] = useActionState<FeedResult | null, FormData>(connectFeed, null);
 
   return (
-    <section aria-labelledby={`${id}-h`} className="mt-12 rounded-3xl border border-line bg-surface p-5 sm:p-8">
+    <section id="feeds" aria-labelledby={`${id}-h`} className="mt-12 scroll-mt-24 rounded-3xl border border-line bg-surface p-5 sm:p-8">
       <h2 id={`${id}-h`} className="flex items-center gap-2 font-display text-2xl font-semibold tracking-[-0.02em]">
         <Rss aria-hidden="true" className="size-5 text-signal-ink" />
         {t("hire.feedTitle")}
