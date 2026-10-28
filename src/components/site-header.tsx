@@ -38,7 +38,7 @@ export function SiteHeader() {
           <Link href="/roadmaps" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
             {t("nav.roadmaps")}
           </Link>
-          <Link href="/#companies" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
+          <Link href="/employers" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
             {t("nav.companies")}
           </Link>
           <Suspense fallback={<GuestLinks />}>
