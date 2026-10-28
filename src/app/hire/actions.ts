@@ -3,7 +3,8 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { t } from "@/i18n";
 import { checkFeed } from "@/lib/feed-check";
-import { STAGES, type Question } from "@/lib/hiring";
+import { MAX_CUSTOM, readForm, writeForm } from "@/lib/application-form";
+import { STAGES } from "@/lib/hiring";
 import { reviewJob, type JobDraft } from "@/lib/job-review";
 import { loadViewer } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
@@ -51,13 +52,17 @@ export async function postJob(form: FormData): Promise<HireResult> {
   if (description.length > 20000) return { ok: false, message: t("hire.errDescriptionLong") };
   if (min && (!/^[A-Z]{3}$/.test(currency) || (max ?? 0) < min)) return { ok: false, message: t("hire.errSalary") };
 
-  let questions: Question[] = [];
+  // The application form: standard fields set to required/optional/off, plus the company's own questions.
+  let questions: ReturnType<typeof writeForm>;
   try {
-    const raw = JSON.parse(String(form.get("questions") ?? "[]")) as Question[];
-    questions = raw
-      .filter((q) => q && typeof q.q === "string" && q.q.trim())
-      .slice(0, 5)
-      .map((q) => ({ q: q.q.trim().slice(0, 200), kind: q.kind === "yesno" ? "yesno" : "text", required: Boolean(q.required) }));
+    const f = readForm(JSON.parse(String(form.get("questions") ?? "[]")));
+    const custom = f.custom.slice(0, MAX_CUSTOM).map((q) => ({
+      ...q,
+      q: q.q.trim().slice(0, 200),
+      ...(q.kind === "choice" ? { options: [...new Set((q.options ?? []).map((o) => o.trim().slice(0, 100)).filter(Boolean))] } : {}),
+    }));
+    if (custom.some((q) => q.kind === "choice" && (q.options?.length ?? 0) < 2)) return { ok: false, message: "Give each multiple-choice question at least two options." };
+    questions = writeForm({ modes: f.modes, custom });
   } catch {
     return { ok: false, message: t("hire.errForm") };
   }

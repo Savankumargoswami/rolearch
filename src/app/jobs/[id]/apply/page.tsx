@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
 import { t } from "@/i18n";
-import type { Question } from "@/lib/hiring";
+import { readForm } from "@/lib/application-form";
 import { requireMember } from "@/lib/require-member";
 import { createClient } from "@/lib/supabase/server";
 import { ApplyForm } from "./apply-form";
@@ -31,7 +31,17 @@ async function Apply({ params }: { params: PageProps<"/jobs/[id]/apply">["params
   const { data: existing } = await db.from("applications").select("id").eq("job_id", id).eq("applicant_id", viewer.id).maybeSingle();
   const p = viewer.profile;
   const ready = Boolean(p.full_name.trim()) && p.resume.experience.length + p.resume.skills.length + p.resume.education.length > 0;
-  const questions = (Array.isArray(job.questions) ? job.questions : []) as Question[];
+  const form = readForm(job.questions);
+  // Prefilled from the profile; the applicant can change anything before sending.
+  const [first, ...rest] = p.full_name.trim().split(/\s+/);
+  const linkedin = p.links.find((l) => /linkedin\.com/i.test(l.url))?.url ?? "";
+  const website = p.links.find((l) => l.url && !/linkedin\.com/i.test(l.url))?.url ?? "";
+  const prefill = { firstName: first ?? "", lastName: rest.join(" "), phone: "", location: p.location, linkedin, website };
+  const resume = {
+    roles: p.resume.experience.map((e) => [e.title, e.company].filter(Boolean).join(", ")),
+    schools: p.resume.education.map((e) => [e.degree, e.school].filter(Boolean).join(", ")),
+    skills: p.resume.skills,
+  };
 
   return (
     <>
@@ -68,7 +78,7 @@ async function Apply({ params }: { params: PageProps<"/jobs/[id]/apply">["params
             </Link>
           </section>
           {ready ? (
-            <ApplyForm jobId={id} company={job.company} questions={questions} />
+            <ApplyForm jobId={id} company={job.company} form={form} prefill={prefill} resume={resume} />
           ) : (
             <p role="alert" className="mt-6 rounded-2xl border border-[#b4532a]/50 bg-[#b4532a]/5 p-5">{t("apply.errProfile")}</p>
           )}

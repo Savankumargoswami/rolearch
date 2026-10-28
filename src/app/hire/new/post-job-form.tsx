@@ -1,11 +1,12 @@
 "use client";
 
-import { Plus, ShieldCheck, X } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { t, type MessageKey } from "@/i18n";
-import type { Question } from "@/lib/hiring";
+import { readForm, writeForm } from "@/lib/application-form";
 import { postJob } from "../actions";
+import { ApplicationFormSetup } from "./application-form-setup";
 
 const field =
   "w-full rounded-xl border border-line bg-surface px-4 outline-none transition-[border-color,box-shadow] duration-200 focus:border-ink focus:shadow-[0_0_0_3px_rgba(14,31,47,0.12)]";
@@ -16,7 +17,7 @@ export function PostJobForm({ enabled, company }: { enabled: boolean; company: s
   const id = useId();
   const router = useRouter();
   const [workplace, setWorkplace] = useState<"onsite" | "hybrid" | "remote">("onsite");
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [appForm, setAppForm] = useState(() => readForm(null));
   const [status, setStatus] = useState<{ kind: "error" | "rejected"; text: string } | null>(null);
   const [pending, start] = useTransition();
   const [description, setDescription] = useState("");
@@ -25,7 +26,7 @@ export function PostJobForm({ enabled, company }: { enabled: boolean; company: s
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     data.set("workplace", workplace);
-    data.set("questions", JSON.stringify(questions));
+    data.set("questions", JSON.stringify(writeForm(appForm)));
     setStatus(null);
     start(async () => {
       const res = await postJob(data);
@@ -138,65 +139,7 @@ export function PostJobForm({ enabled, company }: { enabled: boolean; company: s
         {t("hire.fVisa")}
       </label>
 
-      <fieldset>
-        <legend className={label}>{t("hire.fQuestions")}</legend>
-        <p className={hint}>{t("hire.fQuestionsHint")}</p>
-        <ul className="mt-3 flex flex-col gap-3">
-          {questions.map((q, i) => (
-            <li key={i} className="rounded-xl border border-line bg-surface p-3">
-              <div className="flex items-start gap-2">
-                <label className="sr-only" htmlFor={`${id}-q${i}`}>{t("hire.fQuestions")} {i + 1}</label>
-                <input
-                  id={`${id}-q${i}`}
-                  value={q.q}
-                  maxLength={200}
-                  placeholder={t("hire.qPlaceholder")}
-                  onChange={(e) => setQuestions((list) => list.map((x, j) => (j === i ? { ...x, q: e.target.value } : x)))}
-                  className={`${field} h-11`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setQuestions((list) => list.filter((_, j) => j !== i))}
-                  aria-label={t("hire.removeQuestion")}
-                  className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full hover:bg-ink-soft"
-                >
-                  <X aria-hidden="true" className="size-4" />
-                </button>
-              </div>
-              <div className="mt-2 flex flex-wrap items-center gap-4 text-sm">
-                <select
-                  aria-label={t("hire.fQuestions")}
-                  value={q.kind}
-                  onChange={(e) => setQuestions((list) => list.map((x, j) => (j === i ? { ...x, kind: e.target.value as Question["kind"] } : x)))}
-                  className="h-10 rounded-lg border border-line bg-surface px-2"
-                >
-                  <option value="yesno">{t("hire.qYesNo")}</option>
-                  <option value="text">{t("hire.qText")}</option>
-                </select>
-                <label className="inline-flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={q.required}
-                    onChange={(e) => setQuestions((list) => list.map((x, j) => (j === i ? { ...x, required: e.target.checked } : x)))}
-                    className="size-4"
-                  />
-                  {t("hire.qRequired")}
-                </label>
-              </div>
-            </li>
-          ))}
-        </ul>
-        {questions.length < 5 && (
-          <button
-            type="button"
-            onClick={() => setQuestions((list) => [...list, { q: "", kind: "yesno", required: true }])}
-            className="mt-3 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-line px-4 hover:border-ink"
-          >
-            <Plus aria-hidden="true" className="size-4" />
-            {t("hire.addQuestion")}
-          </button>
-        )}
-      </fieldset>
+      <ApplicationFormSetup value={appForm} onChange={setAppForm} />
 
       <p id={`${id}-note`} className="flex items-start gap-2 text-sm text-muted">
         <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-signal-ink" />

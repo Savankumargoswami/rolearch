@@ -1,4 +1,4 @@
-import { ArrowLeft, Mail } from "lucide-react";
+import { ArrowLeft, Mail, Phone } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,6 +7,7 @@ import { Avatar } from "@/components/avatar";
 import { MatchRing } from "@/components/match-ring";
 import { ResumeView } from "@/components/resume-view";
 import { t, type MessageKey } from "@/i18n";
+import { STD_FIELDS } from "@/lib/application-form";
 import { application, companyJob, events, type EventRow } from "@/lib/hiring";
 import type { Requirement, Verdict } from "@/lib/match";
 import type { ProfileData } from "@/lib/profile-schema";
@@ -44,6 +45,11 @@ async function Applicant({ params }: { params: PageProps<"/hire/applications/[id
   const resume = withDefaults({ resume: (s.resume as ProfileData["resume"]) ?? undefined }).resume;
   const reqs = ((app.match as { reqs?: Requirement[] }).reqs ?? []).slice(0, 24);
   const verdict = (app.match.verdict as Verdict) ?? "weak";
+  // Work authorization and sponsorship are the answers screeners look at first, so they get their own row.
+  const keyLabels = new Map(STD_FIELDS.filter((f) => f.id === "workAuth" || f.id === "sponsorship").map((f) => [f.label, f.id === "workAuth" ? "Authorized to work" : "Needs sponsorship"]));
+  const keyAnswers = app.answers.filter((a) => keyLabels.has(a.q));
+  const answers = app.answers.filter((a) => !keyLabels.has(a.q));
+  const coverLetter = s.coverLetter || app.note;
 
   return (
     <>
@@ -61,6 +67,12 @@ async function Applicant({ params }: { params: PageProps<"/hire/applications/[id
               {s.headline && <p className="text-lg">{s.headline}</p>}
               <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
                 {s.location && <span>{s.location}</span>}
+                {s.phone && (
+                  <a href={`tel:${s.phone.replace(/[^\d+]/g, "")}`} className="inline-flex items-center gap-1 underline decoration-line underline-offset-4 hover:decoration-ink">
+                    <Phone aria-hidden="true" className="size-4" />
+                    {s.phone}
+                  </a>
+                )}
                 {s.email && (
                   <a href={`mailto:${s.email}`} className="inline-flex items-center gap-1 underline decoration-line underline-offset-4 hover:decoration-ink">
                     <Mail aria-hidden="true" className="size-4" />
@@ -75,6 +87,20 @@ async function Applicant({ params }: { params: PageProps<"/hire/applications/[id
               </p>
             </div>
           </header>
+
+          {keyAnswers.length > 0 && (
+            <dl className="mt-6 flex flex-wrap gap-2">
+              {keyAnswers.map((a) => {
+                const good = a.q.startsWith("Are you legally") ? a.a === "yes" : a.a === "no";
+                return (
+                  <div key={a.q} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm ${good ? "bg-[#E8F3F1] text-[#0B5A50]" : "bg-[#FDF3E3] text-[#7A4708]"}`}>
+                    <dt>{keyLabels.get(a.q)}:</dt>
+                    <dd className="font-semibold">{a.a === "yes" ? "Yes" : a.a === "no" ? "No" : a.a || "—"}</dd>
+                  </div>
+                );
+              })}
+            </dl>
+          )}
 
           <section aria-labelledby="match-h" className="mt-8 rounded-2xl border border-line bg-surface p-5">
             <h2 id="match-h" className="font-display text-xl font-semibold">{t("hire.matchBreakdown")}</h2>
@@ -101,11 +127,11 @@ async function Applicant({ params }: { params: PageProps<"/hire/applications/[id
             )}
           </section>
 
-          {app.answers.length > 0 && (
+          {answers.length > 0 && (
             <section aria-labelledby="ans-h" className="mt-8">
               <h2 id="ans-h" className="font-display text-xl font-semibold">{t("hire.answersTitle")}</h2>
               <dl className="mt-3 divide-y divide-line rounded-2xl border border-line bg-surface">
-                {app.answers.map((a) => (
+                {answers.map((a) => (
                   <div key={a.q} className="p-4">
                     <dt className="text-sm text-muted">{a.q}</dt>
                     <dd className="mt-1 font-medium">{a.a === "yes" ? t("apply.yes") : a.a === "no" ? t("apply.no") : a.a || t("hire.none")}</dd>
@@ -115,11 +141,17 @@ async function Applicant({ params }: { params: PageProps<"/hire/applications/[id
             </section>
           )}
 
-          {app.note && (
+          {coverLetter && (
             <section aria-labelledby="note-h" className="mt-8">
-              <h2 id="note-h" className="font-display text-xl font-semibold">{t("hire.noteFromApplicant")}</h2>
-              <p className="mt-2 whitespace-pre-line rounded-2xl border border-line bg-surface p-4">{app.note}</p>
+              <h2 id="note-h" className="font-display text-xl font-semibold">{s.coverLetter ? "Cover letter" : t("hire.noteFromApplicant")}</h2>
+              <p className="mt-2 whitespace-pre-line rounded-2xl border border-line bg-surface p-4 leading-relaxed">{coverLetter}</p>
             </section>
+          )}
+
+          {s.attestedAt && (
+            <p className="mt-6 text-sm text-muted">
+              The applicant confirmed the information is accurate and complete on {when.format(new Date(s.attestedAt))}.
+            </p>
           )}
 
           <section aria-labelledby="resume-h" className="mt-8">

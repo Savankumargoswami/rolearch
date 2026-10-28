@@ -9,7 +9,8 @@ export type Stage = (typeof STAGES)[number] | "withdrawn";
 /** The forward path a hire travels; "rejected" and "withdrawn" leave it. */
 export const FUNNEL = ["new", "screening", "interview", "offer", "hired"] as const;
 
-export type Question = { q: string; kind: "yesno" | "text"; required: boolean };
+/** A custom question (see lib/application-form.ts for the whole form). */
+export type Question = { q: string; kind: "yesno" | "text" | "longtext" | "choice"; required: boolean; options?: string[] };
 export type Answer = { q: string; a: string };
 
 export type PostedJob = {
@@ -32,6 +33,10 @@ export type Snapshot = {
   avatar: string;
   links: { label?: string; url: string }[];
   resume: unknown;
+  /** From the application form (applications made before it have none). */
+  phone?: string;
+  coverLetter?: string;
+  attestedAt?: string;
 };
 
 export type ApplicationRow = {
