@@ -87,8 +87,47 @@ function descriptionHtml(text: string) {
     .join("");
 }
 
-/** schema.org JobPosting, so search engines (Google for Jobs) can list the job. Matches what the page shows. */
-function jobPostingLd(job: Job, text: string) {
+const POSTED_TYPES: Record<string, string> = { full_time: "FULL_TIME", part_time: "PART_TIME", contract: "CONTRACTOR", temporary: "TEMPORARY", internship: "INTERN" };
+const TYPE_WORDS: [string, RegExp][] = [
+  ["INTERN", /\bintern(ship)?s?\b|\bco-?op\b/i],
+  ["PART_TIME", /\bpart[- ]time\b|\bP\/T\b/i],
+  ["FULL_TIME", /\bfull[- ]time\b|\bF\/T\b/i],
+  ["PER_DIEM", /\bper[- ]diem\b|\bPRN\b/],
+  ["TEMPORARY", /\b(temporary|seasonal) (role|position|job|assignment|employee|worker)s?\b/i],
+  ["CONTRACTOR", /\bcontract(-to-hire)? (role|position|job|assignment)\b|\b(1099|W-?2) contract\b/i],
+];
+
+/** The job's employment type for search engines: what the employer chose on Rolearch, else what the title or the
+ *  description's opening says. Left out when the job doesn't say, rather than guessed. */
+function employmentTypes(job: Job, text: string): string[] {
+  if (job.source === "Rolearch") return [POSTED_TYPES[job.employment ?? ""] ?? "FULL_TIME"];
+  for (const words of [job.title, text.slice(0, 4000)]) {
+    const found = TYPE_WORDS.filter(([, re]) => re.test(words)).map(([type]) => type);
+    if (found.length) return found;
+  }
+  return [];
+}
+
+/** The US state of the job's city (GeoNames), for the listing's address. Cities in several states are told apart by
+ *  the job's coordinates; without them only a name used in one state counts. */
+async function usState(job: Job): Promise<string | undefined> {
+  if (job.countryCode !== "US" || !job.city || job.city === "Remote") return undefined;
+  const states = (await import("@/data/us-city-states.json")).default as unknown as Record<string, [string, number, number][]>;
+  const places = states[job.city.toLowerCase()];
+  if (!places?.length) return undefined;
+  if (job.lat != null && job.lon != null) {
+    const [best] = places
+      .map(([st, lat, lon]) => ({ st, d: Math.hypot(lat - job.lat!, (lon - job.lon!) * Math.cos((lat * Math.PI) / 180)) }))
+      .sort((a, b) => a.d - b.d);
+    if (best.d < 0.7) return best.st; // within about 75 km
+  }
+  return new Set(places.map(([st]) => st)).size === 1 ? places[0][0] : undefined;
+}
+
+/** schema.org JobPosting, so search engines (Google for Jobs) can list the job. Matches what the page shows.
+ *  No validThrough: these jobs have no set end date, and a closed job's page stops existing (404) instead. */
+function jobPostingLd(job: Job, text: string, state: string | undefined) {
+  const types = employmentTypes(job, text);
   const remote = job.workplace === "remote";
   const country = job.countryCode || undefined;
   const fallback = `<p>${escapeHtml(job.summary)}</p>${job.duties.length ? `<ul>${job.duties.map((d) => `<li>${escapeHtml(d)}</li>`).join("")}</ul>` : ""}`;
@@ -100,7 +139,7 @@ function jobPostingLd(job: Job, text: string) {
     identifier: { "@type": "PropertyValue", name: job.company, value: job.id },
     datePosted: (job.postedAt ?? "").slice(0, 10) || undefined,
     // No directApply: applying needs a Rolearch account first.
-    ...(job.source === "Rolearch" && { employmentType: "FULL_TIME" }),
+    ...(types.length && { employmentType: types.length === 1 ? types[0] : types }),
     hiringOrganization: {
       "@type": "Organization",
       name: job.company,
@@ -115,6 +154,7 @@ function jobPostingLd(job: Job, text: string) {
             address: {
               "@type": "PostalAddress",
               ...(job.city && job.city !== "Remote" && job.city !== job.country && { addressLocality: job.city }),
+              ...(state && { addressRegion: state }),
               addressCountry: country ?? job.country,
             },
           },
@@ -172,7 +212,7 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
       await db.rpc("record_job_view", { p_job: job.id });
     });
   }
-  const [similar, text] = await Promise.all([similarTo(job), getJobText(job.id)]);
+  const [similar, text, state] = await Promise.all([similarTo(job), getJobText(job.id), usState(job)]);
   const where = place(job);
 
   return (
@@ -187,7 +227,7 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
           <script
             type="application/ld+json"
             // Structured data for search engines' job listings; "<" is escaped so the text can't close the tag.
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingLd(job, text)).replace(/</g, "\\u003c") }}
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingLd(job, text, state)).replace(/</g, "\\u003c") }}
           />
         )}
         <Link

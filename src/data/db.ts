@@ -41,11 +41,12 @@ type Row = {
   category: string;
   verified: boolean;
   company_domain: string | null;
+  employment_type: string | null;
 };
 
 const COLUMNS =
   "id,title,company,city,country,country_code,region,workplace,visa,salary_min,salary_max,salary_currency,salary_period," +
-  "level,years,skills,summary,source,job_url,apply_url,lat,lon,posted_at,last_seen_at,category,verified,company_domain";
+  "level,years,skills,summary,source,job_url,apply_url,lat,lon,posted_at,last_seen_at,category,verified,company_domain,employment_type";
 // The home page map, similar jobs and the sitemap use the newest jobs; search runs in the database.
 const FEED_LIMIT = 2000;
 
@@ -83,6 +84,7 @@ function toJob(r: Row, now: number): Job {
     category: r.category,
     verified: r.verified,
     companyDomain: r.company_domain,
+    employment: r.employment_type ?? undefined,
   };
 }
 

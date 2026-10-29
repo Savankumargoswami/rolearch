@@ -47,4 +47,6 @@ export type Job = JobLite & {
   applyUrl?: string; // where Apply sends the person
   lat?: number | null;
   lon?: number | null;
+  /** full_time, part_time, contract, temporary or internship. Set only for jobs posted on Rolearch; feed jobs keep the column's default. */
+  employment?: string;
 };
