@@ -38,11 +38,15 @@ export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Pro
   const job = await getJob(id);
   if (!job) return { robots: { index: false } };
   const where = place(job);
+  // Until a refresh stores the description, the page is a title and a line: too thin to index. db/028 keeps the same
+  // jobs out of the sitemap; both pick the job up once its description arrives.
+  const thin = (await getJobText(job.id)).trim().length < 300;
   // Job pages are public so search engines can list them; match, ATS check and tracking need an account.
   return {
     title: `${job.title} at ${job.company}`,
     description: [job.summary, `${job.company} · ${where}.`, job.salary ? `${salaryRange(job.salary)}.` : ""].filter(Boolean).join(" "),
     alternates: { canonical: `/jobs/${job.id}` },
+    ...(thin && { robots: { index: false, follow: true } }),
   };
 }
 
