@@ -246,6 +246,20 @@ class PostgresStore:
         self.conn.commit()
         return n
 
+    def close_stale(self, days: float) -> int:
+        """Close open jobs no successful run has seen in `days`. A board that keeps failing (blocked, changed, gone)
+        would otherwise list jobs nobody can confirm are still open."""
+        with self.conn.cursor() as cur:
+            cur.execute(
+                "update jobs set status = 'closed', closed_at = now(), description = '' "
+                "where status = 'open' and last_seen_at < now() - make_interval(secs => %s) "
+                "and company_key not like 'rolearch:%%' and company_key not like 'feed:%%'",
+                (days * 86400,),
+            )
+            n = cur.rowcount
+        self.conn.commit()
+        return n
+
     def employer_feeds(self) -> list[Company]:
         """Feeds companies connected on Rolearch (db/023), as companies to read, named after the account."""
         try:

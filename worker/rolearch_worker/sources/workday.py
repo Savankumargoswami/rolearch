@@ -73,13 +73,18 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     def options(facet_list: list[dict], used: dict) -> list[tuple[str, list[dict]]]:
         """Filters that split the board into pieces, flattest-to-search first."""
         out = []
+        # Grouped filters (locationMainGroup > locations) are searched by the inner group's own parameter;
+        # sending an inner id under the outer name is a 400.
+        flat = []
         for f in facet_list:
-            param = f.get("facetParameter")
+            values = f.get("values") or []
+            if values and "values" in values[0]:
+                flat += [(g.get("facetParameter"), g.get("values") or []) for g in values]
+            else:
+                flat.append((f.get("facetParameter"), values))
+        for param, values in flat:
             if not param or param in used:
                 continue
-            values = f.get("values") or []
-            if values and "values" in values[0]:  # grouped filters (e.g. locations by region)
-                values = [v for g in values for v in g.get("values") or []]
             values = [v for v in values if v.get("id") and v.get("count")]
             if len(values) > 1:
                 out.append((param, values))

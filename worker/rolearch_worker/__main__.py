@@ -58,6 +58,7 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--companies", type=Path, default=DEFAULTS["companies"])
     f.add_argument("--state", type=Path, default=DEFAULTS["state"])
     f.add_argument("--grace-hours", type=float, default=12, help="keep companies refreshed this recently even if unlisted")
+    f.add_argument("--stale-days", type=float, default=3, help="close open jobs no successful run has seen in this many days")
 
     for s in (d, h, r, f):
         s.add_argument("-v", "--verbose", action="store_true")
@@ -97,11 +98,12 @@ def main(argv: list[str] | None = None) -> int:
             listed = {c.key for c in company_file.load(args.companies)}
             since = datetime.now(timezone.utc) - timedelta(hours=args.grace_hours)
             retired = store.retire_companies(listed, since)
+            stale = store.close_stale(args.stale_days) if hasattr(store, "close_stale") else 0
             if hasattr(store, "refresh_summary"):
                 store.refresh_summary()
         finally:
             store.close()
-        print(f"{len(listed)} companies listed · {retired} jobs closed from companies no longer listed · site totals refreshed")
+        print(f"{len(listed)} companies listed · {retired} jobs closed from companies no longer listed · {stale} unconfirmed for {args.stale_days:g} days closed · site totals refreshed")
         return 0
 
     companies = company_file.load(args.companies)

@@ -67,6 +67,21 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
         if isinstance(r, dict):
             jobs.extend((r.get("data") or {}).get("jobs") or [])
 
+    # Most sites put job pages under /{country}/{lang}/job/...; some (careers.davita.com) moved them to /job/...
+    # and the old address is a 404. Check one job and use the address that works.
+    sample = next((j for j in jobs if j.get("jobId") or j.get("reqId")), None)
+    if sample:
+        jid = str(sample.get("jobId") or sample.get("reqId"))
+        try:
+            r = await http.get(f"https://{host}/{prefix}/job/{jid}/{_slug(sample.get('title') or '')}", attempts=1)
+            if r.status_code in (404, 410):
+                r = await http.get(f"https://{host}/job/{jid}/{_slug(sample.get('title') or '')}", attempts=1)
+                if r.status_code == 200:
+                    prefix = ""
+        except Exception:
+            pass
+    base = f"https://{host}/{prefix}/job" if prefix else f"https://{host}/job"
+
     from ..normalize import job_id
 
     described = company.described or set()
@@ -80,7 +95,7 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
         if not jid or not title or jid in seen:
             return None
         seen.add(jid)
-        url = f"https://{host}/{prefix}/job/{jid}/{_slug(title)}"
+        url = f"{base}/{jid}/{_slug(title)}"
         workplace = _workplace(j.get("remote"), j.get("isRemote"), str(j.get("location", "")))
         skills = ", ".join(j.get("ml_skills") or [])
         raw = RawJob(
