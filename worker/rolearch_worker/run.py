@@ -97,7 +97,10 @@ async def pull_one(http: Fetcher, store: Store, company: Company) -> Result:
     except Exception as e:  # a storage error for one company never stops the run
         res.error = f"save failed: {type(e).__name__}: {e}"[:300]
         res.total = res.launch = 0
-        store.record_error(company, res.error)
+        try:
+            store.record_error(company, res.error)
+        except Exception:  # the database is struggling; the error is still in the run log
+            pass
     return res
 
 
@@ -108,7 +111,17 @@ async def pull_all(companies: list[Company], store: Store, concurrency: int = 8)
         async def task(c: Company) -> Result:
             async with sem:
                 t0 = time.monotonic()
-                r = await pull_one(http, store, c)
+                try:
+                    r = await pull_one(http, store, c)
+                except Exception as e:  # a database error (e.g. a timeout) on one company never stops the shard
+                    conn = getattr(store, "conn", None)
+                    if conn is not None:
+                        conn.rollback()  # an aborted transaction would fail every later company too
+                    r = Result(c, error=f"store failed: {type(e).__name__}: {e}"[:300])
+                    try:
+                        store.record_error(c, r.error)
+                    except Exception:
+                        pass
                 status = f"ERROR {r.error}" if r.error else f"{r.total} jobs ({r.launch} data/ML), +{r.added} new, {r.closed} closed"
                 log.info("%-28s %-15s %s [%ds]", c.name[:28], c.ats, status, time.monotonic() - t0)
                 return r

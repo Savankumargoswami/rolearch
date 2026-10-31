@@ -120,6 +120,11 @@ class PostgresStore:
         import psycopg
 
         self.conn = psycopg.connect(dsn, autocommit=False)
+        # The database's default 2-minute limit cut off big boards' saves (USAJOBS, Kroger, Apple...) while it was
+        # busy (autovacuum after mass closes, 12 shards writing): a slow save is fine, a failed one loses the run.
+        with self.conn.cursor() as cur:
+            cur.execute("set statement_timeout = '10min'")
+        self.conn.commit()
 
     def known_urls(self, company: Company) -> dict[str, str]:
         with self.conn.cursor() as cur:
@@ -253,7 +258,9 @@ class PostgresStore:
             cur.execute(
                 "update jobs set status = 'closed', closed_at = now(), description = '' "
                 "where status = 'open' and last_seen_at < now() - make_interval(secs => %s) "
-                "and company_key not like 'rolearch:%%' and company_key not like 'feed:%%'",
+                "and company_key not like 'rolearch:%%' and company_key not like 'feed:%%' "
+                # the board was read fine but our database failed to save it: not the board's fault
+                "and company_key not in (select key from companies where last_error like 'save failed%%' or last_error like 'store failed%%')",
                 (days * 86400,),
             )
             n = cur.rowcount
