@@ -117,14 +117,29 @@ class PostgresStore:
     ).split()
 
     def __init__(self, dsn: str) -> None:
+        self.dsn = dsn
+        self._connect()
+
+    def _connect(self) -> None:
         import psycopg
 
-        self.conn = psycopg.connect(dsn, autocommit=False)
+        self.conn = psycopg.connect(self.dsn, autocommit=False)
         # The database's default 2-minute limit cut off big boards' saves (USAJOBS, Kroger, Apple...) while it was
         # busy (autovacuum after mass closes, 12 shards writing): a slow save is fine, a failed one loses the run.
         with self.conn.cursor() as cur:
             cur.execute("set statement_timeout = '10min'")
         self.conn.commit()
+
+    def recover(self) -> None:
+        """After a database error: roll back so later companies can use the connection, or reconnect if the
+        database dropped it (a restart, e.g. a compute upgrade, ends every open connection)."""
+        try:
+            if not self.conn.closed:
+                self.conn.rollback()
+                return
+        except Exception:
+            pass
+        self._connect()
 
     def known_urls(self, company: Company) -> dict[str, str]:
         with self.conn.cursor() as cur:

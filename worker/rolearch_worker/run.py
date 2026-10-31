@@ -114,11 +114,10 @@ async def pull_all(companies: list[Company], store: Store, concurrency: int = 8)
                 try:
                     r = await pull_one(http, store, c)
                 except Exception as e:  # a database error (e.g. a timeout) on one company never stops the shard
-                    conn = getattr(store, "conn", None)
-                    if conn is not None:
-                        conn.rollback()  # an aborted transaction would fail every later company too
                     r = Result(c, error=f"store failed: {type(e).__name__}: {e}"[:300])
                     try:
+                        if hasattr(store, "recover"):
+                            store.recover()  # an aborted transaction or dropped connection would fail every later company
                         store.record_error(c, r.error)
                     except Exception:
                         pass
