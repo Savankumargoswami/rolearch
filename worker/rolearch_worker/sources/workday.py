@@ -21,6 +21,7 @@ from ..text import html_to_text
 PAGE = 20
 CAP = 2000  # Workday's search returns at most this many results; bigger boards are read filter by filter
 MAX_JOBS = 40000
+PAGE_TRIES = 3
 DETAILS_PER_RUN = int(os.environ.get("WORKDAY_DETAILS_PER_RUN", "300"))
 # Workday rate-limits by client across all its customers' sites, so cap requests to Workday as a whole.
 _WORKDAY = asyncio.Semaphore(int(os.environ.get("WORKDAY_CONCURRENCY", "6")))
@@ -52,13 +53,31 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     now = datetime.now(timezone.utc)
 
     found: dict[str, dict] = {}
+    company.partial = False
+
+    async def page(facets: dict, offset: int) -> dict:
+        """One page of results. Big boards (TJX) now and then answer with an error page partway through:
+        retry it, and if it keeps failing, give up on the page rather than on the whole board."""
+        for attempt in range(PAGE_TRIES):
+            try:
+                async with _WORKDAY:
+                    return await http.post_json(f"{api}/jobs", {"appliedFacets": facets, "limit": PAGE, "offset": offset, "searchText": ""})
+            except Exception:
+                if attempt == PAGE_TRIES - 1:
+                    raise
+                await asyncio.sleep(2 * (attempt + 1))
 
     async def search(facets: dict) -> tuple[int, list[dict]]:
         """Pages through one search; returns its total and its filters (facets)."""
         offset, total, facet_list = 0, None, []
         while offset < CAP and len(found) < MAX_JOBS:
-            async with _WORKDAY:
-                data = await http.post_json(f"{api}/jobs", {"appliedFacets": facets, "limit": PAGE, "offset": offset, "searchText": ""})
+            try:
+                data = await page(facets, offset)
+            except Exception:
+                if not found:
+                    raise  # nothing read at all: report the board as failing
+                company.partial = True  # keep what we have; the jobs we didn't see stay open
+                break
             posts = data.get("jobPostings") or []
             if total is None:
                 total, facet_list = int(data.get("total") or 0), data.get("facets") or []
@@ -97,13 +116,18 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
         if not choices:
             return
         param, values = choices[0]
-        for v in values:
+
+        async def piece(v: dict) -> None:
             if len(found) >= MAX_JOBS:
                 return
             sub = {**facets, param: [v["id"]]}
             total, sub_facets = await search(sub)
             if total >= CAP and depth < 2:
                 await split(sub, sub_facets, depth + 1)
+
+        # Side by side (the Workday-wide limit still applies): TJX splits into 3,000+ locations, which one at a
+        # time took longer than a run allows.
+        await asyncio.gather(*(piece(v) for v in values))
 
     total, facet_list = await search({})
     if total >= CAP:

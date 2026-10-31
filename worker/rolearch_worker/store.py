@@ -75,7 +75,7 @@ class JsonStore:
                 "closedAt": None,
             }
         for jid, job in self.data["jobs"].items():
-            if job["companyKey"] == company.key and job["status"] == "open" and jid not in seen:
+            if not company.partial and job["companyKey"] == company.key and job["status"] == "open" and jid not in seen:
                 job["status"], job["closedAt"] = "closed", now
                 closed += 1
         self.data["companies"][company.key] = {
@@ -210,13 +210,13 @@ class PostgresStore:
                            where company_key = %s and status = 'open' and coalesce(posted_at, first_seen_at) < now() - interval '30 days'""",
                         (company.key,),
                     )
-                else:
+                elif not company.partial:  # a partial read can't tell which jobs are gone
                     cur.execute(
                         """update jobs set status = 'closed', closed_at = now(), description = ''
                            where company_key = %s and status = 'open' and not (id = any(%s))""",
                         (company.key, all_ids),
                     )
-                closed = cur.rowcount
+                closed = cur.rowcount if company.ats in AGGREGATORS or not company.partial else 0
             self.conn.commit()
         except Exception:
             self.conn.rollback()  # leave the connection usable for the next company
