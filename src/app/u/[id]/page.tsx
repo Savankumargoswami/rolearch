@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { ProfileView } from "@/components/profile-view";
+import { SkillBadges } from "@/components/skill-badges";
 import { t } from "@/i18n";
 import { loadProfile } from "@/lib/profile";
 import { listPosts, loadSocial, viewerId } from "@/lib/social";
@@ -29,5 +30,10 @@ async function Member({ params }: { params: Promise<{ id: string }> }) {
   const account = await loadProfile(id);
   if (!account) notFound();
   const [social, posts] = await Promise.all([loadSocial(supabase, id, me), listPosts(supabase, { authorId: id }, 20)]);
-  return <ProfileView account={account} mode="public" social={social} posts={posts} viewerId={me} />;
+  return (
+    <>
+      <ProfileView account={account} mode="public" social={social} posts={posts} viewerId={me} />
+      <SkillBadges userId={id} />
+    </>
+  );
 }

@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
 import { MatchRing } from "@/components/match-ring";
 import { ResumeView } from "@/components/resume-view";
+import { ApplicantSkillTests } from "@/components/skill-badges";
 import { t, type MessageKey } from "@/i18n";
 import { STD_FIELDS } from "@/lib/application-form";
 import { application, companyJob, events, type EventRow } from "@/lib/hiring";
@@ -140,6 +141,10 @@ async function Applicant({ params }: { params: PageProps<"/hire/applications/[id
               </dl>
             </section>
           )}
+
+          <Suspense fallback={null}>
+            <ApplicantSkillTests userId={app.applicantId} />
+          </Suspense>
 
           {coverLetter && (
             <section aria-labelledby="note-h" className="mt-8">
