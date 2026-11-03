@@ -47,8 +47,9 @@ type Row = {
 const COLUMNS =
   "id,title,company,city,country,country_code,region,workplace,visa,salary_min,salary_max,salary_currency,salary_period," +
   "level,years,skills,summary,source,job_url,apply_url,lat,lon,posted_at,last_seen_at,category,verified,company_domain,employment_type";
-// The home page map, similar jobs and the sitemap use the newest jobs; search runs in the database.
-const FEED_LIMIT = 2000;
+// The home page's fresh jobs and the job pages built ahead come from the newest jobs; search runs in the database.
+// Each row is ~1 KB, and on Vercel this cache rarely outlives a request, so keep it to one small page.
+const FEED_LIMIT = 300;
 
 export type JobFeed = { jobs: Job[]; total: number; updatedAt: string | null; companies: number; countries: number; source: "supabase" | "file" | "sample" };
 
@@ -95,12 +96,12 @@ async function fromSupabase(): Promise<JobFeed | null> {
     const res = await fetch(
       `${URL}/rest/v1/jobs?select=${COLUMNS}&status=eq.open&order=posted_at.desc.nullslast,id`,
       // getJobFeed's "use cache" already caches the result; a second fetch-level cache only risks a stale or broken copy.
-      { headers: { apikey: KEY, "Range-Unit": "items", Range: `${from}-${from + PAGE - 1}` }, cache: "no-store" },
+      { headers: { apikey: KEY, "Range-Unit": "items", Range: `${from}-${Math.min(from + PAGE, FEED_LIMIT) - 1}` }, cache: "no-store" },
     );
     if (!res.ok) throw new Error(`Supabase jobs request failed: ${res.status} ${await res.text()}`);
     const page = (await res.json()) as Row[];
     rows.push(...page);
-    if (page.length < PAGE) break;
+    if (page.length < Math.min(PAGE, FEED_LIMIT - from)) break;
   }
   if (rows.length === 0) return null;
   const now = Date.now();
@@ -149,18 +150,35 @@ export async function getJob(id: string): Promise<Job | undefined> {
   "use cache";
   cacheLife("hours");
   cacheTag("jobs");
-  if (URL && KEY && /^[\w.-]{1,160}$/.test(id)) {
+  if (URL && KEY) {
+    if (!/^[\w.-]{1,160}$/.test(id)) return undefined;
     try {
       const res = await fetch(`${URL}/rest/v1/jobs?select=${COLUMNS}&id=eq.${encodeURIComponent(id)}&status=eq.open`, { headers: { apikey: KEY }, cache: "no-store" });
       if (res.ok) {
+        // The database answered: no row means the job closed. Crawlers ask for closed jobs constantly, so this
+        // must not fall through to loading the whole feed.
         const [row] = (await res.json()) as Row[];
-        if (row) return toJob(row, Date.now());
+        return row ? toJob(row, Date.now()) : undefined;
       }
     } catch (e) {
       console.error("[jobs] job lookup failed:", e);
     }
   }
   return (await getJobFeed()).jobs.find((j) => j.id === id);
+}
+
+export type JobStats = { total: number; updatedAt: string | null; companies: number; countries: number };
+
+/** Site-wide totals only (~100 bytes), for pages that don't show any feed jobs. */
+export async function jobStats(): Promise<JobStats> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("jobs");
+  const rows = await rpc<{ jobs: number; companies: number; countries: number; updated_at: string }[]>("job_stats", {});
+  const s = rows?.[0];
+  if (s) return { total: Number(s.jobs), updatedAt: s.updated_at, companies: Number(s.companies), countries: Number(s.countries) };
+  const { total, updatedAt, companies, countries } = await getJobFeed();
+  return { total, updatedAt, companies, countries };
 }
 
 async function rpc<T>(name: string, args: Record<string, unknown>): Promise<T | null> {

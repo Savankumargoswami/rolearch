@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { JobRow } from "@/components/job-row";
 import { JobsControls } from "@/components/jobs-explorer";
-import { correctQuery, getJobFeed, jobCategories, searchJobs, type JobQuery, type Near } from "@/data/db";
+import { correctQuery, jobCategories, jobStats, searchJobs, type JobQuery, type Near } from "@/data/db";
 import { locale, t } from "@/i18n";
 import { isCategory } from "@/lib/categories";
 import { formatJobCount, toQueryString } from "@/lib/job-query";
@@ -58,7 +58,7 @@ export default function JobsPage({ searchParams }: { searchParams: Search }) {
 async function Results({ searchParams }: { searchParams: Search }) {
   const { filters, page } = parse(await searchParams);
   await requireMember(`/jobs${toQueryString(filters, page)}`);
-  const [result, cats, feed] = await Promise.all([findJobs(filters, page), jobCategories(), getJobFeed()]);
+  const [result, cats, stats] = await Promise.all([findJobs(filters, page), jobCategories(), jobStats()]);
   const { jobs, total, corrected, mode, loc, parsed, partial } = result;
   const counts = Object.fromEntries(cats.map((c) => [c.category, c.n]));
   const link = (patch: Partial<JobQuery>) => `/jobs${toQueryString({ ...filters, ...patch })}`;
@@ -77,7 +77,7 @@ async function Results({ searchParams }: { searchParams: Search }) {
         <p aria-live="polite" className="font-display text-xl font-semibold tabular-nums">
           {total === 1 ? t("jobs.countOne") : t("jobs.count", { n: formatJobCount(total) })}
         </p>
-        <p className="text-sm text-muted">{updatedNote(feed.updatedAt, feed.companies)}</p>
+        <p className="text-sm text-muted">{updatedNote(stats.updatedAt, stats.companies)}</p>
       </div>
       <div className="mt-2 flex flex-col gap-1.5 text-sm">
         {corrected && (

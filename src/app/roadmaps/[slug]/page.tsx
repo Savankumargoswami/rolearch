@@ -4,11 +4,11 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { RoadmapViewer } from "@/components/roadmap-viewer";
 import { loadViewer } from "@/lib/profile";
-import { roadmapList } from "@/lib/roadmaps";
+import { roadmapEntry } from "@/lib/roadmaps";
 
 export async function generateMetadata({ params }: PageProps<"/roadmaps/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const entry = (await roadmapList()).find((r) => r.slug === slug);
+  const entry = await roadmapEntry(slug);
   if (!entry) return { robots: { index: false } };
   return { title: `${entry.role} career roadmap`, description: entry.summary, alternates: { canonical: `/roadmaps/${slug}` } };
 }
@@ -25,7 +25,7 @@ export default function RoadmapPage({ params }: PageProps<"/roadmaps/[slug]">) {
 
 async function Body({ params }: { params: PageProps<"/roadmaps/[slug]">["params"] }) {
   const { slug } = await params;
-  const entry = (await roadmapList()).find((r) => r.slug === slug);
+  const entry = await roadmapEntry(slug);
   if (!entry) notFound();
   const viewer = await loadViewer();
   return (

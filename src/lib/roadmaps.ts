@@ -44,7 +44,7 @@ export type RoadmapEntry = { slug: string; role: string; summary: string; depth:
 /** Every role with a roadmap, for the public index. */
 export async function roadmapList(): Promise<RoadmapEntry[]> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife("hours");
   cacheTag("roadmaps");
   if (!supabaseUrl || !supabaseKey) return [];
   try {
@@ -52,6 +52,22 @@ export async function roadmapList(): Promise<RoadmapEntry[]> {
     return res.ok ? ((await res.json()) as RoadmapEntry[]) : [];
   } catch {
     return [];
+  }
+}
+
+/** One role's list entry. Filtered in the database: the whole list is ~600 KB, and job pages only need one name. */
+export async function roadmapEntry(slug: string): Promise<RoadmapEntry | null> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("roadmaps");
+  if (!/^[a-z0-9-]{1,120}$/.test(slug) || !supabaseUrl || !supabaseKey) return null;
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/roadmap_list?slug=eq.${slug}`, { method: "POST", headers: { apikey: supabaseKey, "Content-Type": "application/json" }, body: "{}", cache: "no-store" });
+    if (!res.ok) return null;
+    const [row] = (await res.json()) as RoadmapEntry[];
+    return row ?? null;
+  } catch {
+    return null;
   }
 }
 
@@ -85,7 +101,7 @@ export async function roadmapForTitle(title: string): Promise<{ slug: string; ro
     const [row] = (await res.json()) as { slug: string }[];
     if (!row) return null;
     // The roadmap itself is members-only; its name comes from the public list.
-    const entry = (await roadmapList()).find((r) => r.slug === row.slug);
+    const entry = await roadmapEntry(row.slug);
     return entry ? { slug: entry.slug, role: entry.role } : null;
   } catch {
     return null;
