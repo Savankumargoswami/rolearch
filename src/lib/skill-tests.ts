@@ -10,6 +10,7 @@ export const SKILLS = [
   { id: "react", name: "React" },
   { id: "business_strategy", name: "Business strategy" },
   { id: "azure", name: "Microsoft Azure" },
+  { id: "machine_learning", name: "Machine learning" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
