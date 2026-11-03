@@ -8,6 +8,7 @@ export const SKILLS = [
   { id: "statistics", name: "Statistics" },
   { id: "aws", name: "AWS" },
   { id: "react", name: "React" },
+  { id: "business_strategy", name: "Business strategy" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
