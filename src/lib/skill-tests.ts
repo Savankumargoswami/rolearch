@@ -31,6 +31,7 @@ export const SKILLS = [
   { id: "generative_ai", name: "Generative AI & LLMs" },
   { id: "procurement", name: "Procurement & purchasing" },
   { id: "hvac_design", name: "HVAC design" },
+  { id: "accounts_payable_receivable", name: "Accounts payable & receivable" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
