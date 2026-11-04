@@ -29,6 +29,7 @@ export const SKILLS = [
   { id: "mathematical_modeling", name: "Mathematical modeling" },
   { id: "cybersecurity", name: "Cybersecurity fundamentals" },
   { id: "generative_ai", name: "Generative AI & LLMs" },
+  { id: "procurement", name: "Procurement & purchasing" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
