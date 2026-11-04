@@ -62,19 +62,29 @@ export type Attempt = {
   level: string;
   attempt_no: number;
   status: "in_progress" | "graded" | "expired";
-  questions: PublicQuestion[];
   started_at: string;
   deadline: string;
   submitted_at: string | null;
   score: number | null;
   passed: boolean | null;
-  results: QuestionResult[] | null;
   proctor: Record<string, number>;
 };
 
-export const ATTEMPT_COLUMNS = "id,user_id,skill,level,attempt_no,status,questions,started_at,deadline,submitted_at,score,passed,results,proctor";
+/** What a company sees for a graded attempt (db/030 skill_attempt_review); candidates never get this. */
+export type Review = { questions: PublicQuestion[]; results: QuestionResult[] | null };
+
+// Questions and results aren't readable directly (db/030): the candidate gets questions only while the test runs, through
+// my_skill_test_questions(), and a company gets the graded review through skill_attempt_review().
+export const ATTEMPT_COLUMNS = "id,user_id,skill,level,attempt_no,status,started_at,deadline,submitted_at,score,passed,proctor";
 export const RETRY_HOURS = 24;
 export const PASS_MARK = 90;
+
+/** When a retry opens after a graded attempt, as a short label, or null if it already has. */
+export function retryLabel(submittedAt: string | null): string | null {
+  if (!submittedAt) return null;
+  const at = new Date(submittedAt).getTime() + RETRY_HOURS * 3600_000;
+  return at > Date.now() ? new Date(at).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }) : null;
+}
 
 /** True once the test's time (plus 30 s of grace for the last autosave) has run out. */
 export function deadlinePassed(deadline: string): boolean {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { requireMember } from "@/lib/require-member";
-import { ATTEMPT_COLUMNS, callAssess, deadlinePassed, levelName, skillName, type Attempt } from "@/lib/skill-tests";
+import { ATTEMPT_COLUMNS, callAssess, deadlinePassed, levelName, skillName, type Attempt, type PublicQuestion } from "@/lib/skill-tests";
 import { createClient } from "@/lib/supabase/server";
 import { TestRunner } from "./test-runner";
 
@@ -28,7 +28,11 @@ async function Test({ params }: { params: Promise<{ id: string }> }) {
     await callAssess("/submit", { user_id: viewer.id, attempt_id: id }); // time ran out while away: grade what was saved
     redirect(`/skills/result/${id}`);
   }
-  const { data: saved } = await db.from("skill_answers").select("q_index,answer").eq("attempt_id", id);
+  const [{ data: questions }, { data: saved }] = await Promise.all([
+    db.rpc("my_skill_test_questions", { p_attempt: id }),
+    db.from("skill_answers").select("q_index,answer").eq("attempt_id", id),
+  ]);
+  if (!questions) notFound();
   const answers: Record<number, string> = {};
   for (const row of saved ?? []) answers[row.q_index] = row.answer;
   return (
@@ -36,7 +40,7 @@ async function Test({ params }: { params: Promise<{ id: string }> }) {
       attemptId={id}
       title={`${skillName(attempt.skill)} · ${levelName(attempt.level)}`}
       deadline={attempt.deadline}
-      questions={attempt.questions}
+      questions={questions as PublicQuestion[]}
       saved={answers}
     />
   );

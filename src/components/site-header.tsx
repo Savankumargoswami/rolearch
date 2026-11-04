@@ -5,6 +5,7 @@ import { t } from "@/i18n";
 import { GuestLinks, HeaderAccount } from "./header-account";
 import { HeaderSearch } from "./header-search";
 import { Logo } from "./logo";
+import { MobileMenu } from "./mobile-menu";
 import { NavLink } from "./nav-link";
 
 export function SiteHeader() {
@@ -47,6 +48,7 @@ export function SiteHeader() {
           <Suspense fallback={<GuestLinks />}>
             <HeaderAccount />
           </Suspense>
+          <MobileMenu />
         </nav>
       </div>
     </header>
