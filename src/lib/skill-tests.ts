@@ -17,6 +17,7 @@ export const SKILLS = [
   { id: "clinical_research", name: "Clinical research operations (GCP)" },
   { id: "google_cloud", name: "Google Cloud" },
   { id: "apache_spark", name: "Apache Spark" },
+  { id: "power_bi", name: "Power BI" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
