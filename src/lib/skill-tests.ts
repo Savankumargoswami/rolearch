@@ -15,6 +15,7 @@ export const SKILLS = [
   { id: "business_analysis", name: "Business analysis & requirements" },
   { id: "investment_analysis", name: "Investment analysis & portfolio management" },
   { id: "clinical_research", name: "Clinical research operations (GCP)" },
+  { id: "google_cloud", name: "Google Cloud" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
