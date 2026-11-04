@@ -18,6 +18,7 @@ export const SKILLS = [
   { id: "google_cloud", name: "Google Cloud" },
   { id: "apache_spark", name: "Apache Spark" },
   { id: "power_bi", name: "Power BI" },
+  { id: "logistics", name: "Logistics & transportation" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
