@@ -5,7 +5,7 @@ import type { Scene } from "@/lib/occupation-scene";
  * Pure SVG + CSS (keyframes in globals.css, `pb-*`), anchored to the right so the text side stays calm.
  * Motion stops for people who ask for reduced motion.
  */
-export function ProfileBackdrop({ scene }: { scene: Scene }) {
+export function ProfileBackdrop({ scene, framed = false }: { scene: Scene; framed?: boolean }) {
   const { accent, Art } = SCENE_ART[scene];
   return (
     <div aria-hidden="true" className="pb pointer-events-none absolute inset-0" style={{ "--pb": accent } as React.CSSProperties}>
@@ -13,7 +13,7 @@ export function ProfileBackdrop({ scene }: { scene: Scene }) {
       <div className="absolute -end-24 -top-28 size-[28rem] rounded-full opacity-25 blur-3xl" style={{ background: accent }} />
       <div className="absolute -bottom-36 -start-24 size-80 rounded-full bg-[#3b6ea5]/25 blur-3xl" />
       {/* fades in from the right, clear of the name; the summary strip below sits on its own frosted base */}
-      <div className="absolute inset-0 [mask-image:linear-gradient(to_right,transparent_40%,black_75%)] max-md:[mask-image:none] max-md:opacity-50">
+      <div className={framed ? "absolute inset-0 opacity-90" : "absolute inset-0 [mask-image:linear-gradient(to_right,transparent_40%,black_75%)] max-md:[mask-image:none] max-md:opacity-50"}>
         <svg
           className="absolute inset-0 h-full w-full"
           viewBox="0 0 1200 520"

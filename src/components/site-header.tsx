@@ -5,9 +5,9 @@ import { t } from "@/i18n";
 import { GuestLinks, HeaderAccount } from "./header-account";
 import { HeaderSearch } from "./header-search";
 import { Logo } from "./logo";
-import { MobileMenu } from "./mobile-menu";
 import { NavLink } from "./nav-link";
 
+/** Search, Jobs and Profile stay in view on every screen; everything else lives in the Menu. */
 export function SiteHeader() {
   return (
     <header style={{ viewTransitionName: "site-header" }} className="relative z-20 border-b border-line/70 bg-paper/90 backdrop-blur-sm">
@@ -19,36 +19,23 @@ export function SiteHeader() {
       </a>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6">
         <Link href="/" aria-label={t("nav.home")} className="shrink-0 rounded-md text-ink">
-          <Logo height={26} />
+          <Logo height={26} className="h-[22px] w-auto max-[359px]:h-[17px] sm:h-[26px]" />
         </Link>
         <HeaderSearch />
-        <nav aria-label="Main" className="flex min-w-0 items-center gap-0.5 sm:gap-2">
-          <Link href="/search" aria-label={t("search.label")} className="grid size-11 place-items-center rounded-full text-ink hover:bg-ink-soft md:hidden">
+        <nav aria-label="Main" className="flex shrink-0 items-center gap-0.5 sm:gap-2">
+          <Link href="/search" aria-label={t("search.label")} className="grid size-10 shrink-0 place-items-center rounded-full text-ink hover:bg-ink-soft sm:size-11 md:hidden">
             <Search aria-hidden="true" className="size-5" />
           </Link>
           <NavLink
             href="/jobs"
-            className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 text-[0.95rem] text-ink hover:bg-ink-soft sm:px-3"
+            className="inline-flex min-h-11 min-w-10 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-[0.95rem] text-ink hover:bg-ink-soft sm:px-3"
           >
             <BriefcaseBusiness aria-hidden="true" className="size-[1.1rem]" />
-            {t("nav.jobs")}
+            <span className="max-sm:sr-only">{t("nav.jobs")}</span>
           </NavLink>
-          <Link href="/ats" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
-            {t("nav.ats")}
-          </Link>
-          <Link href="/roadmaps" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
-            {t("nav.roadmaps")}
-          </Link>
-          <Link href="/skills" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft lg:inline-block">
-            {t("nav.skills")}
-          </Link>
-          <Link href="/employers" className="hidden rounded-md px-3 py-2 text-[0.95rem] text-ink hover:bg-ink-soft md:inline-block">
-            {t("nav.companies")}
-          </Link>
           <Suspense fallback={<GuestLinks />}>
             <HeaderAccount />
           </Suspense>
-          <MobileMenu />
         </nav>
       </div>
     </header>

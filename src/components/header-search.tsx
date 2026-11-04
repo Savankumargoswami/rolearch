@@ -26,7 +26,7 @@ export function HeaderSearch() {
   }, []);
 
   return (
-    <Form action="/search" role="search" className="relative hidden flex-1 md:block md:max-w-xs lg:max-w-sm">
+    <Form action="/search" role="search" className="relative hidden flex-1 md:block md:max-w-md lg:max-w-lg">
       <label htmlFor="header-search" className="sr-only">
         {t("search.label")}
       </label>

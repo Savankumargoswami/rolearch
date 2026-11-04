@@ -1,12 +1,15 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { BadgeCheck, Building2, ChartNoAxesColumn, FileSearch, Map, Menu, MessageSquare, UserPlus, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { t } from "@/i18n";
 
-/** Below desktop width the header hides some sections; this menu keeps them reachable. Closes on a link, a tap outside, or Escape. */
-export function MobileMenu() {
+const ICONS = { skills: BadgeCheck, ats: FileSearch, roadmaps: Map, companies: Building2, posts: MessageSquare, tracker: ChartNoAxesColumn, hiring: Building2, join: UserPlus };
+export type MenuItem = { href: string; label: string; icon: keyof typeof ICONS; primary?: boolean };
+
+/** The header's menu, on every screen size: everything that isn't search, Jobs or Profile. Closes on a link, a tap outside, or Escape. */
+export function MobileMenu({ items }: { items: MenuItem[] }) {
   const box = useRef<HTMLDetailsElement>(null);
   const close = () => box.current?.removeAttribute("open");
   useEffect(() => {
@@ -23,28 +26,32 @@ export function MobileMenu() {
       document.removeEventListener("keydown", escape);
     };
   }, []);
-  const links = [
-    { href: "/skills", label: t("nav.skills") },
-    { href: "/ats", label: t("nav.ats"), wide: true },
-    { href: "/roadmaps", label: t("nav.roadmaps"), wide: true },
-    { href: "/employers", label: t("nav.companies"), wide: true },
-  ];
   return (
-    <details ref={box} className="relative lg:hidden">
+    <details ref={box} className="group relative shrink-0">
       <summary
         aria-label={t("nav.menu")}
-        className="grid size-11 cursor-pointer list-none place-items-center rounded-full text-ink hover:bg-ink-soft [&::-webkit-details-marker]:hidden"
+        className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-full border border-line bg-surface px-2.5 text-[0.95rem] text-ink transition-colors duration-200 hover:border-ink sm:px-4 [&::-webkit-details-marker]:hidden"
       >
-        <Menu aria-hidden="true" className="size-5" />
+        <Menu aria-hidden="true" className="size-5 group-open:hidden" />
+        <X aria-hidden="true" className="hidden size-5 group-open:block" />
+        <span className="hidden sm:inline">{t("nav.menu")}</span>
       </summary>
-      <ul className="absolute end-0 top-12 z-30 w-56 rounded-2xl border border-line bg-surface p-2 shadow-lg">
-        {links.map((l) => (
-          <li key={l.href} className={l.wide ? "md:hidden" : undefined}>
-            <Link href={l.href} onClick={close} className="flex min-h-11 items-center rounded-xl px-3 text-[0.95rem] hover:bg-ink-soft">
-              {l.label}
-            </Link>
-          </li>
-        ))}
+      <ul className="absolute end-0 top-13 z-30 w-[min(17rem,calc(100vw-2rem))] rounded-2xl border border-line bg-surface p-2 shadow-[0_18px_40px_-18px_rgba(14,31,47,0.45)]">
+        {items.map((l) => {
+          const Icon = ICONS[l.icon];
+          return (
+            <li key={l.href}>
+              <Link
+                href={l.href}
+                onClick={close}
+                className={`flex min-h-12 items-center gap-3 rounded-xl px-3 text-[0.95rem] ${l.primary ? "mb-1 bg-ink font-medium text-paper hover:bg-ink-hover" : "hover:bg-ink-soft"}`}
+              >
+                <Icon aria-hidden="true" className={`size-[1.15rem] ${l.primary ? "" : "text-muted"}`} />
+                {l.label}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </details>
   );

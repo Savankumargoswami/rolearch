@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: t("auth.accountTitle"), robots: { ind
 
 export default function AccountPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-16">
       <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
         <Account />
       </Suspense>

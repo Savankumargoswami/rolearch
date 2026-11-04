@@ -6,7 +6,7 @@ import { setFollow } from "@/app/posts/actions";
 import { t } from "@/i18n";
 
 /** Follow / Following toggle. Updates right away and rolls back if saving fails. */
-export function FollowButton({ profileId, initialFollowing }: { profileId: string; initialFollowing: boolean }) {
+export function FollowButton({ profileId, initialFollowing, light = false }: { profileId: string; initialFollowing: boolean; light?: boolean }) {
   const [following, setFollowing] = useState(initialFollowing);
   const [error, setError] = useState("");
   const [pending, start] = useTransition();
@@ -32,14 +32,14 @@ export function FollowButton({ profileId, initialFollowing }: { profileId: strin
         disabled={pending}
         aria-pressed={following}
         className={`inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full px-6 font-medium transition-[background-color,color,transform] duration-200 active:scale-95 ${
-          following ? "border border-white/40 text-paper hover:border-signal" : "bg-signal text-ink hover:bg-[#ebb877]"
+          following ? (light ? "border border-ink/30 text-ink hover:border-ink" : "border border-white/40 text-paper hover:border-signal") : "bg-signal text-ink hover:bg-[#ebb877]"
         }`}
       >
         {following ? <UserCheck aria-hidden="true" className="size-4" /> : <UserPlus aria-hidden="true" className="size-4" />}
         {following ? t("social.following") : t("social.follow")}
       </button>
       {error && (
-        <p role="alert" className="text-sm text-signal">
+        <p role="alert" className={`text-sm ${light ? "text-signal-ink" : "text-signal"}`}>
           {error}
         </p>
       )}

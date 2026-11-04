@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { ProfileView } from "@/components/profile-view";
-import { SkillBadges } from "@/components/skill-badges";
 import { t } from "@/i18n";
 import { loadProfile } from "@/lib/profile";
 import { listPosts, loadSocial, viewerId } from "@/lib/social";
@@ -12,7 +11,7 @@ export const metadata: Metadata = { title: t("social.profileTitle"), robots: { i
 
 export default function MemberPage({ params }: { params: Promise<{ id: string }> }) {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-16">
       <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
         <Member params={params} />
       </Suspense>
@@ -33,7 +32,6 @@ async function Member({ params }: { params: Promise<{ id: string }> }) {
   return (
     <>
       <ProfileView account={account} mode="public" social={social} posts={posts} viewerId={me} />
-      <SkillBadges userId={id} />
     </>
   );
 }

@@ -304,3 +304,67 @@ body {
   100% { scale: 1.6; opacity: 0; }
 }
 @keyframes pb-drift { 50% { translate: -24px 12px; } }
+
+/* ---------- Profile portfolio ---------- */
+/* Scroll reveal (components/reveal.tsx): only blocks that start below the fold wait, and only once JS has run. */
+.reveal-wait {
+  opacity: 0;
+  transform: translateY(28px);
+}
+.reveal-in {
+  animation: rise 800ms var(--ease-out-soft) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+/* Bars inside a waiting block fill in when it appears, not while it's off screen. */
+.reveal-wait .grow-x {
+  animation: none;
+  transform: scaleX(0);
+}
+@keyframes float-y {
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.float-y {
+  animation: float-y 6s ease-in-out infinite;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes wave-hand {
+  0%, 60%, 100% {
+    transform: rotate(0deg);
+  }
+  10%, 30% {
+    transform: rotate(14deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  40% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+.wave-hand {
+  display: inline-block;
+  transform-origin: 70% 70%;
+  animation: wave-hand 2.6s ease-in-out 600ms 2;
+}
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.orbit {
+  animation: orbit var(--orbit, 60s) linear infinite;
+}
+.orbit-rev {
+  animation: orbit var(--orbit, 60s) linear infinite reverse;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-wait {
+    opacity: 1;
+    transform: none;
+  }
+}
