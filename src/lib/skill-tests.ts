@@ -19,6 +19,16 @@ export const SKILLS = [
   { id: "apache_spark", name: "Apache Spark" },
   { id: "power_bi", name: "Power BI" },
   { id: "logistics", name: "Logistics & transportation" },
+  { id: "kubernetes", name: "Kubernetes" },
+  { id: "inventory_management", name: "Inventory management" },
+  { id: "tableau", name: "Tableau" },
+  { id: "product_management", name: "Product management" },
+  { id: "risk_management", name: "Risk management" },
+  { id: "account_management", name: "Account management & planning" },
+  { id: "computer_vision", name: "Computer vision" },
+  { id: "mathematical_modeling", name: "Mathematical modeling" },
+  { id: "cybersecurity", name: "Cybersecurity fundamentals" },
+  { id: "generative_ai", name: "Generative AI & LLMs" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
