@@ -33,6 +33,7 @@ export const SKILLS = [
   { id: "hvac_design", name: "HVAC design" },
   { id: "accounts_payable_receivable", name: "Accounts payable & receivable" },
   { id: "stakeholder_management", name: "Stakeholder management" },
+  { id: "supply_chain_planning", name: "Supply chain planning" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
