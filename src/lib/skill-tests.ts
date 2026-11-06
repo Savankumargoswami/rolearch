@@ -34,6 +34,7 @@ export const SKILLS = [
   { id: "accounts_payable_receivable", name: "Accounts payable & receivable" },
   { id: "stakeholder_management", name: "Stakeholder management" },
   { id: "supply_chain_planning", name: "Supply chain planning" },
+  { id: "docker", name: "Docker" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
