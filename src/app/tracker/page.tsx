@@ -6,7 +6,8 @@ import { t, type MessageKey } from "@/i18n";
 import { events, myApplications } from "@/lib/hiring";
 import { requireMember } from "@/lib/require-member";
 import { createClient } from "@/lib/supabase/server";
-import { TRACKER_STATUSES, type TrackedJob, type TrackerStatus } from "@/lib/tracker";
+import { fromRow, funnel, nextStep, nowMs, TRACKER_STATUSES } from "@/lib/tracker";
+import { outcomes, type Rate } from "@/lib/outcomes";
 import { FeedbackPrompt } from "@/components/feedback-prompt";
 import { TrackerItem } from "./tracker-item";
 
@@ -29,26 +30,24 @@ async function Tracker() {
   const viewer = await requireMember("/tracker");
   const db = await createClient();
   const [{ data }, apps] = await Promise.all([
-    db.from("tracked_jobs").select("job_id,status,title,company,url,notes,applied_at,updated_at,created_at").eq("user_id", viewer.id).order("updated_at", { ascending: false }),
+    // "*" so the page works before and after db/031 adds the application manager's columns.
+    db.from("tracked_jobs").select("*").eq("user_id", viewer.id).order("updated_at", { ascending: false }),
     myApplications(db, viewer.id),
   ]);
-  const tracked: TrackedJob[] = (data ?? []).map((r) => ({
-    jobId: r.job_id,
-    status: r.status as TrackerStatus,
-    title: r.title,
-    company: r.company,
-    url: r.url,
-    notes: r.notes,
-    appliedAt: r.applied_at,
-    updatedAt: r.updated_at,
-    createdAt: r.created_at,
-  }));
+  const tracked = (data ?? []).map((r) => fromRow(r as Record<string, unknown>));
+  const now = nowMs();
+  // Which resume version went to which job (db/032), for outcome intelligence.
+  const versionOf = new Map<string, string>();
+  for (const r of (data ?? []) as Record<string, unknown>[]) if (typeof r.resume_version === "string") versionOf.set(String(r.job_id), r.resume_version);
+  const { data: versions } = versionOf.size ? await db.from("resume_versions").select("id,label").eq("user_id", viewer.id) : { data: [] };
+  const labels = new Map((versions ?? []).map((v: { id: string; label: string }) => [v.id, v.label]));
   const appByJob = new Map(apps.map((a) => [a.jobId, a]));
   const history = await events(db, apps.map((a) => a.id));
   const heading = (
     <>
-      <h1 className="font-display text-3xl font-semibold tracking-[-0.025em] sm:text-4xl">{t("tracker.title")}</h1>
-      <p className="mt-2 text-muted">{t("tracker.lead")}</p>
+      <p className="text-xs font-semibold tracking-[0.14em] text-muted uppercase">{t("tracker.managerTitle")}</p>
+      <h1 className="mt-1 font-display text-3xl font-semibold tracking-[-0.025em] sm:text-4xl">{t("tracker.title")}</h1>
+      <p className="mt-2 text-muted">{t("tracker.managerLead")}</p>
     </>
   );
 
@@ -68,9 +67,103 @@ async function Tracker() {
   }
 
   const counts = Object.fromEntries(TRACKER_STATUSES.map((s) => [s, tracked.filter((j) => j.status === s).length]));
+  const f = funnel(tracked);
+  const steps = [
+    { n: f.saved, label: t("tracker.funnelSaved") },
+    { n: f.applied, label: t("tracker.funnelApplied") },
+    { n: f.interviewing, label: t("tracker.funnelInterviews") },
+    { n: f.offer, label: t("tracker.funnelOffers") },
+  ];
+  const top = Math.max(1, ...steps.map((x) => x.n));
+  const o = f.applied >= 3 ? await outcomes(tracked, labels, versionOf) : null;
   return (
     <>
       {heading}
+      <section aria-labelledby="funnel-h" className="mt-6 grid gap-5 rounded-3xl bg-ink p-5 text-paper sm:p-6 md:grid-cols-[1.3fr_1fr]">
+        <div>
+          <h2 id="funnel-h" className="font-display text-lg font-semibold">{t("tracker.funnelTitle")}</h2>
+          <ul className="mt-3 flex flex-col gap-2">
+            {steps.map((x) => (
+              <li key={x.label} className="grid grid-cols-[6.5rem_1fr] items-center gap-3 text-sm">
+                <span className="text-[#c9d2de]">{x.label}</span>
+                <span className="h-7 overflow-hidden rounded-lg bg-white/10">
+                  <span className="grow-x flex h-full min-w-8 items-center rounded-lg bg-signal px-2 font-semibold text-ink tabular-nums" style={{ width: `${Math.max(8, (x.n / top) * 100)}%` }}>
+                    {x.n}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          {f.applied > 0 && (
+            <p className="mt-3 text-sm text-[#dfe5ec]">
+              {t("tracker.interviewRate", { n: f.interviewRate })} · {t("tracker.offerRate", { n: f.offerRate })}
+            </p>
+          )}
+        </div>
+        <div className="rounded-2xl bg-white/[0.06] p-4">
+          <h3 className="font-display font-semibold">{t("tracker.reasonsTitle")}</h3>
+          {f.reasons.length ? (
+            <>
+              <ul className="mt-2 flex flex-col gap-1 text-sm">
+                {f.reasons.map((r) => (
+                  <li key={r.reason} className="flex justify-between gap-2">
+                    <span>{t(`tracker.reason_${r.reason}` as MessageKey)}</span>
+                    <span className="tabular-nums text-[#c9d2de]">{r.n}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-sm text-signal">{t(`tracker.reasonsAdvice_${f.reasons[0].reason}` as MessageKey)}</p>
+            </>
+          ) : (
+            <p className="mt-2 text-sm text-[#c9d2de]">{t("tracker.reasonsNone")}</p>
+          )}
+        </div>
+      </section>
+      {o ? (
+        <section aria-labelledby="outcomes-h" className="mt-6 rounded-3xl border border-line bg-surface p-5 sm:p-6">
+          <h2 id="outcomes-h" className="font-display text-lg font-semibold">
+            {t("outcomes.title")}
+          </h2>
+          <p className="text-sm text-muted">{t("outcomes.lead")}</p>
+          <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { k: "sent", n: o.sent },
+              { k: "responses", n: o.responses },
+              { k: "interviews", n: o.interviews },
+              { k: "offers", n: o.offers },
+            ].map((x) => (
+              <div key={x.k} className="rounded-2xl bg-ink-soft/60 p-3">
+                <dt className="text-xs font-semibold tracking-wide text-muted uppercase">{t(`outcomes.${x.k}` as MessageKey)}</dt>
+                <dd className="font-display text-2xl font-semibold tabular-nums">
+                  {x.n}
+                  {x.k !== "sent" && o.sent > 0 && <span className="ms-1 text-sm font-normal text-muted">{Math.round((x.n / o.sent) * 100)}%</span>}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-5 grid gap-5 md:grid-cols-3">
+            <RateTable title={t("outcomes.byVersion")} rows={o.byVersion} label={(k) => k} />
+            <RateTable title={t("outcomes.byCategory")} rows={o.byCategory} label={(k) => t(`categories.${k}` as MessageKey)} />
+            <RateTable title={t("outcomes.byPlatform")} rows={o.byPlatform} label={(k) => k} />
+          </div>
+          <div className="mt-5 grid gap-5 md:grid-cols-2">
+            <div>
+              <h3 className="font-medium">{t("outcomes.stopsTitle")}</h3>
+              <ul className="mt-1 text-sm">
+                <li>{t("outcomes.stopNoResponse", { n: o.stops.noResponse })}</li>
+                <li>{t("outcomes.stopBefore", { n: o.stops.beforeInterview })}</li>
+                <li>{t("outcomes.stopAfter", { n: o.stops.afterInterview })}</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-medium">{t("outcomes.skillsTitle")}</h3>
+              <p className="mt-1 text-sm text-muted">{o.winningSkills.length ? o.winningSkills.join(", ") : t("outcomes.skillsNone")}</p>
+            </div>
+          </div>
+        </section>
+      ) : (
+        f.applied > 0 && <p className="mt-4 text-sm text-muted">{t("outcomes.notYet")}</p>
+      )}
       <ul className="mt-6 flex flex-wrap gap-2" aria-label={t("tracker.status")}>
         {TRACKER_STATUSES.filter((s) => counts[s] > 0).map((s) => (
           <li key={s}>
@@ -98,7 +191,7 @@ async function Tracker() {
                   : [];
                 return (
                   <li key={j.jobId}>
-                    <TrackerItem job={j} application={app ? { id: app.id, stage: app.stage } : null} messages={msgs} />
+                    <TrackerItem job={j} application={app ? { id: app.id, stage: app.stage } : null} messages={msgs} step={nextStep(j, now)} />
                   </li>
                 );
               })}
@@ -106,5 +199,28 @@ async function Tracker() {
         </section>
       ))}
     </>
+  );
+}
+
+/** Responses and interviews per group (resume version, job category, platform), as counts and rates. */
+function RateTable({ title, rows, label }: { title: string; rows: Rate[]; label: (key: string) => string }) {
+  return (
+    <div>
+      <h3 className="font-medium">{title}</h3>
+      {rows.length ? (
+        <ul className="mt-1 flex flex-col gap-1 text-sm">
+          {rows.map((r) => (
+            <li key={r.key} className="flex justify-between gap-2">
+              <span className="min-w-0 truncate">{label(r.key)}</span>
+              <span className="shrink-0 tabular-nums text-muted">
+                {t("outcomes.rateLine", { interviews: r.interviews, sent: r.sent, pct: Math.round((r.interviews / r.sent) * 100) })}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-1 text-sm text-muted">{t("outcomes.none")}</p>
+      )}
+    </div>
   );
 }

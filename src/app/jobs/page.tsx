@@ -11,6 +11,8 @@ import { formatJobCount, toQueryString } from "@/lib/job-query";
 import { parseQuery } from "@/lib/query-parse";
 import { viewerLocation } from "@/lib/viewer-location";
 import { requireMember } from "@/lib/require-member";
+import { fitsFor } from "@/lib/fit-list";
+import { loadViewer } from "@/lib/profile";
 import { whereOptions, type Where } from "@/lib/regions";
 
 export const metadata: Metadata = {
@@ -58,8 +60,10 @@ export default function JobsPage({ searchParams }: { searchParams: Search }) {
 async function Results({ searchParams }: { searchParams: Search }) {
   const { filters, page } = parse(await searchParams);
   await requireMember(`/jobs${toQueryString(filters, page)}`);
-  const [result, cats, stats] = await Promise.all([findJobs(filters, page), jobCategories(), jobStats()]);
+  const [result, cats, stats, viewer] = await Promise.all([findJobs(filters, page), jobCategories(), jobStats(), loadViewer()]);
   const { jobs, total, corrected, mode, loc, parsed, partial } = result;
+  // Job-Fit Intelligence: a verdict on every job on this page, from the member's own profile.
+  const fits = await fitsFor(jobs, viewer);
   const counts = Object.fromEntries(cats.map((c) => [c.category, c.n]));
   const link = (patch: Partial<JobQuery>) => `/jobs${toQueryString({ ...filters, ...patch })}`;
   const understood = [
@@ -112,11 +116,27 @@ async function Results({ searchParams }: { searchParams: Search }) {
         )}
       </div>
 
+      {fits.size > 0 ? (
+        <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-ink-soft/60 px-3 py-2 text-sm">
+          <span className="font-medium">{t("fit.listSummary", { strong: [...fits.values()].filter((f) => f.verdict === "strong").length, potential: [...fits.values()].filter((f) => f.verdict === "potential").length })}</span>
+          <Link href="/discover" className="font-medium underline underline-offset-4">
+            {t("fit.discoverLink")}
+          </Link>
+        </p>
+      ) : viewer ? (
+        <p className="mt-3 text-sm text-muted">
+          <Link href="/account/profile" className="font-medium text-ink underline underline-offset-4">
+            {t("profile.build")}
+          </Link>{" "}
+          {t("fit.listNeedsProfile")}
+        </p>
+      ) : null}
+
       {jobs.length > 0 ? (
         <ul className="-mx-3 mt-2 divide-y divide-line sm:-mx-4">
           {jobs.map((job) => (
             <li key={job.id}>
-              <JobRow job={job} />
+              <JobRow job={job} fit={fits.get(job.id)} />
             </li>
           ))}
         </ul>

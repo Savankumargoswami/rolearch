@@ -17,11 +17,13 @@ import { freeResources } from "@/data/learning";
 import type { Job } from "@/data/types";
 import { t, type MessageKey } from "@/i18n";
 import { place, postedAgo, salaryRange } from "@/lib/format";
+import { fitReport, type FitReport } from "@/lib/fit";
 import { jobRequirements, type JobRequirements } from "@/lib/job-requirements";
 import type { Match, ReqStatus, Requirement } from "@/lib/match";
 import { loadViewer } from "@/lib/profile";
 import { matchProfile } from "@/lib/role-match";
 import { roadmapForTitle } from "@/lib/roadmaps";
+import { SKILLS } from "@/lib/skill-tests";
 import { createClient } from "@/lib/supabase/server";
 
 // The ATS check's actions run here: reading a resume and tailoring it take 20-40 seconds each.
@@ -179,7 +181,7 @@ const reqIcon: Record<ReqStatus, { Icon: typeof Check; cls: string; label: strin
   missing: { Icon: Minus, cls: "border border-line text-muted", label: t("job.reqMissing") },
 };
 
-type ViewerMatch = { signedIn: boolean; hasProfile: boolean; match: Match | null; req: JobRequirements | null };
+type ViewerMatch = { signedIn: boolean; hasProfile: boolean; match: Match | null; req: JobRequirements | null; fit: FitReport | null };
 
 /**
  * The viewer's match with this job, from their saved profile and the job's requirements (read from its
@@ -188,13 +190,29 @@ type ViewerMatch = { signedIn: boolean; hasProfile: boolean; match: Match | null
 const viewerMatch = cache(async (id: string): Promise<ViewerMatch> => {
   const job = await getJob(id);
   const viewer = await loadViewer();
-  if (!job || !viewer) return { signedIn: Boolean(viewer), hasProfile: false, match: null, req: null };
+  if (!job || !viewer) return { signedIn: Boolean(viewer), hasProfile: false, match: null, req: null, fit: null };
   const description = await getJobText(job.id);
   const req = await jobRequirements(job, description);
   const p = viewer.profile;
   const hasProfile = p.resume.experience.length + p.resume.skills.length > 0;
-  if (!hasProfile) return { signedIn: true, hasProfile, match: null, req };
-  return { signedIn: true, hasProfile, match: matchProfile({ title: job.title, skills: job.skills, years: job.years, description }, p, req), req };
+  if (!hasProfile) return { signedIn: true, hasProfile, match: null, req, fit: null };
+  const db = await createClient();
+  const { data: badges } = await db.from("skill_badges").select("skill,level").eq("user_id", viewer.id);
+  // The job-fit verdict (no screening read here, so a job page never triggers an extra AI call).
+  const fit = fitReport(
+    {
+      title: job.title,
+      description,
+      required: (req?.required.length ? req.required : job.skills).slice(0, 14),
+      preferred: (req?.preferred ?? []).slice(0, 8),
+      certifications: (req?.certifications ?? []).slice(0, 6),
+      years: req?.years || job.years,
+      education: req?.education ?? "none",
+    },
+    p,
+    { badges: (badges ?? []) as { skill: string; level: string }[], tests: SKILLS },
+  );
+  return { signedIn: true, hasProfile, match: matchProfile({ title: job.title, skills: job.skills, years: job.years, description }, p, req), req, fit };
 });
 
 export default function JobPage({ params }: PageProps<"/jobs/[id]">) {
@@ -293,7 +311,7 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
 
           <aside className="flex min-w-0 flex-col gap-5">
             <div className="rounded-2xl border border-line bg-surface p-6">
-              <Suspense fallback={<MatchSummary signedIn={false} hasProfile={false} match={null} />}>
+              <Suspense fallback={<MatchSummary signedIn={false} hasProfile={false} match={null} fit={null} />}>
                 <PersonalMatch job={job} />
               </Suspense>
               <div className="mt-6 flex flex-col gap-3">
@@ -424,8 +442,8 @@ async function FullDescription({ job }: { job: Job }) {
   );
 }
 
-function MatchSummary({ signedIn, hasProfile, match }: { signedIn: boolean; hasProfile: boolean; match: Match | null }) {
-  if (!match) {
+function MatchSummary({ signedIn, hasProfile, match, fit }: { signedIn: boolean; hasProfile: boolean; match: Match | null; fit: FitReport | null }) {
+  if (!match || !fit) {
     return (
       <>
         <h2 className="text-sm text-muted">{t("match.title")}</h2>
@@ -444,9 +462,29 @@ function MatchSummary({ signedIn, hasProfile, match }: { signedIn: boolean; hasP
     <>
       <h2 className="text-sm text-muted">{t("match.title")}</h2>
       <div className="mt-3 flex items-center gap-4">
-        <MatchRing score={match.score} verdict={match.verdict} size={88} />
-        <p className="font-display text-xl font-semibold">{t(`verdict.${match.verdict}` as const)}</p>
+        <MatchRing score={fit.score} verdict={fit.verdict === "strong" ? "strong" : fit.verdict === "potential" ? "partial" : "weak"} size={88} />
+        <div>
+          <p className="font-display text-xl font-semibold">{t(`fit.verdict_${fit.verdict}`)}</p>
+          <p className="text-sm text-muted">{t(`fit.short_${fit.verdict}`)}</p>
+        </div>
       </div>
+      <ul className="mt-4 flex flex-col gap-2">
+        {fit.dimensions.map((d) => (
+          <li key={d.id} className="text-sm">
+            <span className="flex justify-between gap-2">
+              <span>{t(`fit.dim_${d.id}`)}</span>
+              <span className="tabular-nums text-muted">{d.score}</span>
+            </span>
+            <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-ink-soft">
+              <span className={`block h-full rounded-full ${d.score >= 75 ? "bg-[#1f7a4d]" : d.score >= 50 ? "bg-signal" : "bg-[#b4532a]"}`} style={{ width: `${Math.max(4, d.score)}%` }} />
+            </span>
+          </li>
+        ))}
+      </ul>
+      <a href="#ats-h" className="mt-3 inline-flex min-h-10 items-center gap-1 text-sm font-medium underline decoration-line underline-offset-4 hover:decoration-ink">
+        {t("fit.fullReport")}
+        <ArrowUpRight aria-hidden="true" className="size-4" />
+      </a>
       <p className="mt-4 text-sm font-medium">{t("match.missingTitle")}</p>
       {match.missing.length ? (
         <ul className="mt-2 flex flex-wrap gap-1.5">

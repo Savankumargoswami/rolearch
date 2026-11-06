@@ -5,9 +5,17 @@ import { CompanyLogo } from "./company-logo";
 import { t } from "@/i18n";
 import { place, postedAgo, salaryRange } from "@/lib/format";
 import type { MessageKey } from "@/i18n";
+import type { ListFit } from "@/lib/fit-list";
+
+const FIT_CHIP = {
+  strong: "bg-[#1f7a4d]/12 text-[#1f7a4d]",
+  potential: "bg-[#3b6ea5]/12 text-[#2c5585]",
+  stretch: "bg-signal/20 text-signal-ink",
+  poor: "bg-[#b4532a]/10 text-[#b4532a]",
+} as const;
 
 /** One job in a list. Plain component (no hooks) so server and client lists share it. */
-export function JobRow({ job }: { job: JobLite }) {
+export function JobRow({ job, fit }: { job: JobLite; fit?: ListFit }) {
   return (
     <Link
       href={`/jobs/${job.id}`}
@@ -27,6 +35,11 @@ export function JobRow({ job }: { job: JobLite }) {
       </span>
 
       <span className="col-start-2 row-span-2 row-start-1 flex flex-col items-end gap-1 text-end md:[grid-area:1/4]">
+        {fit && (
+          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap tabular-nums ${FIT_CHIP[fit.verdict]}`} title={t("fit.listTitle", { strong: fit.strong, total: fit.total })}>
+            {t(`fit.verdict_${fit.verdict}`)} · {fit.score}
+          </span>
+        )}
         {job.category && job.category !== "other" && (
           <span className="rounded-full bg-ink-soft px-2.5 py-0.5 text-xs font-medium whitespace-nowrap">{t(`categories.${job.category}` as MessageKey)}</span>
         )}

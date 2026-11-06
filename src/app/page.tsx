@@ -45,6 +45,9 @@ export default async function Home() {
           <p className="rise mt-5 max-w-[52ch] text-lg text-muted text-pretty sm:text-xl" style={{ "--delay": "90ms" } as React.CSSProperties}>
             {t("hero.lead")}
           </p>
+          <p className="rise mt-3 font-display text-xl font-semibold tracking-[-0.01em] sm:text-2xl" style={{ "--delay": "130ms" } as React.CSSProperties}>
+            {t("hero.tagline")} <span className="text-signal-ink">{t("hero.taglineB")}</span>
+          </p>
           <div className="rise mt-8 max-w-4xl" style={{ "--delay": "180ms" } as React.CSSProperties}>
             <HeroSearch />
             <Link
@@ -53,6 +56,13 @@ export default async function Home() {
             >
               <span className="rounded-full bg-signal px-2 py-0.5 text-xs font-semibold">{t("home.atsHeroTag")}</span>
               {t("home.atsHero")}
+              <ArrowRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
+            </Link>{" "}
+            <Link
+              href="/discover"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-ink/25 px-4 text-sm font-medium transition-colors duration-200 hover:border-ink"
+            >
+              {t("hero.changers")}
               <ArrowRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
             </Link>
             <div className="rail -mx-4 mt-4 flex items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
@@ -173,7 +183,7 @@ export default async function Home() {
           <h2 id="how" className="font-display text-3xl font-semibold tracking-[-0.025em] sm:text-4xl">
             {t("home.howTitle")}
           </h2>
-          <ol className="mt-8 grid gap-8 md:grid-cols-3 md:gap-10">
+          <ol className="mt-8 grid gap-8 sm:grid-cols-2 md:gap-10 lg:grid-cols-5 lg:gap-6">
             {copy.steps.map((s, i) => (
               <li key={s.title} className="border-t border-line pt-5">
                 <span className="font-display text-5xl font-semibold leading-none text-signal-ink tabular-nums">{i + 1}</span>

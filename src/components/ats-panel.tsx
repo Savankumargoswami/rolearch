@@ -1,10 +1,14 @@
 "use client";
 
+import { ApplicationChecklist } from "./application-checklist";
+import { applyChoices, replaceText } from "@/lib/tailor-evidence";
+import { mentions } from "@/lib/skills";
+import { FitReportView } from "./fit-report";
 import { CircleAlert, CircleHelp, Check, Download, FileText, FileUp, Loader2, Lock, Save, ScanSearch, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { coverLetter, checkProfile, checkUpload, downloadResume, optimizeForJob, type AtsTarget, type Checked, type OptimizedResult } from "@/app/ats/actions";
+import { coverLetter, checkProfile, checkUpload, downloadResume, optimizeForJob, rewriteEdit, saveVersion, type AtsTarget, type Checked, type OptimizedResult } from "@/app/ats/actions";
 import { saveProfile } from "@/app/account/profile/actions";
 import { ShareScore } from "@/components/share-score";
 import { t, type MessageKey } from "@/i18n";
@@ -147,10 +151,10 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
     });
   }
 
-  function saveToProfile() {
+  function saveToProfile(resume: AtsDoc) {
     if (!better) return;
     startSave(async () => {
-      const res = await saveProfile(toProfile(better.resume)).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
+      const res = await saveProfile(toProfile(resume)).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
       if (res.ok) setNote(t("ats.savedToProfile"));
       else setActionError(res.message);
     });
@@ -254,6 +258,9 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
 
       {report && result && (
         <div className="mt-6 border-t border-line pt-5" aria-live="polite">
+          {result.fit && <FitReportView fit={result.fit} jobTitle={jobTitle} jobId={typeof checked === "string" ? checked : undefined} />}
+          <h3 className="mt-6 font-display text-lg font-semibold">{t("ats.scannerTitle")}</h3>
+          <p className="mb-3 text-sm text-muted">{t("ats.scannerLead")}</p>
           <ScoreHeader score={report.score} before={better?.before} system={report.system} />
           {result.screening && result.screening.items.length + (result.screening.sponsorship === "unknown" ? 0 : 1) > 0 && <ScreeningCheck screening={result.screening} />}
           <Breakdown report={report} />
@@ -315,10 +322,12 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
             </div>
           ) : (
             <Improved
+              key={`${better.report.score}-${better.changes.length}-${better.blocking.length}`}
               ref={tailoredRef}
               added={better.report.keywords.filter((k) => k.inResume > 0).length - result.report.keywords.filter((k) => k.inResume > 0).length}
               better={better}
-              source={result.source} onDownload={(f) => download(better.resume, f)} onSave={saveToProfile} downloading={downloading} saving={saving}
+              source={result.source} onDownload={(f, r) => download(r, f)} onSave={saveToProfile} downloading={downloading} saving={saving}
+              target={checked} jobTitle={jobTitle} company={company} confirmed={confirmed}
               onAgain={(more) => optimize(more)} optimizing={optimizing} />
           )}
           {actionError && (
@@ -327,6 +336,11 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
             </p>
           )}
           <CoverLetter target={checked} resume={better?.resume ?? result.resume} contact={result.contact} onError={setActionError} />
+          <ApplicationChecklist
+            jobKey={typeof checked === "string" ? checked : `pasted-${jobTitle}-${company}`.slice(0, 120)}
+            auto={{ fit: Boolean(result.fit), tailored: Boolean(better) }}
+            confirm={result.fit?.confirm ?? []}
+          />
           {note && (
             <p role="status" className="mt-3 text-sm font-medium">
               {note}
@@ -632,13 +646,21 @@ function Improved({
   saving,
   onAgain,
   optimizing,
+  target,
+  jobTitle,
+  company,
+  confirmed,
 }: {
+  target: AtsTarget;
+  jobTitle: string;
+  company: string;
+  confirmed: string[];
   ref: React.Ref<HTMLDivElement>;
   added: number;
   better: Better;
   source: Source;
-  onDownload: (format: Format) => void;
-  onSave: () => void;
+  onDownload: (format: Format, resume: AtsDoc) => void;
+  onSave: (resume: AtsDoc) => void;
   downloading: boolean;
   saving: boolean;
   onAgain: (more: string[]) => void;
@@ -646,8 +668,50 @@ function Improved({
 }) {
   const [all, setAll] = useState(false);
   const [have, setHave] = useState<string[]>([]);
+  // Evidence-based review: every edit starts accepted; "Keep original" puts the person's own line back.
+  const [keep, setKeep] = useState<Set<number>>(() => new Set());
+  // Rewrites change an edit's wording; the document follows.
+  const [items, setItems] = useState(better.changes);
+  const [doc, setDoc] = useState(better.resume);
+  const [rewriting, setRewriting] = useState<number | null>(null);
+  const [rewriteError, setRewriteError] = useState<{ i: number; message: string } | null>(null);
+  const [version, setVersion] = useState<"idle" | "saving" | "saved">("idle");
+  const [versionError, setVersionError] = useState("");
+  const final = applyChoices(doc, items, keep);
   const reached = better.report.score >= better.goal;
-  const changes = all ? better.changes : better.changes.slice(0, 4);
+  const changes = all ? items : items.slice(0, 4);
+  const keywordNames = better.report.keywords.map((k) => k.name);
+  const adds = (c: { before: string; after: string }) => keywordNames.filter((k) => mentions(k, c.after) > 0 && mentions(k, c.before) === 0).slice(0, 6);
+
+  async function rewrite(i: number) {
+    setRewriting(i);
+    setRewriteError(null);
+    const c = items[i];
+    const res = await rewriteEdit(target, c, confirmed).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
+    setRewriting(null);
+    if (!res.ok) return setRewriteError({ i, message: res.message });
+    setDoc((d) => replaceText(d, c.after, res.after));
+    setItems((xs) => xs.map((x, j) => (j === i ? { ...x, after: res.after } : x)));
+    setKeep((k) => {
+      const n = new Set(k);
+      n.delete(i);
+      return n;
+    });
+  }
+
+  async function saveAsVersion() {
+    setVersion("saving");
+    setVersionError("");
+    const res = await saveVersion(target, { title: jobTitle, company }, final, { accepted: items.length - keep.size, kept: keep.size }).catch(() => ({
+      ok: false as const,
+      message: t("ats.errUnexpected"),
+    }));
+    if (res.ok) setVersion("saved");
+    else {
+      setVersion("idle");
+      setVersionError(res.message);
+    }
+  }
   return (
     <div ref={ref} className="mt-6 scroll-mt-24 rounded-2xl border border-signal/50 bg-signal/10 p-4">
       <p className="flex items-center gap-2 font-display font-semibold">
@@ -661,9 +725,9 @@ function Improved({
       <p className={`mt-2 text-sm font-medium ${reached ? "" : "text-signal-ink"}`}>
         {reached ? t("ats.goalReached", { goal: better.goal }) : t("ats.goalShort", { goal: better.goal, score: better.report.score })}
       </p>
-      {!reached && better.blocking.length > 0 && (
+      {better.blocking.length > 0 && (
         <div className="mt-3 rounded-xl bg-surface p-3 text-sm">
-          <p className="font-medium">{t("ats.goalTitle", { goal: better.goal })}</p>
+          <p className="font-medium">{t("ats.evAskTitle")}</p>
           <p className="mt-1 text-muted">{t("ats.goalLead")}</p>
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {better.blocking.map((k) => {
@@ -691,21 +755,78 @@ function Improved({
           <p className="mt-2 text-xs text-muted">{t("ats.goalHonest")}</p>
         </div>
       )}
-      {better.changes.length > 0 && (
+      {items.length > 0 && (
         <ol className="mt-3 flex flex-col gap-3">
-          {changes.map((c, i) => (
-            <li key={i} className="rounded-xl bg-surface p-3 text-sm">
-              <p className="text-xs font-semibold tracking-wide text-signal-ink uppercase">{c.section}</p>
-              {c.before && <p className="mt-1 text-muted line-through decoration-muted/60">{c.before}</p>}
-              <p className="mt-1">{c.after}</p>
-              {c.why && <p className="mt-1 text-xs text-muted">{c.why}</p>}
-            </li>
-          ))}
+          {changes.map((c, i) => {
+            const kept = keep.has(i);
+            return (
+              <li key={i} className="rounded-xl bg-surface p-3 text-sm">
+                <p className="text-xs font-semibold tracking-wide text-signal-ink uppercase">{c.section}</p>
+                {c.requirement && (
+                  <p className="mt-1.5">
+                    <span className="text-xs font-semibold tracking-wide text-muted uppercase">{t("ats.evRequirement")}</span>
+                    <span className="mt-0.5 block">{c.requirement}</span>
+                  </p>
+                )}
+                {c.before && (
+                  <p className="mt-1.5">
+                    <span className="text-xs font-semibold tracking-wide text-muted uppercase">{t("ats.evOriginal")}</span>
+                    <span className={`mt-0.5 block ${kept ? "" : "text-muted"}`}>{c.before}</span>
+                  </p>
+                )}
+                <p className="mt-1.5 border-s-2 border-[#1f7a4d] ps-2">
+                  <span className="text-xs font-semibold tracking-wide text-[#1f7a4d] uppercase">{t("ats.evSuggested")}</span>
+                  <span className={`mt-0.5 block ${kept ? "text-muted line-through decoration-muted/60" : ""}`}>{c.after}</span>
+                </p>
+                {c.why && <p className="mt-1 text-xs text-muted">{c.why}</p>}
+                {adds(c).length > 0 && (
+                  <p className="mt-1.5 flex flex-wrap items-center gap-1">
+                    <span className="text-xs font-semibold tracking-wide text-muted uppercase">{t("ats.evAdds")}</span>
+                    {adds(c).map((k) => (
+                      <span key={k} className="rounded-md bg-[#3b6ea5]/12 px-1.5 py-0.5 font-mono text-xs text-[#2c5585]">
+                        {k}
+                      </span>
+                    ))}
+                  </p>
+                )}
+                {c.before && (
+                  <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label={t("ats.evChoice")}>
+                    <button
+                      type="button"
+                      aria-pressed={!kept}
+                      onClick={() => setKeep((k) => { const n = new Set(k); n.delete(i); return n; })}
+                      className={`min-h-9 cursor-pointer rounded-full px-3 text-xs font-semibold ${!kept ? "bg-[#1f7a4d] text-white" : "border border-line hover:border-ink"}`}
+                    >
+                      {t("ats.evAccept")}
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={kept}
+                      onClick={() => setKeep((k) => new Set(k).add(i))}
+                      className={`min-h-9 cursor-pointer rounded-full px-3 text-xs font-semibold ${kept ? "bg-ink text-paper" : "border border-line hover:border-ink"}`}
+                    >
+                      {t("ats.evKeep")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => rewrite(i)}
+                      disabled={rewriting !== null}
+                      className="inline-flex min-h-9 cursor-pointer items-center gap-1 rounded-full border border-line px-3 text-xs font-semibold hover:border-ink disabled:opacity-50"
+                    >
+                      {rewriting === i ? <Loader2 aria-hidden="true" className="size-3.5 animate-spin" /> : null}
+                      {rewriting === i ? t("ats.evRewriting") : t("ats.evRewrite")}
+                    </button>
+                  </div>
+                )}
+                {rewriteError?.i === i && <p role="alert" className="mt-1.5 text-xs text-[#b4532a]">{rewriteError.message}</p>}
+              </li>
+            );
+          })}
         </ol>
       )}
-      {better.changes.length > 4 && (
+      {items.length > 4 && (
         <button type="button" onClick={() => setAll((v) => !v)} className="mt-2 min-h-9 cursor-pointer text-sm font-medium underline underline-offset-4">
-          {all ? t("ats.showFewer") : t("ats.showAll", { n: better.changes.length })}
+          {all ? t("ats.showFewer") : t("ats.showAll", { n: items.length })}
         </button>
       )}
       {better.skipped.length > 0 && (
@@ -727,7 +848,7 @@ function Improved({
             <button
               key={f}
               type="button"
-              onClick={() => onDownload(f)}
+              onClick={() => onDownload(f, final)}
               disabled={downloading}
               className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-ink px-4 font-medium text-paper hover:bg-ink-hover disabled:opacity-60"
             >
@@ -736,10 +857,25 @@ function Improved({
             </button>
           ))}
         </div>
+        <button
+          type="button"
+          onClick={saveAsVersion}
+          disabled={version !== "idle"}
+          className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-ink px-5 font-medium hover:bg-ink hover:text-paper disabled:opacity-60"
+        >
+          {version === "saving" ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : <Save aria-hidden="true" className="size-4" />}
+          {version === "saving" ? t("ats.versionSaving") : version === "saved" ? t("ats.versionSaved") : t("ats.versionSave")}
+        </button>
+        {version === "saved" && (
+          <Link href="/account/resumes" className="text-center text-sm font-medium underline underline-offset-4">
+            {t("ats.versionOpen")}
+          </Link>
+        )}
+        {versionError && <p role="alert" className="text-sm text-[#b4532a]">{versionError}</p>}
         {source === "profile" && (
           <button
             type="button"
-            onClick={onSave}
+            onClick={() => onSave(final)}
             disabled={saving}
             className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-ink px-5 font-medium hover:bg-ink hover:text-paper disabled:opacity-60"
           >

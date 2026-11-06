@@ -9,14 +9,18 @@ import { AtsDocSchema, fit, fromProfile, MAX_WORDS, type AtsDoc } from "@/lib/at
 import { jobAtsKeywords } from "@/lib/ats-keywords-cached";
 import { writeCoverLetter } from "@/lib/cover-letter";
 import { docxFacts } from "@/lib/docx-format";
-import { jobRequirements, readRequirements } from "@/lib/job-requirements";
+import { fitReport, type FitReport } from "@/lib/fit";
+import { jobRequirements, readRequirements, type JobRequirements } from "@/lib/job-requirements";
 import { loadAccount } from "@/lib/profile";
 import { coverLetterDocx, resumeDocx } from "@/lib/resume-docx";
-import { optimizeResume, placeKeywords, type Change, type TailorMode } from "@/lib/resume-optimizer";
+import { optimizeResume, placeKeywords, rewriteLine, type Change, type TailorMode } from "@/lib/resume-optimizer";
 import { coverLetterPdf, resumePdf } from "@/lib/resume-pdf";
 import { readResume, type Contact } from "@/lib/resume-reader";
 import { jobScreening, screen, type JobScreening, type Screening } from "@/lib/screening";
 import { signShare } from "@/lib/share-card";
+import { SKILLS } from "@/lib/skill-tests";
+import { systemFromUrl } from "@/lib/ats-system";
+import { keepOriginal, unsupported } from "@/lib/tailor-evidence";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -27,7 +31,7 @@ const TYPES = {
 const DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 export type Checked =
-  | { ok: true; report: AtsReport; resume: AtsDoc; contact: Contact; file: AtsFile | null; screening: Screening | null }
+  | { ok: true; report: AtsReport; resume: AtsDoc; contact: Contact; file: AtsFile | null; screening: Screening | null; fit: FitReport }
   | { ok: false; message: string };
 export type OptimizedResult =
   | {
@@ -61,26 +65,10 @@ const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
 // Shorter than this, a saved posting is only a summary: too little to scan honestly.
 const MIN_SAVED = 600;
 
-/** The applicant tracking system behind a job link, from its host. */
-function systemFromUrl(url: string): string {
-  let host = "";
-  try {
-    host = new URL(url).hostname.toLowerCase();
-  } catch {
-    return "";
-  }
-  const known: [RegExp, string][] = [
-    [/myworkdayjobs\.com|workday\.com$/, "Workday"], [/icims\.com$/, "iCIMS"], [/greenhouse\.io$/, "Greenhouse"], [/lever\.co$/, "Lever"],
-    [/taleo\.net$/, "Taleo"], [/successfactors\.(com|eu)$|sapsf\.(com|eu)$/, "SuccessFactors"], [/smartrecruiters\.com$/, "SmartRecruiters"],
-    [/ashbyhq\.com$/, "Ashby"], [/jobvite\.com$/, "Jobvite"], [/oraclecloud\.com$/, "Oracle"], [/bamboohr\.com$/, "BambooHR"],
-    [/workable\.com$/, "Workable"], [/adp\.com$/, "ADP"], [/paylocity\.com$/, "Paylocity"], [/ultipro\.com|ukg\.(com|net)$/, "UKG"],
-    [/eightfold\.ai$/, "Eightfold"], [/avature\.net$/, "Avature"], [/rippling\.com$/, "Rippling"],
-  ];
-  return known.find(([re]) => re.test(host))?.[1] ?? "";
-}
-
 /** where: the stored job's city and workplace, a fallback when the posting doesn't say. */
-type Found = { job: AtsJob & { company: string }; description: string; screening: JobScreening | null; where: { city?: string; workplace?: string } } | { error: string };
+type Found =
+  | { job: AtsJob & { company: string }; description: string; screening: JobScreening | null; where: { city?: string; workplace?: string }; req: JobRequirements | null; tags: string[] }
+  | { error: string };
 
 async function jobFor(target: AtsTarget): Promise<Found> {
   if (typeof target === "string") {
@@ -99,6 +87,8 @@ async function jobFor(target: AtsTarget): Promise<Found> {
       description,
       screening,
       where: { city: job.city, workplace: job.workplace },
+      req,
+      tags: job.skills,
     };
   }
   const title = String(target?.title ?? "").trim().slice(0, 200);
@@ -110,7 +100,7 @@ async function jobFor(target: AtsTarget): Promise<Found> {
   const [req, keywords, screening] = await Promise.all([readRequirements(title, description), jobAtsKeywords(key, title, description), jobScreening(key, title, description)]);
   const skills = req ? [...req.required, ...req.certifications] : [];
   const company = String(target.company ?? "").trim().slice(0, 120);
-  return { job: { title, company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years ?? 0, system: systemFromUrl(String(target.url ?? "")) }, description, screening, where: {} };
+  return { job: { title, company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years ?? 0, system: systemFromUrl(String(target.url ?? "")) }, description, screening, where: {}, req, tags: [] };
 }
 
 /** The resume as sent back by the browser, with anything over the limits shortened (null if it isn't a resume). */
@@ -137,6 +127,34 @@ function screeningFor(found: Extract<Found, { job: unknown }>, resume: AtsDoc): 
   return found.screening ? screen(found.screening, resume, resumeText(resume), { years: found.job.years, ...found.where }) : null;
 }
 
+/** The signed-in member's Rolearch skill badges (verified skills count as the strongest evidence). */
+async function myBadges(): Promise<{ skill: string; level: string }[]> {
+  const db = await createClient();
+  const user = await signedIn();
+  if (!user) return [];
+  const { data } = await db.from("skill_badges").select("skill,level").eq("user_id", user.id);
+  return (data ?? []) as { skill: string; level: string }[];
+}
+
+/** The job-fit report: skills with evidence, experience, industry, education, eligibility and presentation. */
+async function fitFor(found: Extract<Found, { job: unknown }>, resume: AtsDoc, screening: Screening | null, ats: AtsReport): Promise<FitReport> {
+  const req = found.req;
+  const required = req && req.required.length ? req.required : found.tags.length ? found.tags : found.job.skills;
+  return fitReport(
+    {
+      title: found.job.title,
+      description: found.description,
+      required: required.slice(0, 14),
+      preferred: (req?.preferred ?? found.job.preferred ?? []).slice(0, 8),
+      certifications: (req?.certifications ?? []).slice(0, 6),
+      years: found.job.years,
+      education: req?.education ?? "none",
+    },
+    resume,
+    { badges: await myBadges(), screening, ats, tests: SKILLS },
+  );
+}
+
 /** Scores the signed-in member's saved profile against a job. */
 async function checkProfileInner(target: AtsTarget, phone: string): Promise<Checked> {
   if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
@@ -146,7 +164,9 @@ async function checkProfileInner(target: AtsTarget, phone: string): Promise<Chec
   const resume = fromProfile(account.profile);
   if (resume.resume.experience.length + resume.resume.skills.length === 0) return { ok: false, message: t("ats.errEmptyProfile") };
   const contact = sanitizeContact({ email: account.email, phone });
-  return { ok: true, resume, contact, file: null, report: scoreAts(found.job, resume, contact), screening: screeningFor(found, resume) };
+  const report = scoreAts(found.job, resume, contact);
+  const screening = screeningFor(found, resume);
+  return { ok: true, resume, contact, file: null, report, screening, fit: await fitFor(found, resume, screening, report) };
 }
 
 /** Reads an uploaded resume (not stored) and scores it against a job, layout included for Word files. */
@@ -167,7 +187,9 @@ async function checkUploadInner(target: AtsTarget, form: FormData): Promise<Chec
   if (words(resumeText(read.draft)) > MAX_WORDS) return { ok: false, message: t("ats.errResumeTooLong", { n: MAX_WORDS.toLocaleString("en") }) };
   const contact = sanitizeContact(read.contact);
   const file: AtsFile = { name: upload.name.slice(0, 200), kind, facts };
-  return { ok: true, resume: read.draft, contact, file, report: scoreAts(found.job, read.draft, contact, file), screening: screeningFor(found, read.draft) };
+  const report = scoreAts(found.job, read.draft, contact, file);
+  const screening = screeningFor(found, read.draft);
+  return { ok: true, resume: read.draft, contact, file, report, screening, fit: await fitFor(found, read.draft, screening, report) };
 }
 
 /** Tailoring aims for this score (Jobscan's own guidance is 75-80%), without adding anything untrue. */
@@ -221,13 +243,30 @@ async function optimizeForJobInner(
       }
     }
   }
+  // Evidence check: an edit that brings in a job keyword the original resume never shows (and the person hasn't
+  // confirmed) is undone, and the keyword becomes a question for the person instead.
+  const originalText = resumeText(parsed);
+  const keywordNames = before.keywords.map((k) => k.name);
+  const asked = new Set<string>();
+  const kept: Change[] = [];
+  for (const c of changes) {
+    const bad = unsupported(c, originalText, keywordNames, confirmedOk);
+    if (bad.length) {
+      improved = keepOriginal(improved, c);
+      bad.forEach((k) => asked.add(k));
+    } else kept.push(c);
+  }
+  if (kept.length < changes.length) {
+    changes = kept;
+    report = scoreAts(job, improved, safeContact, await ours(improved));
+  }
   // Never hand back something that scores worse than what came in.
   if (report.score < before.score) {
     improved = parsed;
     report = before;
   }
   // What's left between the resume and the goal: missing keywords the person hasn't said they have.
-  const blocking = report.score < GOAL ? still().filter((k) => !confirmed.includes(k)).slice(0, 15) : [];
+  const blocking = [...new Set([...asked, ...(report.score < GOAL ? still() : [])])].filter((k) => !confirmed.includes(k)).slice(0, 15);
   return { ok: true, before: before.score, report, resume: improved, changes: changes.slice(0, 25), skipped: skipped.slice(0, 20), goal: GOAL, blocking };
 }
 
@@ -295,4 +334,67 @@ export async function downloadResume(resume: AtsDoc, contact: Contact, company: 
 }
 export async function coverLetter(target: AtsTarget, resume: AtsDoc, contact: Contact, format: "docx" | "pdf"): Promise<FileResult & { text?: string }> {
   return (await guarded("coverLetter", coverLetterInner)(target, resume, contact, format)) as FileResult & { text?: string };
+}
+
+/** "Rewrite": a different wording for one suggested edit, under the same evidence rules. */
+export async function rewriteEdit(target: AtsTarget, change: Change, confirmed: string[]): Promise<{ ok: true; after: string } | { ok: false; message: string }> {
+  try {
+    if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
+    const found = await jobFor(target);
+    if ("error" in found) return { ok: false, message: found.error };
+    const line = await rewriteLine({
+      original: String(change.before ?? "").slice(0, 600),
+      current: String(change.after ?? "").slice(0, 600),
+      requirement: String(change.requirement ?? "").slice(0, 200),
+      job: { title: found.job.title, description: found.description },
+    });
+    if (!line) return { ok: false, message: t("ats.errRewrite") };
+    const keywords = (found.job.keywords?.hard ?? found.job.skills).slice(0, 40);
+    const bad = unsupported({ ...change, after: line }, String(change.before ?? ""), keywords, confirmed.slice(0, 30).map(String));
+    if (bad.length) return { ok: false, message: t("ats.errRewriteEvidence", { what: bad.slice(0, 3).join(", ") }) };
+    return { ok: true, after: line };
+  } catch (e) {
+    console.error("[ats] rewriteEdit failed:", e instanceof Error ? e.stack ?? e.message : e);
+    return { ok: false, message: t("ats.errUnexpected") };
+  }
+}
+
+/** Resume version manager: keeps a tailored resume as its own version (the profile stays the original). */
+export async function saveVersion(
+  target: AtsTarget,
+  meta: { title: string; company: string },
+  resume: AtsDoc,
+  counts: { accepted: number; kept: number },
+): Promise<{ ok: true; id: string } | { ok: false; message: string }> {
+  try {
+    const user = await signedIn();
+    if (!user) return { ok: false, message: t("profile.errSignedOut") };
+    const parsed = fitted(resume);
+    if (!parsed) return { ok: false, message: t("profile.errInvalid") };
+    const db = await createClient();
+    const title = String(meta.title ?? "").slice(0, 200);
+    const company = String(meta.company ?? "").slice(0, 120);
+    const jobId = typeof target === "string" ? target.slice(0, 100) : "";
+    const { data, error } = await db
+      .from("resume_versions")
+      .insert({
+        user_id: user.id,
+        job_id: jobId,
+        title,
+        company,
+        label: [title, company].filter(Boolean).join(" · ").slice(0, 120),
+        doc: parsed,
+        accepted: Math.max(0, Math.min(500, Math.round(Number(counts.accepted) || 0))),
+        kept: Math.max(0, Math.min(500, Math.round(Number(counts.kept) || 0))),
+      })
+      .select("id")
+      .single();
+    if (error || !data) return { ok: false, message: error?.code === "42P01" ? t("tracker.errNotReady") : t("ats.errVersion") };
+    // Link the version to the tracked job, so outcomes can be compared by version.
+    if (jobId) await db.from("tracked_jobs").update({ resume_version: data.id }).eq("user_id", user.id).eq("job_id", jobId);
+    return { ok: true, id: data.id };
+  } catch (e) {
+    console.error("[ats] saveVersion failed:", e instanceof Error ? e.stack ?? e.message : e);
+    return { ok: false, message: t("ats.errUnexpected") };
+  }
 }

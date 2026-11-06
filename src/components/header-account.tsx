@@ -47,6 +47,10 @@ export async function HeaderAccount() {
   const company = user.user_metadata?.account_type === "company";
   const items: MenuItem[] = [
     company ? { href: "/hire", label: t("nav.hiring"), icon: "hiring" } : { href: "/tracker", label: t("nav.tracker"), icon: "tracker" },
+    { href: "/discover", label: t("nav.discover"), icon: "discover" },
+    { href: "/gaps", label: t("nav.gaps"), icon: "gaps" },
+    { href: "/account/resumes", label: t("nav.versions"), icon: "versions" },
+    { href: "/interview", label: t("nav.interview"), icon: "interview" },
     { href: "/feed", label: t("nav.posts"), icon: "posts" },
     ...common,
   ];

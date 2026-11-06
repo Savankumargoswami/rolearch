@@ -102,3 +102,20 @@ export async function readRequirements(title: string, description: string): Prom
     return null;
   }
 }
+
+/** The stored requirements of many jobs in one request (jobs never read yet are simply missing). No AI calls. */
+export async function storedRequirements(ids: string[]): Promise<Map<string, JobRequirements>> {
+  const out = new Map<string, JobRequirements>();
+  const list = [...new Set(ids)].filter((id) => /^[\w.:-]{1,100}$/.test(id)).slice(0, 200);
+  if (!list.length || !supabaseUrl || !supabaseKey) return out;
+  try {
+    const inList = list.map((id) => `"${id}"`).join(",");
+    const res = await fetch(`${supabaseUrl}/rest/v1/jobs?select=id,requirements&requirements=not.is.null&id=in.(${encodeURIComponent(inList)})`, {
+      headers: { apikey: supabaseKey },
+      cache: "no-store",
+    });
+    if (!res.ok) return out;
+    for (const row of (await res.json()) as { id: string; requirements: JobRequirements | null }[]) if (row.requirements) out.set(row.id, row.requirements);
+  } catch {}
+  return out;
+}

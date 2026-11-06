@@ -220,8 +220,13 @@ const stem = (w: string) => w.replace(/(ations?|ings?|ed|es|s|ers?|ment|ments)$/
 /** 0 none · 1 associate/diploma · 2 bachelor's · 3 master's · 4 doctorate. */
 export function degreeLevel(text: string): number {
   if (/\b(ph\.?\s?d|doctorate|doctoral)\b/i.test(text)) return 4;
-  if (/\b(master'?s?|m\.?s\.?c?|m\.?eng|mba|m\.?a\.?)(\b|\s)/i.test(text)) return 3;
-  if (/\b(bachelor'?s?|b\.?s\.?c?|b\.?a\.?|b\.?eng|b\.?tech|undergraduate degree|bs\/ms)\b/i.test(text)) return 2;
+  if (/\b(master'?s?|m\.?s\.?c?|m\.?eng|mba|m\.?a\.?|m\.?\s?tech|mca|m\.?com)(\b|\s)/i.test(text) || /\bM\.?E\.?(\s|$|,)/.test(text)) return 3;
+  if (
+    /\b(bachelor'?s?|b\.?s\.?c?|b\.?a\.?|b\.?eng|b\.?\s?tech|b\.?com|bba|bca|undergraduate degree|bs\/ms)\b/i.test(text) ||
+    // "B.E." / "BE" (Bachelor of Engineering): case-sensitive so the word "be" doesn't count
+    /\bB\.?E\.?(\s|$|,)/.test(text)
+  )
+    return 2;
   if (/\b(associate'?s? degree|diploma)\b/i.test(text)) return 1;
   return 0;
 }

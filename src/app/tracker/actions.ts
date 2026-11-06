@@ -5,7 +5,7 @@ import { getJob } from "@/data/db";
 import { t } from "@/i18n";
 import { loadViewer } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
-import { TRACKER_STATUSES, type TrackerStatus } from "@/lib/tracker";
+import { LOG_KINDS, REJECTION_REASONS, TRACKER_STATUSES, type LogEntry, type TrackerStatus } from "@/lib/tracker";
 
 export type TrackResult = { ok: true } | { ok: false; message: string };
 
@@ -62,6 +62,59 @@ export async function updateTracked(jobId: string, patch: { status?: TrackerStat
     })
     .eq("user_id", viewer.id)
     .eq("job_id", jobId);
+  if (error) return { ok: false, message: t("tracker.errSave") };
+  revalidatePath("/tracker");
+  return { ok: true };
+}
+
+const isoDate = (v: string | null | undefined) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
+const isoTime = (v: string | null | undefined) => (v && !Number.isNaN(Date.parse(v)) ? new Date(v).toISOString() : null);
+
+export type ManagerPatch = {
+  deadline?: string | null;
+  interviewAt?: string | null;
+  followUpOn?: string | null;
+  contactName?: string;
+  contactEmail?: string;
+  rejectionReason?: string;
+};
+
+/** AI application manager details: deadline, interview, follow-up date, recruiter contact and rejection reason. */
+export async function updateManager(jobId: string, patch: ManagerPatch): Promise<TrackResult> {
+  const viewer = await loadViewer();
+  if (!viewer) return { ok: false, message: t("profile.errSignedOut") };
+  const reason = patch.rejectionReason ?? undefined;
+  if (reason !== undefined && reason !== "" && !(REJECTION_REASONS as readonly string[]).includes(reason)) return { ok: false, message: t("tracker.errSave") };
+  const db = await createClient();
+  const { error } = await db
+    .from("tracked_jobs")
+    .update({
+      ...("deadline" in patch ? { deadline: isoDate(patch.deadline) } : {}),
+      ...("interviewAt" in patch ? { interview_at: isoTime(patch.interviewAt) } : {}),
+      ...("followUpOn" in patch ? { follow_up_on: isoDate(patch.followUpOn) } : {}),
+      ...(patch.contactName !== undefined ? { contact_name: patch.contactName.trim().slice(0, 120) } : {}),
+      ...(patch.contactEmail !== undefined ? { contact_email: patch.contactEmail.trim().slice(0, 200) } : {}),
+      ...(reason !== undefined ? { rejection_reason: reason } : {}),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", viewer.id)
+    .eq("job_id", jobId);
+  if (error) return { ok: false, message: error.code === "42703" ? t("tracker.errNotReady") : t("tracker.errSave") };
+  revalidatePath("/tracker");
+  return { ok: true };
+}
+
+/** Adds a recruiter conversation or event to an application's log. */
+export async function addLogEntry(jobId: string, entry: { kind: string; text: string }): Promise<TrackResult> {
+  const viewer = await loadViewer();
+  if (!viewer) return { ok: false, message: t("profile.errSignedOut") };
+  const text = String(entry.text ?? "").trim().slice(0, 1000);
+  if (!text || !(LOG_KINDS as readonly string[]).includes(entry.kind)) return { ok: false, message: t("tracker.errSave") };
+  const db = await createClient();
+  const { data, error: readError } = await db.from("tracked_jobs").select("log").eq("user_id", viewer.id).eq("job_id", jobId).maybeSingle();
+  if (readError) return { ok: false, message: readError.code === "42703" ? t("tracker.errNotReady") : t("tracker.errSave") };
+  const log = [...(((data?.log as LogEntry[] | undefined) ?? []).slice(-199)), { at: new Date().toISOString(), kind: entry.kind as LogEntry["kind"], text }];
+  const { error } = await db.from("tracked_jobs").update({ log, updated_at: new Date().toISOString() }).eq("user_id", viewer.id).eq("job_id", jobId);
   if (error) return { ok: false, message: t("tracker.errSave") };
   revalidatePath("/tracker");
   return { ok: true };

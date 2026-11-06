@@ -1,11 +1,11 @@
 "use client";
 
-import { BadgeCheck, Building2, ChartNoAxesColumn, FileSearch, Map, Menu, MessageSquare, UserPlus, X } from "lucide-react";
+import { BadgeCheck, Compass, FileStack, Route, Building2, ChartNoAxesColumn, FileSearch, Map, Menu, MessageSquare, MessagesSquare, UserPlus, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { t } from "@/i18n";
 
-const ICONS = { skills: BadgeCheck, ats: FileSearch, roadmaps: Map, companies: Building2, posts: MessageSquare, tracker: ChartNoAxesColumn, hiring: Building2, join: UserPlus };
+const ICONS = { gaps: Route, versions: FileStack, discover: Compass, interview: MessagesSquare, skills: BadgeCheck, ats: FileSearch, roadmaps: Map, companies: Building2, posts: MessageSquare, tracker: ChartNoAxesColumn, hiring: Building2, join: UserPlus };
 export type MenuItem = { href: string; label: string; icon: keyof typeof ICONS; primary?: boolean };
 
 /** The header's menu, on every screen size: everything that isn't search, Jobs or Profile. Closes on a link, a tap outside, or Escape. */
