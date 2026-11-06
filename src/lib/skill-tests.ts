@@ -36,6 +36,7 @@ export const SKILLS = [
   { id: "supply_chain_planning", name: "Supply chain planning" },
   { id: "docker", name: "Docker" },
   { id: "technical_documentation", name: "Technical documentation" },
+  { id: "data_warehousing", name: "Data warehousing" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
