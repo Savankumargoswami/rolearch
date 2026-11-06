@@ -38,6 +38,7 @@ export const SKILLS = [
   { id: "technical_documentation", name: "Technical documentation" },
   { id: "data_warehousing", name: "Data warehousing" },
   { id: "pure_mathematics", name: "Pure mathematics" },
+  { id: "recruiting", name: "Recruiting & talent acquisition" },
 ] as const;
 export const LEVELS = [
   { id: "entry", name: "Entry" },
