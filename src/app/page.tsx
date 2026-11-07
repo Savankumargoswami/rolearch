@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ArrowRight, Check, ScanSearch } from "lucide-react";
 import { CANDIDATE_FEATURES, EMPLOYER_FEATURES } from "@/lib/features";
 import Link from "next/link";
@@ -21,6 +22,10 @@ const quick = [
   { label: "Visa sponsorship", href: "/jobs?visa=1" },
   { label: "Entry level", href: "/jobs?level=entry" },
 ];
+
+
+/** Only the homepage is canonical at "/"; every other public page declares its own address. */
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const pageTransition = {
   enter: { "nav-forward": "nav-forward", "nav-back": "nav-back", default: "none" },

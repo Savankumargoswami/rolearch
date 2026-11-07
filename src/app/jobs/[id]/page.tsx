@@ -106,6 +106,14 @@ const TYPE_WORDS: [string, RegExp][] = [
 
 /** The job's employment type for search engines: what the employer chose on Rolearch, else what the title or the
  *  description's opening says. Left out when the job doesn't say, rather than guessed. */
+/** 30 days after the job data was last refreshed (posted date plus its age when we loaded it). */
+function validThrough(job: Job): string | undefined {
+  const posted = job.postedAt ? Date.parse(job.postedAt) : NaN;
+  if (Number.isNaN(posted)) return undefined;
+  const checked = posted + Math.max(0, job.postedDaysAgo) * 86_400_000;
+  return new Date(checked + 30 * 86_400_000).toISOString();
+}
+
 function employmentTypes(job: Job, text: string): string[] {
   if (job.source === "Rolearch") return [POSTED_TYPES[job.employment ?? ""] ?? "FULL_TIME"];
   for (const words of [job.title, text.slice(0, 4000)]) {
@@ -132,7 +140,9 @@ async function usState(job: Job): Promise<string | undefined> {
 }
 
 /** schema.org JobPosting, so search engines (Google for Jobs) can list the job. Matches what the page shows.
- *  No validThrough: these jobs have no set end date, and a closed job's page stops existing (404) instead. */
+ *  validThrough is a rolling window: 30 days past our last check of the employer's site (jobs are re-checked daily,
+ *  and a closed job's page stops existing, 404, so Google drops it). Fields the employer didn't publish (salary,
+ *  street address, postal code) are left out rather than guessed, as Google's guidelines require. */
 function jobPostingLd(job: Job, text: string, state: string | undefined) {
   const types = employmentTypes(job, text);
   const remote = job.workplace === "remote";
@@ -145,8 +155,10 @@ function jobPostingLd(job: Job, text: string, state: string | undefined) {
     description: text.trim().length >= 120 ? descriptionHtml(text) : fallback,
     identifier: { "@type": "PropertyValue", name: job.company, value: job.id },
     datePosted: (job.postedAt ?? "").slice(0, 10) || undefined,
+    ...(validThrough(job) && { validThrough: validThrough(job) }),
     // No directApply: applying needs a Rolearch account first.
-    ...(types.length && { employmentType: types.length === 1 ? types[0] : types }),
+    // Unknown type: schema.org's OTHER, rather than guessing full time.
+    employmentType: types.length === 0 ? "OTHER" : types.length === 1 ? types[0] : types,
     hiringOrganization: {
       "@type": "Organization",
       name: job.company,

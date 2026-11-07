@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SkillPicker, type SkillOption } from "./skill-picker";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/skills" },
   title: t("skills.title"),
   description: "Proctored, auto-graded skill tests across tech, data, cloud, finance, business and clinical research. Pass with 90% to earn a verified badge.",
 };
