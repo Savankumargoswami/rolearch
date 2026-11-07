@@ -10,9 +10,10 @@ import { t } from "@/i18n";
 import { coreTitle } from "@/lib/ats";
 import type { Verdict } from "@/lib/fit";
 import { fitsFor, type ListFit } from "@/lib/fit-list";
-import { loadPreferences } from "@/lib/preferences";
+import { loadPreferences, type Preferences } from "@/lib/preferences";
 import { requireMember } from "@/lib/require-member";
 import { createClient } from "@/lib/supabase/server";
+import { DiscoveryQueue, type QueueItem } from "./discovery-queue";
 
 export const metadata: Metadata = { title: "Roles worth your time", robots: { index: false } };
 
@@ -89,7 +90,11 @@ async function Queue({ searchParams }: { searchParams: Promise<{ role?: string }
         <p className="mt-8 text-muted">{t("discover.none", { role })}</p>
       ) : (
         <>
-          <ul className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-5">
+          <DiscoveryQueue items={queueOf(ranked, prefs)} />
+          <h2 id="all" className="mt-12 scroll-mt-20 font-display text-2xl font-semibold">
+            {t("discover.allTitle")}
+          </h2>
+          <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
             {ORDER.map((v) => (
               <li key={v}>
                 <a href={`#${v}`} className="flex flex-col rounded-2xl border border-line bg-surface px-4 py-3 hover:border-ink">
@@ -125,6 +130,27 @@ async function Queue({ searchParams }: { searchParams: Promise<{ role?: string }
       )}
     </>
   );
+}
+
+/** The queue: the best matches worth reviewing one at a time (strong, potential and stretch, best first). */
+function queueOf(ranked: { job: JobLite; fit: ListFit }[], prefs: Preferences): QueueItem[] {
+  const worth = ranked.filter((x) => x.fit.verdict === "strong" || x.fit.verdict === "potential" || x.fit.verdict === "stretch");
+  return (worth.length ? worth : ranked).slice(0, 20).map(({ job, fit }) => ({ job, fit, locationFit: locationFit(job, prefs), reason: reason(fit) }));
+}
+
+/** How well the job's place and work mode match the member's saved preferences (0-100), or null without any. */
+function locationFit(job: JobLite, prefs: Preferences): number | null {
+  const places = prefs.locations.map((l) => l.toLowerCase()).filter(Boolean);
+  const pts: number[] = [];
+  if (prefs.workMode !== "any") {
+    pts.push(job.workplace === prefs.workMode ? 1 : prefs.workMode === "remote" ? 0 : job.workplace === "remote" ? 0.8 : 0.5);
+  }
+  if (places.length) {
+    const where = `${job.city} ${job.country}`.toLowerCase();
+    const near = places.some((l) => where.includes(l) || l.includes(job.city.toLowerCase()) || l.includes(job.country.toLowerCase()));
+    pts.push(near ? 1 : job.workplace === "remote" ? 0.7 : 0.2);
+  }
+  return pts.length ? Math.round((pts.reduce((a, b) => a + b, 0) / pts.length) * 100) : null;
 }
 
 /** One line explaining the verdict: what's proven, what carries over, and the main gap. */

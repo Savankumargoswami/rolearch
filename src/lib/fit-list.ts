@@ -20,6 +20,8 @@ export type ListFit = {
   missing: string | null;
   /** A transferable skill that carries over, if any ("Tableau via Power BI"). */
   transfer: string | null;
+  /** Dimension scores (0-100) for the queue's rings: skills, experience, transferable, and location when known. */
+  dims: Partial<Record<"skills" | "experience" | "transferable" | "location" | "education", number>>;
 };
 
 const hasProfile = (v: AccountProfile | null) => Boolean(v && v.profile.resume.experience.length + v.profile.resume.skills.length > 0);
@@ -70,5 +72,8 @@ export function summarize(f: FitReport): ListFit {
     total: core.length,
     missing: core.find((s) => s.tier === "missing")?.name ?? null,
     transfer: transfer ? `${transfer.name} via ${transfer.via}` : null,
+    dims: Object.fromEntries(
+      f.dimensions.filter((d) => ["skills", "experience", "transferable", "location", "education"].includes(d.id)).map((d) => [d.id, d.score]),
+    ),
   };
 }

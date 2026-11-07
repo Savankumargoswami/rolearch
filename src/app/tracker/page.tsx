@@ -77,10 +77,11 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
   );
   const f = funnel(tracked);
   const steps = [
-    { n: f.saved, label: t("tracker.funnelSaved") },
-    { n: f.applied, label: t("tracker.funnelApplied") },
-    { n: f.interviewing, label: t("tracker.funnelInterviews") },
-    { n: f.offer, label: t("tracker.funnelOffers") },
+    { n: f.saved, label: t("tracker.funnelSaved"), of: false },
+    { n: f.applied, label: t("tracker.funnelApplied"), of: false },
+    { n: f.responses, label: t("tracker.funnelResponses"), of: true },
+    { n: f.interviewing, label: t("tracker.funnelInterviews"), of: true },
+    { n: f.offer, label: t("tracker.funnelOffers"), of: true },
   ];
   const top = Math.max(1, ...steps.map((x) => x.n));
   const o = f.applied >= 3 ? await outcomes(tracked, labels, versionOf) : null;
@@ -90,15 +91,17 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
       <section aria-labelledby="funnel-h" className="mt-6 grid gap-5 rounded-3xl bg-ink p-5 text-paper sm:p-6 md:grid-cols-[1.3fr_1fr]">
         <div>
           <h2 id="funnel-h" className="font-display text-lg font-semibold">{t("tracker.funnelTitle")}</h2>
+          <p className="text-xs text-[#c9d2de]">{t("tracker.funnelLead")}</p>
           <ul className="mt-3 flex flex-col gap-2">
             {steps.map((x) => (
-              <li key={x.label} className="grid grid-cols-[6.5rem_1fr] items-center gap-3 text-sm">
+              <li key={x.label} className="grid grid-cols-[6.5rem_1fr_2.75rem] items-center gap-3 text-sm">
                 <span className="text-[#c9d2de]">{x.label}</span>
                 <span className="h-7 overflow-hidden rounded-lg bg-white/10">
                   <span className="grow-x flex h-full min-w-8 items-center rounded-lg bg-signal px-2 font-semibold text-ink tabular-nums" style={{ width: `${Math.max(8, (x.n / top) * 100)}%` }}>
                     {x.n}
                   </span>
                 </span>
+                <span className="text-end text-xs text-[#c9d2de] tabular-nums">{x.of && f.applied > 0 ? `${Math.round((x.n / f.applied) * 100)}%` : ""}</span>
               </li>
             ))}
           </ul>
@@ -149,10 +152,10 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
               </div>
             ))}
           </dl>
-          <div className="mt-5 grid gap-5 md:grid-cols-3">
+          <PlatformChart rows={o.byPlatform} />
+          <div className="mt-5 grid gap-5 md:grid-cols-2">
             <RateTable title={t("outcomes.byVersion")} rows={o.byVersion} label={(k) => k} />
             <RateTable title={t("outcomes.byCategory")} rows={o.byCategory} label={(k) => t(`categories.${k}` as MessageKey)} />
-            <RateTable title={t("outcomes.byPlatform")} rows={o.byPlatform} label={(k) => k} />
           </div>
           <div className="mt-5 grid gap-5 md:grid-cols-2">
             <div>
@@ -270,6 +273,42 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
       </>
       )}
     </>
+  );
+}
+
+/** Interview rate by hiring platform, as columns (highest first). */
+function PlatformChart({ rows }: { rows: Rate[] }) {
+  const data = rows
+    .filter((r) => r.sent > 0)
+    .map((r) => ({ ...r, pct: Math.round((r.interviews / r.sent) * 1000) / 10 }))
+    .sort((a, b) => b.pct - a.pct || b.sent - a.sent)
+    .slice(0, 8);
+  const top = Math.max(1, ...data.map((d) => d.pct));
+  return (
+    <div className="mt-5 rounded-2xl bg-ink p-4 text-paper sm:p-5">
+      <div className="flex items-baseline justify-between gap-2">
+        <h3 className="font-display font-semibold">{t("outcomes.byPlatform")}</h3>
+        <span className="text-xs text-[#c9d2de]">{t("outcomes.higherBetter")}</span>
+      </div>
+      {data.length ? (
+        <ul className="mt-4 flex h-44 items-end gap-2 sm:gap-4" aria-label={t("outcomes.byPlatform")}>
+          {data.map((d) => (
+            <li key={d.key} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
+              <span className="text-xs font-semibold tabular-nums">{d.pct}%</span>
+              <span
+                className="w-full max-w-14 rounded-t-md bg-signal"
+                style={{ height: `${Math.max(4, (d.pct / top) * 100)}%` }}
+                title={t("outcomes.rateLine", { interviews: d.interviews, sent: d.sent, pct: Math.round(d.pct) })}
+              />
+              <span className="w-full truncate text-center text-[0.65rem] font-semibold tracking-[0.08em] text-[#c9d2de] uppercase">{d.key}</span>
+              <span className="text-[0.65rem] text-[#c9d2de] tabular-nums">{t("outcomes.sentN", { n: d.sent })}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-sm text-[#c9d2de]">{t("outcomes.none")}</p>
+      )}
+    </div>
   );
 }
 

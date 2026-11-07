@@ -11,7 +11,8 @@ import { loadPreferences } from "@/lib/preferences";
 import { requireMember } from "@/lib/require-member";
 import { createClient } from "@/lib/supabase/server";
 import { roadmapForTitle } from "@/lib/roadmaps";
-import { transitionPath } from "@/lib/transitions";
+import { transitionNetwork, transitionPath } from "@/lib/transitions";
+import { PathNetwork } from "./path-network";
 
 export const metadata: Metadata = { title: "Career gap-to-action roadmap", robots: { index: false } };
 
@@ -75,6 +76,7 @@ async function Gaps({ searchParams }: { searchParams: Promise<{ role?: string }>
   // Transferable skill intelligence: the bridge between the member's current role and the target, and the exact
   // experience that supports the move.
   const path = transitionPath(current?.title ?? p.headline, role);
+  const routes = path ? transitionNetwork(path.from, path.to, [...p.resume.skills, ...g.skills.filter((s) => s.tier === "proven" || s.tier === "verified").map((s) => s.name)]) : [];
   const carries = g.skills.filter((s) => (s.tier === "proven" || s.tier === "verified" || s.tier === "transferable") && (s.quote || s.via)).slice(0, 6);
 
   return (
@@ -87,20 +89,10 @@ async function Gaps({ searchParams }: { searchParams: Promise<{ role?: string }>
           {path && (
             <section aria-labelledby="move-h" className="mt-8 rounded-3xl bg-ink p-5 text-paper sm:p-6">
               <h2 id="move-h" className="font-display text-xl font-semibold">
-                {t("gaps.moveTitle")}
+                {t("gaps.netTitle")}
               </h2>
-              <ol className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-                {[path.from, path.bridge, path.to].filter(Boolean).map((step, i, all) => (
-                  <li key={step} className="flex items-center gap-2 sm:contents">
-                    <span className={`rounded-2xl px-4 py-3 font-medium ${i === all.length - 1 ? "bg-signal text-ink" : "bg-white/10"}`}>
-                      <span className="block text-xs font-semibold tracking-wide uppercase opacity-70">{i === 0 ? t("gaps.moveNow") : i === all.length - 1 ? t("gaps.moveGoal") : t("gaps.moveBridge")}</span>
-                      {step}
-                    </span>
-                    {i < all.length - 1 && <span aria-hidden="true" className="text-signal sm:px-1">→</span>}
-                  </li>
-                ))}
-              </ol>
-              {path.carries.length > 0 && <p className="mt-3 text-sm text-[#dfe5ec]">{t("gaps.moveCarries", { what: path.carries.join(", ") })}</p>}
+              <p className="mt-1 text-sm text-[#c9d2de]">{t("gaps.netLead")}</p>
+              <PathNetwork routes={routes} />
               {carries.length > 0 && (
                 <>
                   <h3 className="mt-5 font-display font-semibold">{t("gaps.moveEvidence")}</h3>

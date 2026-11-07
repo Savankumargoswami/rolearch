@@ -96,6 +96,8 @@ export function nextStep(j: TrackedJob, now: number): NextStep | null {
 export type Funnel = {
   saved: number;
   applied: number;
+  /** Applications the employer replied to: a screen, an interview, an offer, a logged conversation or a stated rejection. */
+  responses: number;
   interviewing: number;
   offer: number;
   rejected: number;
@@ -116,6 +118,14 @@ export function funnel(jobs: TrackedJob[]): Funnel {
   return {
     saved: jobs.filter((j) => j.status === "saved" || j.status === "analyzing" || j.status === "ready").length,
     applied: sent.length,
+    responses: sent.filter(
+      (j) =>
+        interviewed.includes(j) ||
+        j.status === "screen" ||
+        j.status === "offer" ||
+        j.log.some((e) => e.kind !== "status") ||
+        (j.status === "rejected" && j.rejectionReason !== "" && j.rejectionReason !== "no_response"),
+    ).length,
     interviewing: interviewed.length,
     offer: offers.length,
     rejected: jobs.filter((j) => j.status === "rejected").length,
