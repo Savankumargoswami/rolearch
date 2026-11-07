@@ -4,13 +4,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Avatar } from "@/components/avatar";
-import { MatchRing } from "@/components/match-ring";
+import { FitReportView } from "@/components/fit-report";
 import { ResumeView } from "@/components/resume-view";
 import { ApplicantSkillTests } from "@/components/skill-badges";
 import { t, type MessageKey } from "@/i18n";
 import { STD_FIELDS } from "@/lib/application-form";
+import { getJob, getJobText } from "@/data/db";
+import { fitReport } from "@/lib/fit";
+import { loadBadges } from "@/lib/fit-data";
 import { application, companyJob, events, type EventRow } from "@/lib/hiring";
-import type { Requirement, Verdict } from "@/lib/match";
+import { jobRequirements } from "@/lib/job-requirements";
+import { SKILLS } from "@/lib/skill-tests";
 import type { ProfileData } from "@/lib/profile-schema";
 import { withDefaults } from "@/lib/profile-schema";
 import { requireMember } from "@/lib/require-member";
@@ -44,8 +48,25 @@ async function Applicant({ params }: { params: PageProps<"/hire/applications/[id
   const history = (await events(db, [app.id])).get(app.id) ?? [];
   const s = app.snapshot;
   const resume = withDefaults({ resume: (s.resume as ProfileData["resume"]) ?? undefined }).resume;
-  const reqs = ((app.match as { reqs?: Requirement[] }).reqs ?? []).slice(0, 24);
-  const verdict = (app.match.verdict as Verdict) ?? "weak";
+  // JobFit for the employer: the same evidence-backed report the candidate sees, from the application snapshot, the
+  // job's own requirements and the candidate's proctored Rolearch skill badges (no candidate-private corrections).
+  const [full, text, badges] = await Promise.all([getJob(app.jobId), getJobText(app.jobId), loadBadges(db, app.applicantId)]);
+  const req = full ? await jobRequirements(full, text) : null;
+  const fit = full
+    ? fitReport(
+        {
+          title: full.title,
+          description: text || full.summary,
+          required: (req?.required.length ? req.required : full.skills).slice(0, 14),
+          preferred: (req?.preferred ?? []).slice(0, 8),
+          certifications: (req?.certifications ?? []).slice(0, 6),
+          years: req?.years || full.years,
+          education: req?.education ?? "none",
+        },
+        withDefaults({ headline: s.headline, location: s.location, resume: (s.resume as ProfileData["resume"]) ?? undefined }),
+        { badges, tests: SKILLS, source: req?.required.length ? "stored" : "tags" },
+      )
+    : null;
   // Work authorization and sponsorship are the answers screeners look at first, so they get their own row.
   const keyLabels = new Map(STD_FIELDS.filter((f) => f.id === "workAuth" || f.id === "sponsorship").map((f) => [f.label, f.id === "workAuth" ? "Authorized to work" : "Needs sponsorship"]));
   const keyAnswers = app.answers.filter((a) => keyLabels.has(a.q));
@@ -103,30 +124,12 @@ async function Applicant({ params }: { params: PageProps<"/hire/applications/[id
             </dl>
           )}
 
-          <section aria-labelledby="match-h" className="mt-8 rounded-2xl border border-line bg-surface p-5">
-            <h2 id="match-h" className="font-display text-xl font-semibold">{t("hire.matchBreakdown")}</h2>
-            <div className="mt-3 flex flex-wrap items-center gap-5">
-              {app.matchScore != null && <MatchRing score={app.matchScore} verdict={verdict} size={72} />}
-              <div>
-                <p className="font-medium">{t(`verdict.${verdict}` as MessageKey)}</p>
-                {app.atsScore != null && <p className="text-sm text-muted">{t("hire.ats", { n: app.atsScore })}</p>}
-              </div>
+          {fit && (
+            <div className="mt-8">
+              <p className="mb-2 text-sm text-muted">{t("hire.fitNote")}</p>
+              <FitReportView fit={fit} jobTitle={job.title} interactive={false} />
             </div>
-            {reqs.length > 0 && (
-              <ul className="mt-4 flex flex-wrap gap-1.5">
-                {reqs.map((r) => (
-                  <li
-                    key={`${r.group}-${r.name}`}
-                    className={`rounded-full border px-2.5 py-1 text-sm ${
-                      r.status === "verified" ? "border-[#2f7d5b]/50 bg-[#2f7d5b]/10" : r.status === "listed" ? "border-line" : "border-dashed border-[#b4532a]/60"
-                    }`}
-                  >
-                    {r.isYears ? t("job.reqYears", { n: r.name }) : r.group === "education" ? t(`job.edu_${r.name}` as MessageKey) : r.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+          )}
 
           {answers.length > 0 && (
             <section aria-labelledby="ans-h" className="mt-8">

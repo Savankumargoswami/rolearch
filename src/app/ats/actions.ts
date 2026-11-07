@@ -10,6 +10,7 @@ import { jobAtsKeywords } from "@/lib/ats-keywords-cached";
 import { writeCoverLetter } from "@/lib/cover-letter";
 import { docxFacts } from "@/lib/docx-format";
 import { fitReport, type FitReport } from "@/lib/fit";
+import { loadBadges, loadCorrections, saveAnalysis } from "@/lib/fit-data";
 import { jobRequirements, readRequirements, type JobRequirements } from "@/lib/job-requirements";
 import { loadAccount } from "@/lib/profile";
 import { coverLetterDocx, resumeDocx } from "@/lib/resume-docx";
@@ -19,6 +20,8 @@ import { readResume, type Contact } from "@/lib/resume-reader";
 import { jobScreening, screen, type JobScreening, type Screening } from "@/lib/screening";
 import { signShare } from "@/lib/share-card";
 import { SKILLS } from "@/lib/skill-tests";
+import { allow } from "@/lib/rate-limit";
+import { band, track } from "@/lib/events";
 import { systemFromUrl } from "@/lib/ats-system";
 import { keepOriginal, unsupported } from "@/lib/tailor-evidence";
 import { createClient } from "@/lib/supabase/server";
@@ -67,7 +70,7 @@ const MIN_SAVED = 600;
 
 /** where: the stored job's city and workplace, a fallback when the posting doesn't say. */
 type Found =
-  | { job: AtsJob & { company: string }; description: string; screening: JobScreening | null; where: { city?: string; workplace?: string }; req: JobRequirements | null; tags: string[] }
+  | { job: AtsJob & { company: string }; description: string; screening: JobScreening | null; where: { city?: string; workplace?: string }; req: JobRequirements | null; tags: string[]; key: string }
   | { error: string };
 
 async function jobFor(target: AtsTarget): Promise<Found> {
@@ -89,6 +92,7 @@ async function jobFor(target: AtsTarget): Promise<Found> {
       where: { city: job.city, workplace: job.workplace },
       req,
       tags: job.skills,
+      key: job.id,
     };
   }
   const title = String(target?.title ?? "").trim().slice(0, 200);
@@ -100,7 +104,7 @@ async function jobFor(target: AtsTarget): Promise<Found> {
   const [req, keywords, screening] = await Promise.all([readRequirements(title, description), jobAtsKeywords(key, title, description), jobScreening(key, title, description)]);
   const skills = req ? [...req.required, ...req.certifications] : [];
   const company = String(target.company ?? "").trim().slice(0, 120);
-  return { job: { title, company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years ?? 0, system: systemFromUrl(String(target.url ?? "")) }, description, screening, where: {}, req, tags: [] };
+  return { job: { title, company, description, keywords, skills, preferred: req?.preferred ?? [], years: req?.years ?? 0, system: systemFromUrl(String(target.url ?? "")) }, description, screening, where: {}, req, tags: [], key };
 }
 
 /** The resume as sent back by the browser, with anything over the limits shortened (null if it isn't a resume). */
@@ -127,20 +131,14 @@ function screeningFor(found: Extract<Found, { job: unknown }>, resume: AtsDoc): 
   return found.screening ? screen(found.screening, resume, resumeText(resume), { years: found.job.years, ...found.where }) : null;
 }
 
-/** The signed-in member's Rolearch skill badges (verified skills count as the strongest evidence). */
-async function myBadges(): Promise<{ skill: string; level: string }[]> {
-  const db = await createClient();
-  const user = await signedIn();
-  if (!user) return [];
-  const { data } = await db.from("skill_badges").select("skill,level").eq("user_id", user.id);
-  return (data ?? []) as { skill: string; level: string }[];
-}
-
 /** The job-fit report: skills with evidence, experience, industry, education, eligibility and presentation. */
 async function fitFor(found: Extract<Found, { job: unknown }>, resume: AtsDoc, screening: Screening | null, ats: AtsReport): Promise<FitReport> {
   const req = found.req;
   const required = req && req.required.length ? req.required : found.tags.length ? found.tags : found.job.skills;
-  return fitReport(
+  const user = await signedIn();
+  const db = await createClient();
+  const [badges, corrections] = user ? await Promise.all([loadBadges(db, user.id), loadCorrections(db, user.id)]) : [[], {}];
+  const fit = fitReport(
     {
       title: found.job.title,
       description: found.description,
@@ -151,8 +149,14 @@ async function fitFor(found: Extract<Found, { job: unknown }>, resume: AtsDoc, s
       education: req?.education ?? "none",
     },
     resume,
-    { badges: await myBadges(), screening, ats, tests: SKILLS },
+    { badges, corrections, screening, ats, tests: SKILLS, source: req && req.required.length ? "stored" : "tags", now: new Date().toISOString() },
   );
+  // Keep the analysis (score, category, version, requirement-level output) for the member's history.
+  if (user) {
+    await saveAnalysis(db, user.id, { key: found.key, title: found.job.title, company: found.job.company }, fit).catch(() => {});
+    await track(user.id, "jobfit_completed", { category: fit.verdict, score_band: band(fit.score), confidence: fit.confidence, version: fit.version, input: found.key.startsWith("pasted-") ? "pasted" : "catalog" });
+  }
+  return fit;
 }
 
 /** Scores the signed-in member's saved profile against a job. */
@@ -171,15 +175,18 @@ async function checkProfileInner(target: AtsTarget, phone: string): Promise<Chec
 
 /** Reads an uploaded resume (not stored) and scores it against a job, layout included for Word files. */
 async function checkUploadInner(target: AtsTarget, form: FormData): Promise<Checked> {
-  if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
+  const reader = await signedIn();
+  if (!reader) return { ok: false, message: t("profile.errSignedOut") };
   const upload = form.get("resume");
   if (!(upload instanceof File) || upload.size === 0) return { ok: false, message: t("profile.errNoFile") };
   if (upload.size > MAX_BYTES) return { ok: false, message: t("profile.errTooBig") };
   const kind = TYPES[upload.type as keyof typeof TYPES];
   if (!kind) return { ok: false, message: t("profile.errType") };
+  if (!(await allow(reader.id, "read"))) return { ok: false, message: t("ats.errLimit") };
   const bytes = Buffer.from(await upload.arrayBuffer());
   const [found, read, facts] = await Promise.all([jobFor(target), readResume({ bytes, kind }), kind === "docx" ? docxFacts(bytes) : Promise.resolve(null)]);
   if ("error" in found) return { ok: false, message: found.error };
+  await track(reader.id, "resume_uploaded", { file_type: kind, parse_status: "error" in read ? read.error : "ok" });
   if ("error" in read) {
     const key = { unavailable: "profile.errReaderOff", refused: "profile.errUnreadable", unreadable: "profile.errUnreadable", too_long: "profile.errTooLong" } as const;
     return { ok: false, message: t(key[read.error]) };
@@ -204,7 +211,9 @@ async function optimizeForJobInner(
   original: AtsFile | null,
   mode: TailorMode = "deep",
 ): Promise<OptimizedResult> {
-  if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
+  const tailorer = await signedIn();
+  if (!tailorer) return { ok: false, message: t("profile.errSignedOut") };
+  if (!(await allow(tailorer.id, "tailor"))) return { ok: false, message: t("ats.errLimit") };
   const started = Date.now();
   const parsed = fitted(resume);
   if (!parsed) return { ok: false, message: t("profile.errInvalid") };
@@ -282,14 +291,22 @@ async function downloadResumeInner(resume: AtsDoc, contact: Contact, company: st
 
 /** A cover letter for this job written from the resume's facts, as a Word or PDF file. */
 async function coverLetterInner(target: AtsTarget, resume: AtsDoc, contact: Contact, format: "docx" | "pdf"): Promise<FileResult & { text?: string }> {
-  if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
+  const writer = await signedIn();
+  if (!writer) return { ok: false, message: t("profile.errSignedOut") };
+  if (!(await allow(writer.id, "letter"))) return { ok: false, message: t("ats.errLimit") };
   const parsed = fitted(resume);
   if (!parsed) return { ok: false, message: t("profile.errInvalid") };
   const found = await jobFor(target);
   if ("error" in found) return { ok: false, message: found.error };
+  await track(writer.id, "document_generated", { artifact_type: "cover_letter" });
   const letter = await writeCoverLetter({ resume: parsed, job: { title: found.job.title, company: found.job.company, description: found.description } });
   if ("error" in letter) return { ok: false, message: letter.error === "unavailable" ? t("ats.errOff") : t("ats.errLetter") };
   const safe = sanitizeContact(contact);
+  // Keep the letter with the tracked application for this job, so it retains the exact document used.
+  if (typeof target === "string") {
+    const db = await createClient();
+    await db.from("tracked_jobs").update({ cover_letter: letter.paragraphs.join("\n\n").slice(0, 8000) }).eq("user_id", writer.id).eq("job_id", target);
+  }
   const buf = format === "pdf" ? await coverLetterPdf(parsed, safe, letter.paragraphs) : await coverLetterDocx(parsed, safe, letter.paragraphs);
   const company = found.job.company;
   return {
@@ -339,7 +356,9 @@ export async function coverLetter(target: AtsTarget, resume: AtsDoc, contact: Co
 /** "Rewrite": a different wording for one suggested edit, under the same evidence rules. */
 export async function rewriteEdit(target: AtsTarget, change: Change, confirmed: string[]): Promise<{ ok: true; after: string } | { ok: false; message: string }> {
   try {
-    if (!(await signedIn())) return { ok: false, message: t("profile.errSignedOut") };
+    const user = await signedIn();
+    if (!user) return { ok: false, message: t("profile.errSignedOut") };
+    if (!(await allow(user.id, "rewrite"))) return { ok: false, message: t("ats.errLimit") };
     const found = await jobFor(target);
     if ("error" in found) return { ok: false, message: found.error };
     const line = await rewriteLine({
@@ -390,6 +409,8 @@ export async function saveVersion(
       .select("id")
       .single();
     if (error || !data) return { ok: false, message: error?.code === "42P01" ? t("tracker.errNotReady") : t("ats.errVersion") };
+    await track(user.id, "document_generated", { artifact_type: "resume" });
+    await track(user.id, "claim_reviewed", { accepted: Math.round(Number(counts.accepted) || 0), kept_original: Math.round(Number(counts.kept) || 0) });
     // Link the version to the tracked job, so outcomes can be compared by version.
     if (jobId) await db.from("tracked_jobs").update({ resume_version: data.id }).eq("user_id", user.id).eq("job_id", jobId);
     return { ok: true, id: data.id };

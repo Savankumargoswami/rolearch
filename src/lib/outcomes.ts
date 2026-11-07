@@ -38,10 +38,10 @@ async function facts(ids: string[]): Promise<Map<string, JobFacts>> {
   return out;
 }
 
-const sentOf = (j: TrackedJob) => Boolean(j.appliedAt) || ["applied", "interviewing", "offer", "rejected"].includes(j.status);
+const sentOf = (j: TrackedJob) => Boolean(j.appliedAt) || ["applied", "screen", "interviewing", "offer", "rejected", "withdrawn"].includes(j.status);
 const interviewed = (j: TrackedJob) => j.status === "interviewing" || j.status === "offer" || Boolean(j.interviewAt) || j.rejectionReason === "after_interview";
 /** Any sign the employer replied: an interview, an offer, a logged conversation, or a rejection that wasn't silence. */
-const responded = (j: TrackedJob) => interviewed(j) || j.log.length > 0 || (j.status === "rejected" && j.rejectionReason !== "" && j.rejectionReason !== "no_response");
+const responded = (j: TrackedJob) => interviewed(j) || j.status === "screen" || j.log.some((e) => e.kind !== "status") || (j.status === "rejected" && j.rejectionReason !== "" && j.rejectionReason !== "no_response");
 
 export async function outcomes(jobs: TrackedJob[], versionLabels: Map<string, string>, versionOf: Map<string, string>): Promise<Outcomes> {
   const sent = jobs.filter(sentOf);

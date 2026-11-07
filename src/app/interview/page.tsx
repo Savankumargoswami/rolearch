@@ -33,8 +33,8 @@ async function Prep({ searchParams }: { searchParams: Promise<{ job?: string }> 
 
   // No job picked: offer the member's tracked jobs, interviews first.
   const db = await createClient();
-  const { data } = await db.from("tracked_jobs").select("job_id,title,company,status").eq("user_id", viewer.id).in("status", ["interviewing", "applied", "saved", "offer"]).order("updated_at", { ascending: false }).limit(30);
-  const order = ["interviewing", "offer", "applied", "saved"];
+  const { data } = await db.from("tracked_jobs").select("job_id,title,company,status").eq("user_id", viewer.id).in("status", ["interviewing", "screen", "applied", "ready", "saved", "offer"]).order("updated_at", { ascending: false }).limit(30);
+  const order = ["interviewing", "screen", "offer", "applied", "ready", "saved"];
   const jobs = (data ?? []).sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status));
   if (!jobs.length) {
     return (

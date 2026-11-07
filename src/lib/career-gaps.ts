@@ -32,8 +32,8 @@ export type CareerGaps = {
   best: { job: JobLite; fit: FitReport }[];
 };
 
-const PROGRESS: Record<Tier, number> = { verified: 100, proven: 85, listed: 50, transferable: 40, missing: 0 };
-const RANK: Record<Tier, number> = { verified: 4, proven: 3, listed: 2, transferable: 1, missing: 0 };
+const PROGRESS: Record<Tier, number> = { verified: 100, proven: 85, listed: 50, transferable: 40, missing: 0, gap: 0 };
+const RANK: Record<Tier, number> = { verified: 4, proven: 3, listed: 2, transferable: 1, missing: 0, gap: 0 };
 
 export async function careerGaps(role: string, viewer: AccountProfile): Promise<CareerGaps> {
   const q = { q: role, cat: "all" as const, where: "anywhere" as const, remote: false, visa: false, pay: false, level: "any" as const, sort: "match" as const };

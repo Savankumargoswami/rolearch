@@ -197,7 +197,14 @@ export function TrackerItem({
               {job.log.map((e, i) => (
                 <li key={i} className="text-sm">
                   <span className="me-1.5 rounded-full bg-surface px-2 py-0.5 text-xs font-medium">{t(`tracker.log_${e.kind}` as MessageKey)}</span>
-                  <span className="whitespace-pre-line">{e.text}</span>
+                  <span className="whitespace-pre-line">
+                    {e.kind === "status"
+                      ? t("tracker.statusChange", {
+                          from: t(`tracker.s_${e.text.split("→")[0]}` as MessageKey),
+                          to: t(`tracker.s_${e.text.split("→")[1]}` as MessageKey),
+                        })
+                      : e.text}
+                  </span>
                   <span className="block text-xs text-muted">{date.format(new Date(e.at))}</span>
                 </li>
               ))}
@@ -244,6 +251,15 @@ export function TrackerItem({
           </div>
         </div>
       </details>
+
+      {job.coverLetter && (
+        <details className="mt-1">
+          <summary className="inline-flex min-h-10 cursor-pointer items-center text-sm font-medium underline decoration-line underline-offset-4 hover:decoration-ink">
+            {t("tracker.coverLetter")}
+          </summary>
+          <p className="mt-2 rounded-xl bg-ink-soft/50 p-3 text-sm whitespace-pre-line">{job.coverLetter}</p>
+        </details>
+      )}
 
       <details className="mt-1 group">
         <summary className="inline-flex min-h-10 cursor-pointer items-center text-sm font-medium underline decoration-line underline-offset-4 hover:decoration-ink">

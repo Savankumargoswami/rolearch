@@ -4,6 +4,7 @@
 import "server-only";
 import type { JobLite } from "@/data/types";
 import { fitReport, type FitReport, type Verdict } from "./fit";
+import { loadBadges, loadCorrections } from "./fit-data";
 import { storedRequirements } from "./job-requirements";
 import type { AccountProfile } from "./profile";
 import { SKILLS } from "./skill-tests";
@@ -28,7 +29,7 @@ export async function fitReportsFor(jobs: JobLite[], viewer: AccountProfile | nu
   const out = new Map<string, FitReport>();
   if (!viewer || !hasProfile(viewer) || !jobs.length) return out;
   const db = await createClient();
-  const [reqs, { data: badges }] = await Promise.all([storedRequirements(jobs.map((j) => j.id)), db.from("skill_badges").select("skill,level").eq("user_id", viewer.id)]);
+  const [reqs, badges, corrections] = await Promise.all([storedRequirements(jobs.map((j) => j.id)), loadBadges(db, viewer.id), loadCorrections(db, viewer.id)]);
   for (const job of jobs) {
     const req = reqs.get(job.id);
     const required = (req?.required.length ? req.required : job.skills).slice(0, 14);
@@ -44,7 +45,7 @@ export async function fitReportsFor(jobs: JobLite[], viewer: AccountProfile | nu
         education: req?.education ?? "none",
       },
       viewer.profile,
-      { badges: (badges ?? []) as { skill: string; level: string }[], tests: SKILLS },
+      { badges, corrections, tests: SKILLS, source: req?.required.length ? "stored" : "tags" },
     );
     out.set(job.id, f);
   }

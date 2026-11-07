@@ -12,7 +12,8 @@ export function TrackButton({ id, status }: { id: string; status: string | null 
   const [current, setCurrent] = useState(status);
   const [pending, start] = useTransition();
   const tracked = current !== null;
-  const locked = tracked && current !== "saved"; // applied/interviewing/...: managed from the tracker
+  // Interested / Analyzing / Ready can still be untracked here; applied and later are managed from the tracker.
+  const locked = tracked && current !== "saved" && current !== "analyzing" && current !== "ready";
 
   return (
     <button

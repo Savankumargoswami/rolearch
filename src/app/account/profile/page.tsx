@@ -6,6 +6,9 @@ import { ProfileEditor } from "@/components/profile-editor";
 import { t } from "@/i18n";
 import { loadAccount } from "@/lib/profile";
 import { resumeReaderEnabled } from "@/lib/resume-reader";
+import { loadPreferences } from "@/lib/preferences";
+import { createClient } from "@/lib/supabase/server";
+import { PreferencesForm } from "./preferences-form";
 
 export const metadata: Metadata = { title: t("profile.editTitle"), robots: { index: false } };
 
@@ -26,6 +29,12 @@ export default function EditProfilePage() {
 }
 
 async function Editor() {
-  const { profile, avatarUrl } = await loadAccount();
-  return <ProfileEditor initial={profile} initialPhoto={avatarUrl} readerEnabled={resumeReaderEnabled} />;
+  const { id, profile, avatarUrl } = await loadAccount();
+  const prefs = await loadPreferences(await createClient(), id);
+  return (
+    <>
+      <PreferencesForm initial={prefs} />
+      <ProfileEditor initial={profile} initialPhoto={avatarUrl} readerEnabled={resumeReaderEnabled} />
+    </>
+  );
 }

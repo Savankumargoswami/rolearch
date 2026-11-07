@@ -10,12 +10,14 @@ import { t } from "@/i18n";
 import { coreTitle } from "@/lib/ats";
 import type { Verdict } from "@/lib/fit";
 import { fitsFor, type ListFit } from "@/lib/fit-list";
+import { loadPreferences } from "@/lib/preferences";
 import { requireMember } from "@/lib/require-member";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Roles worth your time", robots: { index: false } };
 
-const ORDER: Verdict[] = ["strong", "potential", "stretch", "poor"];
-const TONE: Record<Verdict, string> = { strong: "text-[#1f7a4d]", potential: "text-[#2c5585]", stretch: "text-signal-ink", poor: "text-[#b4532a]" };
+const ORDER: Verdict[] = ["strong", "potential", "stretch", "poor", "insufficient"];
+const TONE: Record<Verdict, string> = { strong: "text-[#1f7a4d]", potential: "text-[#2c5585]", stretch: "text-signal-ink", poor: "text-[#b4532a]", insufficient: "text-muted" };
 
 export default function DiscoverPage({ searchParams }: { searchParams: Promise<{ role?: string }> }) {
   return (
@@ -40,7 +42,8 @@ async function Queue({ searchParams }: { searchParams: Promise<{ role?: string }
   const viewer = await requireMember(`/discover${asked ? `?role=${encodeURIComponent(asked)}` : ""}`);
   const p = viewer.profile;
   const current = p.resume.experience.find((e) => e.current) ?? p.resume.experience[0];
-  const role = (asked ?? "").trim().slice(0, 80) || coreTitle(current?.title ?? "") || coreTitle(p.headline);
+  const prefs = await loadPreferences(await createClient(), viewer.id);
+  const role = (asked ?? "").trim().slice(0, 80) || prefs.targetRoles[0] || coreTitle(current?.title ?? "") || coreTitle(p.headline);
 
   const form = (
     <form action="/discover" className="mt-6 flex flex-col gap-2 rounded-2xl border border-line bg-surface p-4 sm:flex-row sm:items-end">
@@ -86,7 +89,7 @@ async function Queue({ searchParams }: { searchParams: Promise<{ role?: string }
         <p className="mt-8 text-muted">{t("discover.none", { role })}</p>
       ) : (
         <>
-          <ul className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <ul className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-5">
             {ORDER.map((v) => (
               <li key={v}>
                 <a href={`#${v}`} className="flex flex-col rounded-2xl border border-line bg-surface px-4 py-3 hover:border-ink">

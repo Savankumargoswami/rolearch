@@ -1,5 +1,6 @@
 "use client";
 
+import { resumeText } from "@/lib/ats";
 import { ApplicationChecklist } from "./application-checklist";
 import { applyChoices, replaceText } from "@/lib/tailor-evidence";
 import { mentions } from "@/lib/skills";
@@ -674,6 +675,10 @@ function Improved({
   const [items, setItems] = useState(better.changes);
   const [doc, setDoc] = useState(better.resume);
   const [rewriting, setRewriting] = useState<number | null>(null);
+  // Inline edit: the candidate's own wording, saved as approved content (blueprint 6.2).
+  const [editing, setEditing] = useState<number | null>(null);
+  const [draft, setDraft] = useState("");
+  const [edited, setEdited] = useState<Set<number>>(() => new Set());
   const [rewriteError, setRewriteError] = useState<{ i: number; message: string } | null>(null);
   const [version, setVersion] = useState<"idle" | "saving" | "saved">("idle");
   const [versionError, setVersionError] = useState("");
@@ -697,6 +702,26 @@ function Improved({
       n.delete(i);
       return n;
     });
+  }
+
+  function startEdit(i: number) {
+    setEditing(i);
+    setDraft(items[i].after);
+  }
+
+  function saveEdit(i: number) {
+    const text = draft.trim();
+    if (!text) return;
+    const c = items[i];
+    setDoc((d) => replaceText(d, c.after, text));
+    setItems((xs) => xs.map((x, j) => (j === i ? { ...x, after: text } : x)));
+    setKeep((k) => {
+      const n = new Set(k);
+      n.delete(i);
+      return n;
+    });
+    setEdited((e) => new Set(e).add(i));
+    setEditing(null);
   }
 
   async function saveAsVersion() {
@@ -774,10 +799,37 @@ function Improved({
                     <span className={`mt-0.5 block ${kept ? "" : "text-muted"}`}>{c.before}</span>
                   </p>
                 )}
-                <p className="mt-1.5 border-s-2 border-[#1f7a4d] ps-2">
-                  <span className="text-xs font-semibold tracking-wide text-[#1f7a4d] uppercase">{t("ats.evSuggested")}</span>
-                  <span className={`mt-0.5 block ${kept ? "text-muted line-through decoration-muted/60" : ""}`}>{c.after}</span>
-                </p>
+                <div className="mt-1.5 border-s-2 border-[#1f7a4d] ps-2">
+                  <span className="text-xs font-semibold tracking-wide text-[#1f7a4d] uppercase">
+                    {edited.has(i) ? t("ats.evYourEdit") : t("ats.evSuggested")}
+                  </span>
+                  {editing === i ? (
+                    <>
+                      <label className="sr-only" htmlFor={`edit-${i}`}>
+                        {t("ats.evEdit")}
+                      </label>
+                      <textarea
+                        id={`edit-${i}`}
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        rows={3}
+                        maxLength={400}
+                        className="mt-1 w-full resize-y rounded-lg border border-line bg-paper/40 px-2 py-1.5"
+                      />
+                      <span className="mt-1 flex gap-2">
+                        <button type="button" onClick={() => saveEdit(i)} disabled={!draft.trim()} className="min-h-9 cursor-pointer rounded-full bg-ink px-3 text-xs font-semibold text-paper disabled:opacity-50">
+                          {t("ats.evEditSave")}
+                        </button>
+                        <button type="button" onClick={() => setEditing(null)} className="min-h-9 cursor-pointer rounded-full border border-line px-3 text-xs font-semibold">
+                          {t("privacy.cancel")}
+                        </button>
+                      </span>
+                      <span className="mt-1 block text-xs text-muted">{t("ats.evEditNote")}</span>
+                    </>
+                  ) : (
+                    <span className={`mt-0.5 block ${kept ? "text-muted line-through decoration-muted/60" : ""}`}>{c.after}</span>
+                  )}
+                </div>
                 {c.why && <p className="mt-1 text-xs text-muted">{c.why}</p>}
                 {adds(c).length > 0 && (
                   <p className="mt-1.5 flex flex-wrap items-center gap-1">
@@ -806,6 +858,14 @@ function Improved({
                       className={`min-h-9 cursor-pointer rounded-full px-3 text-xs font-semibold ${kept ? "bg-ink text-paper" : "border border-line hover:border-ink"}`}
                     >
                       {t("ats.evKeep")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => startEdit(i)}
+                      disabled={editing !== null}
+                      className="inline-flex min-h-9 cursor-pointer items-center gap-1 rounded-full border border-line px-3 text-xs font-semibold hover:border-ink disabled:opacity-50"
+                    >
+                      {t("ats.evEdit")}
                     </button>
                     <button
                       type="button"
@@ -841,6 +901,11 @@ function Improved({
           </ul>
         </div>
       )}
+      <details className="mt-4 rounded-xl bg-surface p-3 text-sm">
+        <summary className="cursor-pointer font-medium">{t("ats.plainPreview")}</summary>
+        <p className="mt-1 text-xs text-muted">{t("ats.plainPreviewNote")}</p>
+        <pre className="mt-2 max-h-80 overflow-auto rounded-lg bg-paper/60 p-3 text-xs whitespace-pre-wrap">{resumeText(final)}</pre>
+      </details>
       <div className="mt-4 flex flex-col gap-2">
         <p className="text-sm font-medium">{t("ats.download")}</p>
         <div className="grid grid-cols-2 gap-2">

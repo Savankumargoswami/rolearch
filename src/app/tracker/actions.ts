@@ -5,6 +5,7 @@ import { getJob } from "@/data/db";
 import { t } from "@/i18n";
 import { loadViewer } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
+import { track } from "@/lib/events";
 import { LOG_KINDS, REJECTION_REASONS, TRACKER_STATUSES, type LogEntry, type TrackerStatus } from "@/lib/tracker";
 
 export type TrackResult = { ok: true } | { ok: false; message: string };
@@ -18,10 +19,18 @@ export async function trackJob(jobId: string, status: TrackerStatus = "saved"): 
   if (!job) return { ok: false, message: t("tracker.errSave") };
   const db = await createClient();
   const now = new Date().toISOString();
+  // Moving an existing job (e.g. "I applied") is recorded in its history, as on the tracker page.
+  const { data: cur } = await db.from("tracked_jobs").select("*").eq("user_id", viewer.id).eq("job_id", jobId).maybeSingle();
+  const row = cur as Record<string, unknown> | null;
+  const log =
+    row && row.status !== status && Array.isArray(row.log)
+      ? [...(row.log as LogEntry[]).slice(-199), { at: now, kind: "status" as const, text: `${String(row.status)}→${status}` }]
+      : undefined;
   const { error } = await db.from("tracked_jobs").upsert(
     {
       user_id: viewer.id,
       job_id: jobId,
+      ...(log ? { log } : {}),
       status,
       title: job.title,
       company: job.company,
@@ -32,6 +41,7 @@ export async function trackJob(jobId: string, status: TrackerStatus = "saved"): 
     { onConflict: "user_id,job_id" },
   );
   if (error) return { ok: false, message: t("tracker.errSave") };
+  await track(viewer.id, "application_saved", { status, job_family: job.category ?? "" });
   revalidatePath("/tracker");
   return { ok: true };
 }
@@ -52,9 +62,19 @@ export async function updateTracked(jobId: string, patch: { status?: TrackerStat
   if (patch.status && !TRACKER_STATUSES.includes(patch.status)) return { ok: false, message: t("tracker.errSave") };
   const db = await createClient();
   const now = new Date().toISOString();
+  // A status change is recorded in the job's history (blueprint 7.6: timestamped, reversible).
+  let log: LogEntry[] | undefined;
+  if (patch.status) {
+    const { data: cur } = await db.from("tracked_jobs").select("*").eq("user_id", viewer.id).eq("job_id", jobId).maybeSingle();
+    const row = cur as Record<string, unknown> | null;
+    if (row && row.status !== patch.status && Array.isArray(row.log)) {
+      log = [...(row.log as LogEntry[]).slice(-199), { at: now, kind: "status", text: `${String(row.status)}→${patch.status}` }];
+    }
+  }
   const { error } = await db
     .from("tracked_jobs")
     .update({
+      ...(log ? { log } : {}),
       ...(patch.status ? { status: patch.status } : {}),
       ...(patch.status === "applied" ? { applied_at: now } : {}),
       ...(patch.notes !== undefined ? { notes: patch.notes.slice(0, 4000) } : {}),
@@ -63,6 +83,7 @@ export async function updateTracked(jobId: string, patch: { status?: TrackerStat
     .eq("user_id", viewer.id)
     .eq("job_id", jobId);
   if (error) return { ok: false, message: t("tracker.errSave") };
+  if (patch.status) await track(viewer.id, "application_outcome_updated", { outcome: patch.status });
   revalidatePath("/tracker");
   return { ok: true };
 }

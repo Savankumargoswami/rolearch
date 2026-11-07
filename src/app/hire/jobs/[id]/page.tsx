@@ -7,7 +7,13 @@ import { Avatar } from "@/components/avatar";
 import { t, type MessageKey } from "@/i18n";
 import { count, postedAgo } from "@/lib/format";
 import { FUNNEL, STAGES, applicationsFor, companyJob, daysSince, events, jobStats, viewsFor, type ApplicationRow, type JobStats } from "@/lib/hiring";
+import { getJob, getJobText } from "@/data/db";
+import { fitReport, type Verdict } from "@/lib/fit";
+import { jobRequirements } from "@/lib/job-requirements";
+import type { ProfileData } from "@/lib/profile-schema";
+import { withDefaults } from "@/lib/profile-schema";
 import { requireMember } from "@/lib/require-member";
+import { SKILLS } from "@/lib/skill-tests";
 import { createClient } from "@/lib/supabase/server";
 import { CompanyGate } from "../../company-gate";
 import { JobStatusButton, StageMenu } from "../../pipeline-controls";
@@ -35,6 +41,31 @@ async function Manage({ params, searchParams }: { params: PageProps<"/hire/jobs/
   const [apps, views] = await Promise.all([applicationsFor(db, viewer.id, [id]), viewsFor(db, [id])]);
   const history = await events(db, apps.map((a) => a.id));
   const stats = jobStats(apps, views, history);
+  // RoleArch JobFit for every applicant, from their application snapshot, the job's own requirements and their
+  // proctored skill badges, so the pipeline ranks people on evidence rather than on the score saved at apply time.
+  const fits = new Map<string, { score: number; verdict: Verdict }>();
+  const full = await getJob(id);
+  if (full && apps.length) {
+    const text = await getJobText(id);
+    const req = await jobRequirements(full, text);
+    const { data: badgeRows } = await db.from("skill_badges").select("user_id,skill,level").in("user_id", [...new Set(apps.map((a) => a.applicantId))]);
+    for (const a of apps) {
+      const f = fitReport(
+        {
+          title: full.title,
+          description: text || full.summary,
+          required: (req?.required.length ? req.required : full.skills).slice(0, 14),
+          preferred: (req?.preferred ?? []).slice(0, 8),
+          certifications: (req?.certifications ?? []).slice(0, 6),
+          years: req?.years || full.years,
+          education: req?.education ?? "none",
+        },
+        withDefaults({ headline: a.snapshot.headline, location: a.snapshot.location, resume: (a.snapshot.resume as ProfileData["resume"]) ?? undefined }),
+        { badges: (badgeRows ?? []).filter((b) => b.user_id === a.applicantId), tests: SKILLS, source: req?.required.length ? "stored" : "tags" },
+      );
+      fits.set(a.id, { score: f.score, verdict: f.verdict });
+    }
+  }
   const days = daysSince(job.postedAt);
 
   return (
@@ -79,7 +110,7 @@ async function Manage({ params, searchParams }: { params: PageProps<"/hire/jobs/
         {apps.length === 0 ? (
           <p className="mt-6 text-muted">{t("hire.pipelineEmpty")}</p>
         ) : (
-          <Board apps={apps} />
+          <Board apps={apps} fits={fits} />
         )}
       </section>
     </>
@@ -175,10 +206,12 @@ function Analytics({ stats }: { stats: JobStats }) {
   );
 }
 
-function Board({ apps }: { apps: ApplicationRow[] }) {
+function Board({ apps, fits }: { apps: ApplicationRow[]; fits: Map<string, { score: number; verdict: Verdict }> }) {
   const columns = [...STAGES, "withdrawn" as const].map((s) => ({
     stage: s,
-    items: apps.filter((a) => a.stage === s).sort((a, b) => (b.matchScore ?? -1) - (a.matchScore ?? -1)),
+    items: apps
+      .filter((a) => a.stage === s)
+      .sort((a, b) => (fits.get(b.id)?.score ?? b.matchScore ?? -1) - (fits.get(a.id)?.score ?? a.matchScore ?? -1)),
   }));
   return (
     <div className="mt-5 flex gap-3 overflow-x-auto pb-3">
@@ -203,7 +236,14 @@ function Board({ apps }: { apps: ApplicationRow[] }) {
                       </span>
                     </Link>
                     <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
-                      {a.matchScore != null && <span className="font-medium text-ink">{t("hire.match", { n: a.matchScore })}</span>}
+                      {fits.get(a.id) ? (
+                        <span className="font-medium text-ink">
+                          {t(`fit.verdict_${fits.get(a.id)!.verdict}`)}
+                          {fits.get(a.id)!.verdict !== "insufficient" && ` · ${fits.get(a.id)!.score}`}
+                        </span>
+                      ) : (
+                        a.matchScore != null && <span className="font-medium text-ink">{t("hire.match", { n: a.matchScore })}</span>
+                      )}
                       {a.atsScore != null && <span>{t("hire.ats", { n: a.atsScore })}</span>}
                       <span>{t("hire.applied", { ago: postedAgo(days) })}</span>
                     </p>

@@ -46,6 +46,7 @@ export async function HeaderAccount() {
   if (!user) return <GuestLinks />;
   const company = user.user_metadata?.account_type === "company";
   const items: MenuItem[] = [
+    { href: "/dashboard", label: t("nav.dashboard"), icon: "dashboard" },
     company ? { href: "/hire", label: t("nav.hiring"), icon: "hiring" } : { href: "/tracker", label: t("nav.tracker"), icon: "tracker" },
     { href: "/discover", label: t("nav.discover"), icon: "discover" },
     { href: "/gaps", label: t("nav.gaps"), icon: "gaps" },
@@ -55,6 +56,7 @@ export async function HeaderAccount() {
     ...common,
   ];
   if (!company) items.push({ href: "/employers", label: t("nav.companies"), icon: "companies" });
+  items.push({ href: "/account/privacy", label: t("nav.privacy"), icon: "privacy" });
   return (
     <>
       <NavLink href="/account" className={buttonClass}>

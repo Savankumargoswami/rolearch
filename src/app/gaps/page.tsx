@@ -7,7 +7,9 @@ import { t } from "@/i18n";
 import { coreTitle } from "@/lib/ats";
 import { careerGaps, type SkillGap, type Stage } from "@/lib/career-gaps";
 import { summarize } from "@/lib/fit-list";
+import { loadPreferences } from "@/lib/preferences";
 import { requireMember } from "@/lib/require-member";
+import { createClient } from "@/lib/supabase/server";
 import { roadmapForTitle } from "@/lib/roadmaps";
 import { transitionPath } from "@/lib/transitions";
 
@@ -40,7 +42,8 @@ async function Gaps({ searchParams }: { searchParams: Promise<{ role?: string }>
   const viewer = await requireMember(`/gaps${asked ? `?role=${encodeURIComponent(asked)}` : ""}`);
   const p = viewer.profile;
   const current = p.resume.experience.find((e) => e.current) ?? p.resume.experience[0];
-  const role = (asked ?? "").trim().slice(0, 80) || coreTitle(current?.title ?? "") || coreTitle(p.headline);
+  const prefs = await loadPreferences(await createClient(), viewer.id);
+  const role = (asked ?? "").trim().slice(0, 80) || prefs.targetRoles[0] || coreTitle(current?.title ?? "") || coreTitle(p.headline);
   const form = (
     <form action="/gaps" className="mt-6 flex flex-col gap-2 rounded-2xl border border-line bg-surface p-4 sm:flex-row sm:items-end">
       <label className="flex flex-1 flex-col gap-1 text-sm">

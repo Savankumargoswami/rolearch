@@ -13,11 +13,13 @@ import { TrackerItem } from "./tracker-item";
 
 export const metadata: Metadata = { title: "Job tracker", robots: { index: false } };
 
-export default function TrackerPage() {
+type Search = Promise<{ view?: string; q?: string; status?: string }>;
+
+export default function TrackerPage({ searchParams }: { searchParams: Search }) {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
-        <Tracker />
+        <Tracker searchParams={searchParams} />
       </Suspense>
       <Suspense fallback={null}>
         <FeedbackPrompt />
@@ -26,7 +28,11 @@ export default function TrackerPage() {
   );
 }
 
-async function Tracker() {
+async function Tracker({ searchParams }: { searchParams: Search }) {
+  const sp = await searchParams;
+  const view = sp.view === "board" ? "board" : "list";
+  const query = String(sp.q ?? "").trim().toLowerCase().slice(0, 80);
+  const only = (TRACKER_STATUSES as readonly string[]).includes(String(sp.status)) ? String(sp.status) : "";
   const viewer = await requireMember("/tracker");
   const db = await createClient();
   const [{ data }, apps] = await Promise.all([
@@ -66,7 +72,9 @@ async function Tracker() {
     );
   }
 
-  const counts = Object.fromEntries(TRACKER_STATUSES.map((s) => [s, tracked.filter((j) => j.status === s).length]));
+  const shown = tracked.filter(
+    (j) => (!only || j.status === only) && (!query || `${j.title} ${j.company} ${j.notes} ${j.contactName}`.toLowerCase().includes(query)),
+  );
   const f = funnel(tracked);
   const steps = [
     { n: f.saved, label: t("tracker.funnelSaved") },
@@ -164,23 +172,84 @@ async function Tracker() {
       ) : (
         f.applied > 0 && <p className="mt-4 text-sm text-muted">{t("outcomes.notYet")}</p>
       )}
-      <ul className="mt-6 flex flex-wrap gap-2" aria-label={t("tracker.status")}>
-        {TRACKER_STATUSES.filter((s) => counts[s] > 0).map((s) => (
-          <li key={s}>
-            <a href={`#${s}`} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-line px-4 text-sm hover:border-ink">
-              {t(`tracker.s_${s}` as MessageKey)}
-              <span className="rounded-full bg-ink-soft px-2 tabular-nums">{counts[s]}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-      {TRACKER_STATUSES.filter((s) => counts[s] > 0).map((s) => (
+      {/* Search, status filter, list or board, and CSV export (blueprint 2.2 F, 7.4). */}
+      <form action="/tracker" className="mt-6 flex flex-col gap-2 rounded-2xl border border-line bg-surface p-3 sm:flex-row sm:items-end">
+        <input type="hidden" name="view" value={view} />
+        <label className="flex flex-1 flex-col gap-1 text-sm">
+          <span className="font-medium">{t("tracker.search")}</span>
+          <input name="q" defaultValue={query} placeholder={t("tracker.searchPlaceholder")} maxLength={80} className="h-10 rounded-lg border border-line bg-paper/40 px-3" />
+        </label>
+        <label className="flex flex-col gap-1 text-sm sm:w-48">
+          <span className="font-medium">{t("tracker.status")}</span>
+          <select name="status" defaultValue={only} className="h-10 rounded-lg border border-line bg-surface px-2">
+            <option value="">{t("tracker.allStatuses")}</option>
+            {TRACKER_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {t(`tracker.s_${s}` as MessageKey)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="submit" className="min-h-10 cursor-pointer rounded-full bg-ink px-5 text-sm font-medium text-paper hover:bg-ink-hover">
+          {t("tracker.apply")}
+        </button>
+      </form>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="inline-flex rounded-full bg-ink-soft p-1 text-sm" role="group" aria-label={t("tracker.viewLabel")}>
+          {(["list", "board"] as const).map((v) => (
+            <Link
+              key={v}
+              href={`/tracker?view=${v}${query ? `&q=${encodeURIComponent(query)}` : ""}${only ? `&status=${only}` : ""}`}
+              aria-current={view === v ? "page" : undefined}
+              className={`inline-flex min-h-9 items-center rounded-full px-4 font-medium ${view === v ? "bg-surface shadow-sm" : "text-muted hover:text-ink"}`}
+            >
+              {t(v === "list" ? "tracker.viewList" : "tracker.viewBoard")}
+            </Link>
+          ))}
+        </div>
+        <a href="/tracker/export" className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-line px-4 text-sm font-medium hover:border-ink">
+          {t("tracker.exportCsv")}
+        </a>
+      </div>
+
+      {view === "board" ? (
+        <div className="rail -mx-4 mt-6 flex gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0">
+          {TRACKER_STATUSES.filter((s) => !only || s === only).map((s) => {
+            const col = shown.filter((j) => j.status === s);
+            return (
+              <section key={s} aria-labelledby={`b-${s}`} className="flex w-64 shrink-0 flex-col rounded-2xl bg-ink-soft/60 p-3">
+                <h2 id={`b-${s}`} className="flex items-center justify-between text-sm font-semibold">
+                  {t(`tracker.s_${s}` as MessageKey)}
+                  <span className="rounded-full bg-surface px-2 tabular-nums">{col.length}</span>
+                </h2>
+                <ul className="mt-2 flex flex-col gap-2">
+                  {col.map((j) => {
+                    const step = nextStep(j, now);
+                    return (
+                      <li key={j.jobId} className="rounded-xl border border-line bg-surface p-3 text-sm">
+                        <Link href={`/tracker?q=${encodeURIComponent(j.title.toLowerCase())}`} className="font-medium hover:underline">
+                          {j.title}
+                        </Link>
+                        <p className="text-muted">{j.company}</p>
+                        {step && <p className={`mt-1 text-xs ${step.urgent ? "text-signal-ink" : "text-muted"}`}>{t(`tracker.next_${step.id}` as MessageKey, step.values)}</p>}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          })}
+        </div>
+      ) : (
+      <>
+      {shown.length === 0 && <p className="mt-8 text-muted">{t("tracker.noMatches")}</p>}
+      {TRACKER_STATUSES.filter((s) => shown.some((j) => j.status === s)).map((s) => (
         <section key={s} id={s} aria-labelledby={`${s}-h`} className="mt-10 scroll-mt-20">
           <h2 id={`${s}-h`} className="border-b border-ink pb-3 font-display text-2xl font-semibold tracking-[-0.02em]">
             {t(`tracker.s_${s}` as MessageKey)}
           </h2>
           <ul className="mt-3 flex flex-col gap-3">
-            {tracked
+            {shown
               .filter((j) => j.status === s)
               .map((j) => {
                 const app = appByJob.get(j.jobId);
@@ -198,6 +267,8 @@ async function Tracker() {
           </ul>
         </section>
       ))}
+      </>
+      )}
     </>
   );
 }

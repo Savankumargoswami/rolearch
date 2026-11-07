@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { TOPICS } from "@/lib/daily-post";
+import { GUIDES } from "@/lib/transition-guides";
 import { METROS, ROLES, SPECIAL } from "@/lib/seo-pages";
 
 const base = "https://www.rolearch.com";
@@ -15,6 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/ats`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${base}/roles`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/roadmaps`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/guides`, changeFrequency: "monthly", priority: 0.7 },
+    ...GUIDES.map((g) => ({ url: `${base}/guides/${g.slug}`, changeFrequency: "monthly" as const, priority: 0.7 })),
     { url: `${base}/employers`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/signup`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/privacy`, changeFrequency: "yearly", priority: 0.2 },

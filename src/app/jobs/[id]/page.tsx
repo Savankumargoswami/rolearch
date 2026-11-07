@@ -18,6 +18,7 @@ import type { Job } from "@/data/types";
 import { t, type MessageKey } from "@/i18n";
 import { place, postedAgo, salaryRange } from "@/lib/format";
 import { fitReport, type FitReport } from "@/lib/fit";
+import { loadBadges, loadCorrections } from "@/lib/fit-data";
 import { jobRequirements, type JobRequirements } from "@/lib/job-requirements";
 import type { Match, ReqStatus, Requirement } from "@/lib/match";
 import { loadViewer } from "@/lib/profile";
@@ -197,7 +198,7 @@ const viewerMatch = cache(async (id: string): Promise<ViewerMatch> => {
   const hasProfile = p.resume.experience.length + p.resume.skills.length > 0;
   if (!hasProfile) return { signedIn: true, hasProfile, match: null, req, fit: null };
   const db = await createClient();
-  const { data: badges } = await db.from("skill_badges").select("skill,level").eq("user_id", viewer.id);
+  const [badges, corrections] = await Promise.all([loadBadges(db, viewer.id), loadCorrections(db, viewer.id)]);
   // The job-fit verdict (no screening read here, so a job page never triggers an extra AI call).
   const fit = fitReport(
     {
@@ -210,7 +211,7 @@ const viewerMatch = cache(async (id: string): Promise<ViewerMatch> => {
       education: req?.education ?? "none",
     },
     p,
-    { badges: (badges ?? []) as { skill: string; level: string }[], tests: SKILLS },
+    { badges, corrections, tests: SKILLS, source: req?.required.length ? "stored" : "tags" },
   );
   return { signedIn: true, hasProfile, match: matchProfile({ title: job.title, skills: job.skills, years: job.years, description }, p, req), req, fit };
 });
@@ -280,6 +281,10 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
             </ul>
             <p className="mt-2 text-sm text-muted">
               {job.source === "Rolearch" ? t("job.postedOnRolearch") : t("job.source", { c: job.company, s: job.source })}
+            </p>
+            {/* Blueprint 4.5: only call a job open when a trustworthy source says so; otherwise say it's unknown. */}
+            <p className="mt-1 text-sm text-muted">
+              {job.source === "Rolearch" ? t("job.statusRolearch") : job.verified ? t("job.statusChecked") : t("job.statusUnknown")}
             </p>
 
             <section aria-labelledby="about" className="mt-10">
@@ -376,7 +381,7 @@ async function ApplyArea({ job }: { job: Job }) {
           </Link>
         )
       ) : job.applyUrl ? (
-        <ExternalApply id={job.id} url={job.applyUrl} company={job.company} applied={status !== null && status !== "saved"} />
+        <ExternalApply id={job.id} url={job.applyUrl} company={job.company} applied={status !== null && !["saved", "analyzing", "ready"].includes(status)} />
       ) : (
         <ApplyButton company={job.company} />
       )}

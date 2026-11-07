@@ -12,6 +12,7 @@ const FIT_CHIP = {
   potential: "bg-[#3b6ea5]/12 text-[#2c5585]",
   stretch: "bg-signal/20 text-signal-ink",
   poor: "bg-[#b4532a]/10 text-[#b4532a]",
+  insufficient: "bg-ink-soft text-muted",
 } as const;
 
 /** One job in a list. Plain component (no hooks) so server and client lists share it. */

@@ -12,7 +12,17 @@ import type { ProfileData } from "./profile-schema";
 import type { Screening } from "./screening";
 import { degreeLevel, mentions } from "./skills";
 
-export type Tier = "verified" | "proven" | "listed" | "transferable" | "missing";
+/**
+ * Requirement-level match status (blueprint 5.2): verified and proven are direct matches (a Rolearch skill badge, or
+ * explicit evidence in a role), listed is a partial match (in a project or the skills list, depth unclear),
+ * transferable is a closely related capability, missing means "not found in your current profile", and gap means the
+ * candidate confirmed they don't have it.
+ */
+export type Tier = "verified" | "proven" | "listed" | "transferable" | "missing" | "gap";
+export type Confidence = "high" | "medium" | "low";
+export type Correction = "lack" | "have" | "wrong";
+/** The scoring configuration version, shown with every analysis so results are reproducible. */
+export const FIT_VERSION = "jobfit-1.1";
 export type SkillFit = {
   name: string;
   group: "required" | "preferred" | "certification";
@@ -25,10 +35,16 @@ export type SkillFit = {
   via?: string;
   /** A Rolearch skill test that would verify it. */
   test?: { id: string; name: string };
+  /** How sure the match is, from the kind of evidence behind it. */
+  confidence: Confidence;
+  /** "must" for required skills and credentials, "preferred" for nice-to-haves. */
+  importance: "must" | "preferred";
+  /** The candidate's own correction, when they made one. */
+  corrected?: Correction;
 };
-export type DimensionId = "skills" | "experience" | "industry" | "education" | "location" | "presentation";
+export type DimensionId = "skills" | "transferable" | "experience" | "industry" | "education" | "location" | "presentation";
 export type Dimension = { id: DimensionId; score: number; values: Record<string, string | number> };
-export type Verdict = "strong" | "potential" | "stretch" | "poor";
+export type Verdict = "strong" | "potential" | "stretch" | "poor" | "insufficient";
 export type FitReport = {
   score: number;
   verdict: Verdict;
@@ -38,6 +54,14 @@ export type FitReport = {
   blockers: string[];
   /** Things only the candidate can confirm (relocation, citizenship, other screening questions). */
   confirm: string[];
+  /** Share of core requirements with any evidence (0-100). */
+  coverage: number;
+  /** How complete the inputs were: a full profile and the posting's own requirements give high confidence. */
+  confidence: Confidence;
+  /** Why the inputs were incomplete, when confidence isn't high. */
+  missingInfo: string[];
+  version: string;
+  analyzedAt: string;
 };
 
 export type FitJob = {
@@ -53,7 +77,9 @@ export type Badge = { skill: string; level: string };
 type TestRef = { id: string; name: string };
 
 const EDUCATION_LEVEL: Record<Education, number> = { none: 0, high_school: 0.5, associate: 1, bachelor: 2, master: 3, doctorate: 4 };
-const WEIGHT: Record<DimensionId, number> = { skills: 40, experience: 25, industry: 10, education: 10, location: 10, presentation: 5 };
+// Blueprint 5.3 starting weights (a hypothesis to validate, not a predictor of hiring): experience 25, skills 30,
+// transferable 20, industry 10, education 5, practical constraints 10. Resume presentation is shown, not scored.
+const WEIGHT: Record<DimensionId, number> = { experience: 25, skills: 30, transferable: 20, industry: 10, education: 5, location: 10, presentation: 0 };
 
 // Skills that stand in for each other: having one is real, transferable evidence for another in the same family.
 const FAMILIES: string[][] = [
@@ -180,7 +206,18 @@ const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
 export function fitReport(
   job: FitJob,
   p: ProfileData,
-  opts: { badges?: Badge[]; screening?: Screening | null; ats?: AtsReport | null; tests: readonly TestRef[] },
+  opts: {
+    badges?: Badge[];
+    screening?: Screening | null;
+    ats?: AtsReport | null;
+    tests: readonly TestRef[];
+    /** The candidate's corrections, keyed by lowercased skill name. */
+    corrections?: Record<string, Correction>;
+    /** "tags" when the job's own requirements haven't been read yet (lower confidence). */
+    source?: "stored" | "tags";
+    /** ISO time of the analysis (passed in so this stays pure). */
+    now?: string;
+  },
 ): FitReport {
   const r = p.resume;
   const badges = new Set((opts.badges ?? []).map((b) => b.skill));
@@ -204,14 +241,28 @@ export function fitReport(
     const key = name.trim().toLowerCase();
     if (!key || seen.has(key)) return;
     seen.add(key);
+    const importance: SkillFit["importance"] = group === "preferred" ? "preferred" : "must";
+    const corrected = opts.corrections?.[key];
     const test = testFor(name, opts.tests);
-    const found = evidence(name);
+    // "That evidence is wrong": ignore what we matched in the resume (a passed skill test still counts).
+    const found = corrected === "wrong" ? null : evidence(name);
     if (test && badges.has(test.id)) {
-      skills.push({ name, group, tier: "verified", where: found?.where, quote: found?.quote, test });
+      skills.push({ name, group, tier: "verified", where: found?.where, quote: found?.quote, test, confidence: "high", importance, corrected });
+      return;
+    }
+    // "I don't have this": a confirmed gap, not just missing evidence.
+    if (corrected === "lack") {
+      skills.push({ name, group, tier: "gap", test, confidence: "high", importance, corrected });
       return;
     }
     if (found) {
-      skills.push({ name, group, ...found, test });
+      const confidence: Confidence = found.tier === "proven" ? (found.quote ? "high" : "medium") : found.where === "skills" ? "low" : "medium";
+      skills.push({ name, group, ...found, test, confidence, importance, corrected });
+      return;
+    }
+    // "I do have this": a candidate-confirmed fact counts as partial evidence until a role or project shows it.
+    if (corrected === "have") {
+      skills.push({ name, group, tier: "listed", where: "confirmed", test, confidence: "medium", importance, corrected });
       return;
     }
     // Transferable: a skill from the same family is proven or listed.
@@ -220,17 +271,18 @@ export function fitReport(
       if (other.toLowerCase() === key || shows(other, name)) continue;
       const via = evidence(other);
       if (via) {
-        skills.push({ name, group, tier: "transferable", via: other, where: via.where, quote: via.quote, test });
+        skills.push({ name, group, tier: "transferable", via: other, where: via.where, quote: via.quote, test, confidence: "medium", importance, corrected });
         return;
       }
     }
-    skills.push({ name, group, tier: "missing", test });
+    skills.push({ name, group, tier: "missing", test, confidence: "low", importance, corrected });
   };
   job.required.forEach((n) => add(n, "required"));
   job.certifications.forEach((n) => add(n, "certification"));
   job.preferred.forEach((n) => add(n, "preferred"));
 
-  const credit: Record<Tier, number> = { verified: 1, proven: 1, listed: 0.6, transferable: 0.5, missing: 0 };
+  // Skills score only direct and partial evidence; transferable capability is scored on its own (below).
+  const credit: Record<Tier, number> = { verified: 1, proven: 1, listed: 0.5, transferable: 0.3, missing: 0, gap: 0 };
   const weightOf = (s: SkillFit) => (s.group === "preferred" ? 0.5 : 1);
   const totalW = skills.reduce((a, s) => a + weightOf(s), 0);
   const gotW = skills.reduce((a, s) => a + weightOf(s) * credit[s.tier], 0);
@@ -242,9 +294,20 @@ export function fitReport(
       values: {
         strong: core.filter((s) => s.tier === "verified" || s.tier === "proven").length,
         partial: core.filter((s) => s.tier === "listed" || s.tier === "transferable").length,
-        missing: core.filter((s) => s.tier === "missing").length,
+        missing: core.filter((s) => s.tier === "missing" || s.tier === "gap").length,
         total: core.length,
       },
+    });
+  }
+  // Transferable capabilities: of the core requirements without direct evidence, how many does related experience
+  // reach? (All direct: nothing needs transferring, full marks.)
+  const indirect = core.filter((s) => s.tier !== "verified" && s.tier !== "proven");
+  if (core.length) {
+    const reach = indirect.reduce((a, s) => a + (s.tier === "transferable" ? 1 : s.tier === "listed" ? 0.6 : 0), 0);
+    dims.push({
+      id: "transferable",
+      score: indirect.length ? clamp((reach / indirect.length) * 100) : 100,
+      values: { transferable: indirect.filter((s) => s.tier === "transferable").length, partial: indirect.filter((s) => s.tier === "listed").length, total: indirect.length },
     });
   }
 
@@ -313,16 +376,41 @@ export function fitReport(
   // ---------- overall and verdict ----------
   const wsum = dims.reduce((a, d) => a + WEIGHT[d.id], 0);
   const score = wsum ? clamp(dims.reduce((a, d) => a + d.score * WEIGHT[d.id], 0) / wsum) : 0;
-  const coreMissing = core.filter((s) => s.tier === "missing").length;
-  const coreShare = core.length ? core.filter((s) => s.tier !== "missing").length / core.length : 1;
-  const verdict: Verdict =
-    score < 40 || blockers.length >= 2 || coreShare < 0.3
-      ? "poor"
-      : score >= 75 && blockers.length === 0 && coreMissing === 0
-        ? "strong"
-        : score >= 55 && blockers.length <= 1
-          ? "potential"
-          : "stretch";
+  const coreMissing = core.filter((s) => s.tier === "missing" || s.tier === "gap").length;
+  const coreShare = core.length ? core.filter((s) => s.tier !== "missing" && s.tier !== "gap").length / core.length : 1;
+  const confirmedGaps = core.filter((s) => s.tier === "gap").length;
 
-  return { score, verdict, dimensions: dims, skills, blockers, confirm };
+  // Confidence in the inputs: too little to go on means "insufficient information", not a low score.
+  const missingInfo: string[] = [];
+  const bullets = r.experience.reduce((a, e) => a + e.bullets.length, 0);
+  if (core.length < 3) missingInfo.push("job_requirements");
+  if (!r.experience.length) missingInfo.push("experience");
+  else if (bullets < 2) missingInfo.push("experience_details");
+  if (opts.source === "tags") missingInfo.push("job_text");
+  const confidence: Confidence = missingInfo.some((m) => m === "job_requirements" || m === "experience") ? "low" : missingInfo.length ? "medium" : "high";
+
+  const verdict: Verdict =
+    confidence === "low"
+      ? "insufficient"
+      : score < 40 || blockers.length >= 2 || coreShare < 0.3 || confirmedGaps >= 3
+        ? "poor"
+        : score >= 75 && blockers.length === 0 && coreMissing === 0
+          ? "strong"
+          : score >= 55 && blockers.length <= 1
+            ? "potential"
+            : "stretch";
+
+  return {
+    score,
+    verdict,
+    dimensions: dims,
+    skills,
+    blockers,
+    confirm,
+    coverage: clamp(coreShare * 100),
+    confidence,
+    missingInfo,
+    version: FIT_VERSION,
+    analyzedAt: opts.now ?? "",
+  };
 }
