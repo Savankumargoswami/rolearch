@@ -2,6 +2,7 @@ import { ArrowRight, CalendarClock, Compass, LayoutDashboard, ScanSearch } from 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { BestRoles } from "@/components/best-roles";
 import { t, type MessageKey } from "@/i18n";
 import { requireMember } from "@/lib/require-member";
 import { createClient } from "@/lib/supabase/server";
@@ -86,6 +87,10 @@ async function Dashboard() {
         <Stat label={t("dash.appliedMonth")} value={thisMonth} />
         <Stat label={t("dash.tracked")} value={jobs.length} />
       </dl>
+
+      <Suspense fallback={<div className="mt-8 h-64 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
+        <BestRoles viewer={viewer} />
+      </Suspense>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <section aria-labelledby="next-h" className="rounded-3xl border border-line bg-surface p-5">

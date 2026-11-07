@@ -105,7 +105,7 @@ export function PathNetwork({ routes }: { routes: Route[] }) {
       </ol>
 
       <h3 className="mt-5 text-xs font-semibold tracking-[0.12em] uppercase opacity-70">{t("gaps.netInfo")}</h3>
-      <ul className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <ul className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-2">
         {routes.map((r) => (
           <li key={r.id}>
             <button

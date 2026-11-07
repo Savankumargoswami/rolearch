@@ -3,7 +3,9 @@ import { ArrowRight, Check, ScanSearch } from "lucide-react";
 import { CANDIDATE_FEATURES, EMPLOYER_FEATURES } from "@/lib/features";
 import Link from "next/link";
 import { Suspense, ViewTransition } from "react";
+import { BestRoles } from "@/components/best-roles";
 import { HeroSearch } from "@/components/hero-search";
+import { HomeShowcase } from "@/components/home-showcase";
 import { JobRow } from "@/components/job-row";
 import { MeridianMap } from "@/components/meridian-map";
 import { getJobFeed, jobMap } from "@/data/db";
@@ -111,10 +113,16 @@ export default async function Home() {
               ))}
             </div>
           </div>
+          <Suspense fallback={null}>
+            <ForYou />
+          </Suspense>
           <div className="mt-14 sm:mt-16">
             <MeridianMap pins={pins} />
           </div>
         </section>
+
+        {/* What Rolearch does differently, A to E, each with a sample of the real screen. */}
+        <HomeShowcase />
 
         {/* Free ATS check: the front door. Anyone can start a scan; the result comes with a free account. */}
         <section aria-labelledby="ats-home" className="mt-20 bg-ink text-paper">
@@ -314,6 +322,13 @@ export default async function Home() {
       </div>
     </ViewTransition>
   );
+}
+
+/** Signed-in members: the roles and open jobs that fit them best, right under the search. */
+async function ForYou() {
+  const viewer = await loadViewer();
+  if (!viewer) return null;
+  return <BestRoles viewer={viewer} limit={4} />;
 }
 
 /** Members see the newest jobs; visitors see how many are waiting and a sign-up button. */

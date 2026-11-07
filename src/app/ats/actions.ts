@@ -223,7 +223,10 @@ async function optimizeForJobInner(
   const safeContact = sanitizeContact(contact);
   const before = scoreAts(job, parsed, safeContact, sanitizeFile(original));
   const missing = before.keywords.filter((k) => k.inResume === 0).map((k) => k.name);
-  const confirmedOk = confirmed.filter((s) => missing.includes(s)).slice(0, 30);
+  // A skill counts only when the resume itself shows it. Skills the person added arrive with their own evidence line
+  // already written into the role or project where they used it, so a bare "I have it" adds nothing here.
+  void confirmed;
+  const confirmedOk: string[] = [];
 
   const out = await optimizeResume({
     resume: parsed,

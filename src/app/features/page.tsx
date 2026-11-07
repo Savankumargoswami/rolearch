@@ -1,6 +1,7 @@
 import { ArrowRight, Check } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HomeShowcase } from "@/components/home-showcase";
 import { CANDIDATE_FEATURES, EMPLOYER_FEATURES, NOT_OFFERED, type Feature } from "@/lib/features";
 
 export const metadata: Metadata = {
@@ -21,7 +22,11 @@ export default function FeaturesPage() {
         your skills, and keeps every application organised, with tools for employers to hire on evidence.
       </p>
 
-      <h2 className="mt-12 font-display text-3xl font-semibold tracking-[-0.02em]">For job seekers</h2>
+      <div className="-mx-4 sm:-mx-6">
+        <HomeShowcase />
+      </div>
+
+      <h2 className="mt-16 font-display text-3xl font-semibold tracking-[-0.02em]">Everything for job seekers</h2>
       <ul className="mt-6 grid gap-5 md:grid-cols-2">
         {CANDIDATE_FEATURES.map((f) => (
           <li key={f.id}>

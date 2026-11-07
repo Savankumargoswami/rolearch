@@ -2,7 +2,7 @@
 
 import { resumeText } from "@/lib/ats";
 import { ApplicationChecklist } from "./application-checklist";
-import { applyChoices, replaceText } from "@/lib/tailor-evidence";
+import { applyChoices, evidenceProblem, replaceText, unsupported, withEvidence, type SkillEvidence } from "@/lib/tailor-evidence";
 import { mentions } from "@/lib/skills";
 import { FitReportView } from "./fit-report";
 import { CircleAlert, CircleHelp, Check, Download, FileText, FileUp, Loader2, Lock, Save, ScanSearch, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
@@ -60,7 +60,9 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<Ready | null>(null);
   const [better, setBetter] = useState<Better | null>(null);
-  const [confirmed, setConfirmed] = useState<string[]>([]);
+  // Skills the person added with evidence: where they used each one and what they did, in their own words.
+  const [evidence, setEvidence] = useState<SkillEvidence[]>([]);
+  const confirmed = evidence.map((e) => e.skill);
   const [mode, setMode] = useState<Mode>("deep");
   const [error, setError] = useState("");
   // Errors from tailoring, downloads and the cover letter show next to those buttons, not up at the scan form.
@@ -81,7 +83,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
     setError("");
     setNote("");
     setBetter(null);
-    setConfirmed([]);
+    setEvidence([]);
     setChecked(goal);
     startCheck(async () => {
       let res: Checked;
@@ -125,15 +127,20 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
     });
   }
 
-  /** Tailors the scanned resume; or, with `more`, tailors the tailored one again with more confirmed skills. */
-  function optimize(more?: string[]) {
+  /**
+   * Tailors the scanned resume; or, with `more`, tailors the tailored one again with more skills the person added
+   * evidence for. Each evidenced skill is first written into the role or project where they used it, in their words,
+   * so nothing goes on the resume that the resume itself doesn't show.
+   */
+  function optimize(more?: SkillEvidence[]) {
     if (!result) return;
     setActionError("");
     const again = Boolean(more && better);
-    const skills = more ? [...new Set([...confirmed, ...more])] : confirmed;
-    if (more) setConfirmed(skills);
+    const all = more ? [...evidence, ...more.filter((m) => !confirmed.includes(m.skill))] : evidence;
+    if (more) setEvidence(all);
+    const skills = all.map((e) => e.skill);
     startOptimize(async () => {
-      const base = again && better ? better.resume : result.resume;
+      const base = again && better ? withEvidence(better.resume, more ?? []) : withEvidence(result.resume, all);
       const res = await optimizeForJob(checked, base, result.contact, skills, result.file, mode).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));
       if (!res.ok) return setActionError(res.message);
       // A second round still compares against the resume as first scanned.
@@ -267,9 +274,10 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
           <Breakdown report={report} />
           <Keywords
             report={report}
-            confirmed={confirmed}
-            onToggle={(k) => setConfirmed((c) => (c.includes(k) ? c.filter((x) => x !== k) : [...c, k]))}
-            onSetAll={(names, on) => setConfirmed((c) => (on ? [...new Set([...c, ...names])] : c.filter((x) => !names.includes(x))))}
+            doc={result.resume}
+            evidence={evidence}
+            onAdd={(ev) => setEvidence((list) => [...list.filter((x) => x.skill !== ev.skill), ev])}
+            onRemove={(k) => setEvidence((list) => list.filter((x) => x.skill !== k))}
             locked={Boolean(better)}
           />
           {(["searchability", "recruiter", "formatting"] as const).map((part) => (
@@ -329,6 +337,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
               better={better}
               source={result.source} onDownload={(f, r) => download(r, f)} onSave={saveToProfile} downloading={downloading} saving={saving}
               target={checked} jobTitle={jobTitle} company={company} confirmed={confirmed}
+              originalText={resumeText(withEvidence(result.resume, evidence))} places={result.resume}
               onAgain={(more) => optimize(more)} optimizing={optimizing} />
           )}
           {actionError && (
@@ -530,27 +539,100 @@ function Breakdown({ report }: { report: AtsReport }) {
   );
 }
 
-type Toggle = { confirmed: string[]; onToggle: (k: string) => void; onSetAll: (names: string[], on: boolean) => void; locked: boolean };
+type Toggle = { doc: AtsDoc; evidence: SkillEvidence[]; onAdd: (ev: SkillEvidence) => void; onRemove: (skill: string) => void; locked: boolean };
 
-function Keywords({ report, confirmed, onToggle, onSetAll, locked }: { report: AtsReport } & Toggle) {
+function Keywords({ report, ...rest }: { report: AtsReport } & Toggle) {
   return (
     <>
       {(["hard", "soft"] as const).map((kind) => (
-        <KeywordList
-          key={kind}
-          kind={kind}
-          list={report.keywords.filter((k) => k.kind === kind)}
-          confirmed={confirmed}
-          onToggle={onToggle}
-          onSetAll={onSetAll}
-          locked={locked}
-        />
+        <KeywordList key={kind} kind={kind} list={report.keywords.filter((k) => k.kind === kind)} {...rest} />
       ))}
     </>
   );
 }
 
-function KeywordList({ kind, list, confirmed, onToggle, onSetAll, locked }: { kind: "hard" | "soft"; list: AtsKeyword[] } & Toggle) {
+/** The roles and projects on the resume, for "where did you use it?". */
+function placesOf(doc: AtsDoc): { id: string; label: string }[] {
+  return [
+    ...doc.resume.experience.map((e, i) => ({ id: `exp:${i}`, label: [e.title, e.company].filter(Boolean).join(" · ") })),
+    ...doc.resume.projects.map((p, i) => ({ id: `proj:${i}`, label: p.name ? t("ats.evProject", { name: p.name }) : "" })),
+  ].filter((x) => x.label);
+}
+
+/**
+ * Adding a missing skill takes evidence: the role or project where the person used it, and one line on what they
+ * did with it. Without that, Rolearch won't put the skill on the resume.
+ */
+function EvidenceForm({ skill, doc, onSave, onCancel }: { skill: string; doc: AtsDoc; onSave: (ev: SkillEvidence) => void; onCancel: () => void }) {
+  const places = placesOf(doc);
+  const [place, setPlace] = useState(places[0]?.id ?? "");
+  const [line, setLine] = useState("");
+  const [problem, setProblem] = useState<"" | "short" | "name">("");
+  if (!places.length) {
+    return (
+      <div className="mt-2 rounded-xl bg-ink-soft/60 p-3 text-sm">
+        <p>{t("ats.evNoPlaces", { skill })}</p>
+        <button type="button" onClick={onCancel} className="mt-2 min-h-9 cursor-pointer rounded-full border border-line px-3 text-xs font-semibold">
+          {t("privacy.cancel")}
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-2 rounded-xl bg-ink-soft/60 p-3 text-sm">
+      <p className="font-medium">{t("ats.evFormTitle", { skill })}</p>
+      <label className="mt-2 flex flex-col gap-1">
+        <span className="text-xs font-semibold tracking-wide text-muted uppercase">{t("ats.evWhere")}</span>
+        <select value={place} onChange={(e) => setPlace(e.target.value)} className="h-10 rounded-lg border border-line bg-surface px-2">
+          {places.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="mt-2 flex flex-col gap-1">
+        <span className="text-xs font-semibold tracking-wide text-muted uppercase">{t("ats.evWhat", { skill })}</span>
+        <textarea
+          value={line}
+          onChange={(e) => {
+            setLine(e.target.value);
+            setProblem("");
+          }}
+          rows={2}
+          maxLength={300}
+          placeholder={t("ats.evWhatPh", { skill })}
+          className="resize-y rounded-lg border border-line bg-surface px-2 py-1.5"
+        />
+      </label>
+      {problem && (
+        <p role="alert" className="mt-1 text-xs text-[#b4532a]">
+          {problem === "short" ? t("ats.evTooShort") : t("ats.evNameIt", { skill })}
+        </p>
+      )}
+      <span className="mt-2 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            const why = evidenceProblem(skill, line);
+            if (why) return setProblem(why);
+            onSave({ skill, place, line: line.trim() });
+          }}
+          className="min-h-9 cursor-pointer rounded-full bg-ink px-3 text-xs font-semibold text-paper"
+        >
+          {t("ats.evAddIt")}
+        </button>
+        <button type="button" onClick={onCancel} className="min-h-9 cursor-pointer rounded-full border border-line px-3 text-xs font-semibold">
+          {t("ats.evDontHave")}
+        </button>
+      </span>
+      <p className="mt-2 text-xs text-muted">{t("ats.evFormNote")}</p>
+    </div>
+  );
+}
+
+function KeywordList({ kind, list, doc, evidence, onAdd, onRemove, locked }: { kind: "hard" | "soft"; list: AtsKeyword[] } & Toggle) {
+  const [open, setOpen] = useState<string | null>(null);
   if (!list.length) return null;
   const missing = list.filter((k) => k.inResume === 0);
   const found = list.filter((k) => k.inResume > 0);
@@ -560,38 +642,41 @@ function KeywordList({ kind, list, confirmed, onToggle, onSetAll, locked }: { ki
       <p className="mt-1 text-xs text-muted">{t("ats.countsLead")}</p>
       {missing.length > 0 && (
         <>
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm text-muted">{locked ? t("ats.missingAfter") : t("ats.missingLead")}</p>
-            {!locked && missing.length > 1 && (
-              <span className="flex gap-3 text-sm">
-                <button type="button" onClick={() => onSetAll(missing.map((k) => k.name), true)} className="min-h-9 cursor-pointer font-medium underline underline-offset-4">
-                  {t("ats.haveAll")}
-                </button>
-                {missing.some((k) => confirmed.includes(k.name)) && (
-                  <button type="button" onClick={() => onSetAll(missing.map((k) => k.name), false)} className="min-h-9 cursor-pointer text-muted underline underline-offset-4">
-                    {t("ats.clearAll")}
-                  </button>
-                )}
-              </span>
-            )}
-          </div>
+          <p className="mt-2 text-sm text-muted">{locked ? t("ats.missingAfter") : t("ats.missingLead")}</p>
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {missing.map((k) => {
-              const on = confirmed.includes(k.name);
+              const ev = evidence.find((e) => e.skill === k.name);
               return (
                 <li key={k.name}>
-                  <label
-                    className={`inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-sm transition-colors ${on ? "border-ink bg-ink text-paper" : "border-dashed border-muted/70 hover:border-ink"} ${locked ? "pointer-events-none opacity-70" : ""}`}
+                  <button
+                    type="button"
+                    disabled={locked}
+                    aria-expanded={open === k.name}
+                    onClick={() => (ev ? onRemove(k.name) : setOpen(open === k.name ? null : k.name))}
+                    title={ev ? t("ats.evRemove") : t("ats.evAddTitle")}
+                    className={`inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-sm transition-colors disabled:cursor-default disabled:opacity-70 ${ev ? "border-ink bg-ink text-paper" : "border-dashed border-muted/70 hover:border-ink"}`}
                   >
-                    <input type="checkbox" className="sr-only" checked={on} disabled={locked} onChange={() => onToggle(k.name)} />
-                    {on ? <Check aria-hidden="true" className="size-3.5" /> : <X aria-hidden="true" className="size-3.5 text-[#b4532a]" />}
+                    {ev ? <Check aria-hidden="true" className="size-3.5" /> : <X aria-hidden="true" className="size-3.5 text-[#b4532a]" />}
                     {k.name}
                     <span className="text-xs tabular-nums opacity-70">0/{k.inJob}</span>
-                  </label>
+                  </button>
                 </li>
               );
             })}
           </ul>
+          {open && !locked && (
+            <EvidenceForm
+              key={open}
+              skill={open}
+              doc={doc}
+              onSave={(ev) => {
+                onAdd(ev);
+                setOpen(null);
+              }}
+              onCancel={() => setOpen(null)}
+            />
+          )}
+          {evidence.some((e) => missing.some((k) => k.name === e.skill)) && <p className="mt-2 text-xs text-muted">{t("ats.evAddedNote")}</p>}
         </>
       )}
       {found.length > 0 && (
@@ -651,11 +736,17 @@ function Improved({
   jobTitle,
   company,
   confirmed,
+  originalText,
+  places,
 }: {
   target: AtsTarget;
   jobTitle: string;
   company: string;
   confirmed: string[];
+  /** The resume as scanned (with any evidence the person added), for checking their own edits. */
+  originalText: string;
+  /** The scanned resume, for "where did you use it?". */
+  places: AtsDoc;
   ref: React.Ref<HTMLDivElement>;
   added: number;
   better: Better;
@@ -664,11 +755,13 @@ function Improved({
   onSave: (resume: AtsDoc) => void;
   downloading: boolean;
   saving: boolean;
-  onAgain: (more: string[]) => void;
+  onAgain: (more: SkillEvidence[]) => void;
   optimizing: boolean;
 }) {
   const [all, setAll] = useState(false);
-  const [have, setHave] = useState<string[]>([]);
+  const [have, setHave] = useState<SkillEvidence[]>([]);
+  const [asking, setAsking] = useState<string | null>(null);
+  const [editError, setEditError] = useState<{ i: number; what: string[] } | null>(null);
   // Evidence-based review: every edit starts accepted; "Keep original" puts the person's own line back.
   const [keep, setKeep] = useState<Set<number>>(() => new Set());
   // Rewrites change an edit's wording; the document follows.
@@ -707,12 +800,17 @@ function Improved({
   function startEdit(i: number) {
     setEditing(i);
     setDraft(items[i].after);
+    setEditError(null);
   }
 
   function saveEdit(i: number) {
     const text = draft.trim();
     if (!text) return;
     const c = items[i];
+    // The person's own wording can't bring in a job skill the resume doesn't show either.
+    const bad = unsupported({ ...c, after: text }, originalText, keywordNames, confirmed);
+    if (bad.length) return setEditError({ i, what: bad.slice(0, 3) });
+    setEditError(null);
     setDoc((d) => replaceText(d, c.after, text));
     setItems((xs) => xs.map((x, j) => (j === i ? { ...x, after: text } : x)));
     setKeep((k) => {
@@ -756,18 +854,34 @@ function Improved({
           <p className="mt-1 text-muted">{t("ats.goalLead")}</p>
           <ul className="mt-2 flex flex-wrap gap-1.5">
             {better.blocking.map((k) => {
-              const on = have.includes(k);
+              const on = have.some((h) => h.skill === k);
               return (
                 <li key={k}>
-                  <label className={`inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border px-3 transition-colors ${on ? "border-ink bg-ink text-paper" : "border-dashed border-muted/70 hover:border-ink"}`}>
-                    <input type="checkbox" className="sr-only" checked={on} onChange={() => setHave((h) => (on ? h.filter((x) => x !== k) : [...h, k]))} />
+                  <button
+                    type="button"
+                    aria-expanded={asking === k}
+                    onClick={() => (on ? setHave((h) => h.filter((x) => x.skill !== k)) : setAsking(asking === k ? null : k))}
+                    className={`inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border px-3 transition-colors ${on ? "border-ink bg-ink text-paper" : "border-dashed border-muted/70 hover:border-ink"}`}
+                  >
                     {on ? <Check aria-hidden="true" className="size-3.5" /> : <X aria-hidden="true" className="size-3.5 text-[#b4532a]" />}
                     {k}
-                  </label>
+                  </button>
                 </li>
               );
             })}
           </ul>
+          {asking && (
+            <EvidenceForm
+              key={asking}
+              skill={asking}
+              doc={places}
+              onSave={(ev) => {
+                setHave((h) => [...h.filter((x) => x.skill !== ev.skill), ev]);
+                setAsking(null);
+              }}
+              onCancel={() => setAsking(null)}
+            />
+          )}
           <button
             type="button"
             onClick={() => onAgain(have)}
@@ -824,6 +938,11 @@ function Improved({
                           {t("privacy.cancel")}
                         </button>
                       </span>
+                      {editError?.i === i && (
+                        <span role="alert" className="mt-1 block text-xs text-[#b4532a]">
+                          {t("ats.evEditBlocked", { what: editError.what.join(", ") })}
+                        </span>
+                      )}
                       <span className="mt-1 block text-xs text-muted">{t("ats.evEditNote")}</span>
                     </>
                   ) : (

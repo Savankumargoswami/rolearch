@@ -58,7 +58,7 @@ function write(m: Memory) {
 const TONE = { strong: "text-[#1f7a4d]", potential: "text-[#2c5585]", stretch: "text-signal-ink", poor: "text-[#b4532a]", insufficient: "text-muted" } as const;
 const ringTone = (n: number) => (n >= 75 ? "#1f7a4d" : n >= 50 ? "#2c5585" : "var(--color-signal-ink)");
 
-function Ring({ value, label }: { value: number; label: string }) {
+export function Ring({ value, label }: { value: number; label: string }) {
   const r = 22;
   const c = 2 * Math.PI * r;
   const v = Math.max(0, Math.min(100, Math.round(value)));

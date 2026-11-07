@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { BestRoles } from "@/components/best-roles";
 import { CompanyAccount } from "@/components/company-account";
 import { FeedbackPrompt } from "@/components/feedback-prompt";
 import { NewsletterCard } from "@/components/newsletter-card";
@@ -45,6 +46,9 @@ async function Account() {
   return (
     <>
       <ProfileView account={account} mode="own" social={social} posts={posts} viewerId={account.id} canPost={postReviewEnabled} />
+      <Suspense fallback={<div className="mt-8 h-64 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
+        <BestRoles viewer={account} />
+      </Suspense>
       <NewsletterCard userId={account.id} />
     </>
   );
