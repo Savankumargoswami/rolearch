@@ -42,7 +42,7 @@ async function Queue({ searchParams }: { searchParams: Promise<{ role?: string }
   const viewer = await requireMember(`/discover${asked ? `?role=${encodeURIComponent(asked)}` : ""}`);
   const p = viewer.profile;
   const current = p.resume.experience.find((e) => e.current) ?? p.resume.experience[0];
-  const prefs = await loadPreferences(await createClient(), viewer.id);
+  const prefs = await loadPreferences(await createClient());
   const role = (asked ?? "").trim().slice(0, 80) || prefs.targetRoles[0] || coreTitle(current?.title ?? "") || coreTitle(p.headline);
 
   const form = (

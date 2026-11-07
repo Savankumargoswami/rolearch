@@ -56,6 +56,7 @@ export async function HeaderAccount() {
     ...common,
   ];
   if (!company) items.push({ href: "/employers", label: t("nav.companies"), icon: "companies" });
+  else items.splice(1, 0, { href: "/hire/talent", label: t("nav.talent"), icon: "talent" });
   items.push({ href: "/account/privacy", label: t("nav.privacy"), icon: "privacy" });
   return (
     <>

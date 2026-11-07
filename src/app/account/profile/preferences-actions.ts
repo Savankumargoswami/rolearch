@@ -21,3 +21,17 @@ export async function savePreferences(input: Preferences): Promise<{ ok: boolean
   revalidatePath("/gaps");
   return { ok: true };
 }
+
+/** Open to work: lets verified employers find the member in talent search (off unless they switch it on). */
+export async function setOpenToWork(on: boolean): Promise<{ ok: boolean; message?: string }> {
+  const viewer = await loadViewer();
+  if (!viewer) return { ok: false, message: t("profile.errSignedOut") };
+  if (viewer.accountType !== "seeker") return { ok: false, message: t("profile.errSave") };
+  const db = await createClient();
+  const { error } = await db
+    .from("profiles")
+    .update({ open_to_work: Boolean(on), open_to_work_at: on ? new Date().toISOString() : null })
+    .eq("id", viewer.id);
+  if (error) return { ok: false, message: error.code === "42703" ? t("tracker.errNotReady") : t("profile.errSave") };
+  return { ok: true };
+}

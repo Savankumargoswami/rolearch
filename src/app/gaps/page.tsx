@@ -42,7 +42,7 @@ async function Gaps({ searchParams }: { searchParams: Promise<{ role?: string }>
   const viewer = await requireMember(`/gaps${asked ? `?role=${encodeURIComponent(asked)}` : ""}`);
   const p = viewer.profile;
   const current = p.resume.experience.find((e) => e.current) ?? p.resume.experience[0];
-  const prefs = await loadPreferences(await createClient(), viewer.id);
+  const prefs = await loadPreferences(await createClient());
   const role = (asked ?? "").trim().slice(0, 80) || prefs.targetRoles[0] || coreTitle(current?.title ?? "") || coreTitle(p.headline);
   const form = (
     <form action="/gaps" className="mt-6 flex flex-col gap-2 rounded-2xl border border-line bg-surface p-4 sm:flex-row sm:items-end">

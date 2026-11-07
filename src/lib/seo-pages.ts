@@ -64,7 +64,9 @@ export function heading(r: Role, p?: Place) {
   return `${r.name} jobs in ${p.name}, ${p.state}`;
 }
 
-export type Stats = { employers: { name: string; n: number }[]; pay: string; cities: string[] };
+/** Posted-pay insight: the middle half of published ranges, by seniority when there's enough data, and how many listings it's from. */
+export type PayInsight = { unit: "year" | "hour"; low: string; high: string; n: number; byLevel: { level: string; median: string; n: number }[] };
+export type Stats = { employers: { name: string; n: number }[]; pay: string; cities: string[]; payInsight: PayInsight | null };
 
 const usd = (n: number) => (n >= 1000 ? `$${Math.round(n / 1000)}k` : `$${n.toFixed(n < 100 ? 2 : 0).replace(/\.00$/, "")}`);
 const median = (xs: number[]) => {
@@ -84,5 +86,18 @@ export function stats(jobs: JobLite[]): Stats {
   const byCity = new Map<string, number>();
   for (const j of jobs) if (j.city && j.workplace !== "remote") byCity.set(j.city, (byCity.get(j.city) ?? 0) + 1);
   const cities = [...byCity].sort((a, b) => b[1] - a[1]).map(([c]) => c).slice(0, 5);
-  return { employers, pay, cities };
+  // Pay insight from the listings that publish pay (yearly preferred; hourly roles use hourly).
+  const unit: "year" | "hour" | null = yearly.length >= 3 ? "year" : hourly.length >= 3 ? "hour" : null;
+  let payInsight: PayInsight | null = null;
+  if (unit) {
+    const rows = paid.filter((j) => j.salary!.period === unit);
+    const mids = rows.map((j) => (j.salary!.min + j.salary!.max) / 2).sort((a, b) => a - b);
+    const q = (p: number) => mids[Math.min(mids.length - 1, Math.floor(p * (mids.length - 1)))];
+    const byLevel = (["entry", "mid", "senior", "lead"] as const)
+      .map((level) => ({ level, xs: rows.filter((j) => j.level === level).map((j) => (j.salary!.min + j.salary!.max) / 2) }))
+      .filter((x) => x.xs.length >= 3)
+      .map((x) => ({ level: x.level, median: usd(median(x.xs)), n: x.xs.length }));
+    payInsight = { unit, low: usd(q(0.25)), high: usd(q(0.75)), n: mids.length, byLevel };
+  }
+  return { employers, pay, cities, payInsight };
 }

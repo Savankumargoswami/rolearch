@@ -3,7 +3,7 @@
 import { Check, Loader2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { t } from "@/i18n";
-import { savePreferences } from "./preferences-actions";
+import { savePreferences, setOpenToWork } from "./preferences-actions";
 
 type Prefs = { targetRoles: string[]; experience: string; locations: string[]; workMode: "any" | "remote" | "hybrid" | "onsite" };
 const EXPERIENCE = ["0-2", "3-5", "6-10", "10+"];
@@ -12,7 +12,8 @@ const MODES = ["any", "remote", "hybrid", "onsite"] as const;
 const split = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
 
 /** Job preferences: the roles you're aiming for, your experience, where and how you can work. */
-export function PreferencesForm({ initial }: { initial: Prefs }) {
+export function PreferencesForm({ initial, openToWork, seeker }: { initial: Prefs; openToWork: boolean; seeker: boolean }) {
+  const [open, setOpen] = useState(openToWork);
   const [roles, setRoles] = useState(initial.targetRoles.join(", "));
   const [experience, setExperience] = useState(initial.experience);
   const [locations, setLocations] = useState(initial.locations.join(", "));
@@ -77,6 +78,31 @@ export function PreferencesForm({ initial }: { initial: Prefs }) {
         {saved ? t("prefs.saved") : t("prefs.save")}
       </button>
       {error && <p role="alert" className="mt-2 text-sm text-[#b4532a]">{error}</p>}
+      {seeker && (
+        <div className="mt-5 border-t border-line pt-4">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={open}
+              disabled={busy}
+              onChange={(e) => {
+                const on = e.target.checked;
+                start(async () => {
+                  setError("");
+                  const res = await setOpenToWork(on);
+                  if (res.ok) setOpen(on);
+                  else setError(res.message ?? "");
+                });
+              }}
+              className="mt-1 size-5 accent-[#0e1f2f]"
+            />
+            <span>
+              <span className="block font-medium">{t("prefs.openToWork")}</span>
+              <span className="block text-sm text-muted">{t("prefs.openToWorkNote")}</span>
+            </span>
+          </label>
+        </div>
+      )}
     </section>
   );
 }

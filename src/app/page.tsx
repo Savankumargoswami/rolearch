@@ -1,4 +1,5 @@
 import { ArrowRight, Check, ScanSearch } from "lucide-react";
+import { CANDIDATE_FEATURES, EMPLOYER_FEATURES } from "@/lib/features";
 import Link from "next/link";
 import { Suspense, ViewTransition } from "react";
 import { HeroSearch } from "@/components/hero-search";
@@ -34,6 +35,33 @@ export default async function Home() {
   return (
     <ViewTransition enter={pageTransition.enter} exit={pageTransition.exit} default="none">
       <div>
+        {/* Structured data: who Rolearch is and what it does, so search engines and AI answers describe it accurately. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "Rolearch",
+                url: "https://www.rolearch.com",
+                logo: "https://www.rolearch.com/brand/logo.svg",
+                email: "admin@rolearch.com",
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebApplication",
+                name: "Rolearch",
+                url: "https://www.rolearch.com",
+                applicationCategory: "BusinessApplication",
+                operatingSystem: "Web",
+                description: t("meta.description"),
+                offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+                featureList: [...CANDIDATE_FEATURES, ...EMPLOYER_FEATURES].map((f) => `${f.name}: ${f.summary}`),
+              },
+            ]).replace(/</g, "\\u003c"),
+          }}
+        />
         {/* Hero */}
         <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-20">
           <h1

@@ -26,9 +26,15 @@ export function cleanPreferences(raw: unknown): Preferences {
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 
-/** The member's preferences; empty before db/034 adds the column or before they've set any. */
-export async function loadPreferences(db: Db, userId: string): Promise<Preferences> {
-  const { data, error } = await db.from("profiles").select("preferences").eq("id", userId).maybeSingle();
+/** The signed-in member's own preferences (private: read through db/035 my_preferences()); empty if none yet. */
+export async function loadPreferences(db: Db): Promise<Preferences> {
+  const { data, error } = await db.rpc("my_preferences");
   if (error || !data) return emptyPreferences;
-  return cleanPreferences((data as { preferences?: unknown }).preferences);
+  return cleanPreferences(data);
+}
+
+/** Whether the signed-in member has switched on "Open to work". */
+export async function loadOpenToWork(db: Db, userId: string): Promise<boolean> {
+  const { data, error } = await db.from("profiles").select("open_to_work").eq("id", userId).maybeSingle();
+  return !error && Boolean((data as { open_to_work?: boolean } | null)?.open_to_work);
 }

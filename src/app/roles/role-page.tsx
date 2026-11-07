@@ -28,6 +28,21 @@ async function cachedListing(roleSlug: string, placeSlug: string) {
   return { total, jobs: (titled.length >= 5 ? titled : jobs).slice(0, PER_PAGE) };
 }
 
+/** Recent listings for the role that publish pay (for the pay insight), kept for an hour. */
+async function cachedPaid(roleSlug: string, placeSlug: string): Promise<JobLite[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("jobs");
+  const r = findRole(roleSlug)!;
+  const p = placeSlug ? findPlace(placeSlug) : undefined;
+  const f: JobQuery = { q: r.q, cat: "all", where: "anywhere", remote: p?.kind === "remote", visa: p?.kind === "visa", pay: true, level: "any", sort: "match", country: "US" };
+  const near = p?.kind === "metro" ? { lat: p.lat, lon: p.lon, only: true } : null;
+  const { jobs } = await searchJobs(f, 1, PULL, near, true);
+  const words = r.q.toLowerCase().split(/\s+/).filter(Boolean);
+  const titled = jobs.filter((j) => words.every((w) => new RegExp(`\\b${w}`, "i").test(j.title)));
+  return titled.length >= 5 ? titled : jobs;
+}
+
 /** null when the search failed this time (it's tried again on the next visit). */
 async function listing(roleSlug: string, placeSlug: string): Promise<{ jobs: JobLite[]; total: number } | null> {
   try {
@@ -80,7 +95,9 @@ export async function RolePage({ roleSlug, placeSlug = "" }: { roleSlug: string;
     );
   }
   const { jobs, total } = found;
-  const s = stats(jobs);
+  // Pay insight from the wider set of listings that publish pay; the rest from the newest listings shown.
+  const paid = await cachedPaid(roleSlug, placeSlug).catch(() => [] as JobLite[]);
+  const s = { ...stats(jobs), payInsight: stats(paid).payInsight ?? stats(jobs).payInsight };
   const near = p?.kind === "metro" ? METROS.filter((m) => m.kind === "metro" && m.state === p.state && m.slug !== p.slug) : [];
   const otherPlaces = [...near, ...METROS.filter((m) => !near.includes(m) && m.slug !== p?.slug)].slice(0, 12);
 
@@ -130,6 +147,29 @@ export async function RolePage({ roleSlug, placeSlug = "" }: { roleSlug: string;
             </div>
           )}
         </dl>
+      )}
+
+      {s.payInsight && total > 0 && (
+        <section aria-labelledby="pay-h" className="mt-6 rounded-2xl border border-line p-4">
+          <h2 id="pay-h" className="font-display text-lg font-semibold">
+            {r.name} pay {where(p)}
+          </h2>
+          <p className="mt-1 text-[0.95rem]">
+            Most posted ranges sit between <strong>{s.payInsight.low}</strong> and <strong>{s.payInsight.high}</strong> {s.payInsight.unit === "year" ? "a year" : "an hour"}.
+          </p>
+          {s.payInsight.byLevel.length > 0 && (
+            <ul className="mt-2 flex flex-wrap gap-2 text-sm">
+              {s.payInsight.byLevel.map((b) => (
+                <li key={b.level} className="rounded-full bg-ink-soft px-3 py-1">
+                  <span className="capitalize">{b.level === "lead" ? "Lead" : b.level}</span>: {b.median} <span className="text-muted">({b.n})</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-2 text-xs text-muted">
+            From {s.payInsight.n} of the newest listings that publish pay (the middle half of their midpoints). Employer-posted ranges, not reported salaries.
+          </p>
+        </section>
       )}
 
       {jobs.length > 0 && (

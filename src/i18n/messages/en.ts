@@ -5,10 +5,10 @@ const en = {
     tagline: "One network, endless opportunity.",
   },
   meta: {
-    title: "Rolearch: One network, endless opportunity",
+    title: "Rolearch: Understand your fit before you apply",
     titleTemplate: "%s · Rolearch",
     description:
-      "Your skills. Your next opportunity. RoleArch connects your real experience with the right jobs: a reasoned job-fit report, evidence-based resume tailoring, an AI application manager and interview preparation.",
+      "Understand your fit before you apply. Rolearch gives you a reasoned job-fit report, evidence-based resume tailoring and cover letters, proctored skill tests with verified badges, jobs ranked by fit, career roadmaps, an application manager and interview prep. Free for job seekers.",
   },
   nav: {
     ats: "ATS check",
@@ -29,6 +29,7 @@ const en = {
     interview: "Interview prep",
     discover: "Roles for you",
     dashboard: "Dashboard",
+    talent: "Talent search",
     gaps: "Career roadmap",
     versions: "Resume versions",
     privacy: "Settings and privacy",
@@ -1308,6 +1309,19 @@ const en = {
     haveTitle: "Skills you already prove",
     oppTitle: "Your best opportunities right now",
   },
+  talent: {
+    eyebrow: "For employers",
+    title: "Talent search",
+    lead: "Candidates who chose to be found by verified employers. Verified badges come from proctored Rolearch skill tests.",
+    searchLabel: "Role or skill",
+    searchPh: "e.g. Data Analyst, SQL, Power BI",
+    search: "Search",
+    privacy: "Only members who switched on Open to work appear here, and only their professional profile. Reach out about a specific role.",
+    none: "Nobody open to work matches “{q}” yet.",
+    empty: "No members are open to work yet.",
+    badges: "{n} verified skill(s)",
+    targets: "Looking for: {roles}",
+  },
   guides: {
     eyebrow: "Career-change guide",
     indexTitle: "Career-change guides",
@@ -1344,6 +1358,8 @@ const en = {
     locations: "Where you can work",
     locationsPh: "e.g. Toronto, Remote (Canada)",
     save: "Save preferences",
+    openToWork: "Open to work: let verified employers find me",
+    openToWorkNote: "Verified company accounts can then find your profile (headline, experience, skills, target roles and verified badges) in Rolearch talent search. Your email, phone and resume file are never shown. Switch it off any time.",
     saved: "Saved",
   },
   dash: {

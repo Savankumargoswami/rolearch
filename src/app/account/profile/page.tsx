@@ -6,7 +6,7 @@ import { ProfileEditor } from "@/components/profile-editor";
 import { t } from "@/i18n";
 import { loadAccount } from "@/lib/profile";
 import { resumeReaderEnabled } from "@/lib/resume-reader";
-import { loadPreferences } from "@/lib/preferences";
+import { loadOpenToWork, loadPreferences } from "@/lib/preferences";
 import { createClient } from "@/lib/supabase/server";
 import { PreferencesForm } from "./preferences-form";
 
@@ -29,11 +29,12 @@ export default function EditProfilePage() {
 }
 
 async function Editor() {
-  const { id, profile, avatarUrl } = await loadAccount();
-  const prefs = await loadPreferences(await createClient(), id);
+  const { id, profile, avatarUrl, accountType } = await loadAccount();
+  const db = await createClient();
+  const [prefs, openToWork] = await Promise.all([loadPreferences(db), loadOpenToWork(db, id)]);
   return (
     <>
-      <PreferencesForm initial={prefs} />
+      <PreferencesForm initial={prefs} openToWork={openToWork} seeker={accountType === "seeker"} />
       <ProfileEditor initial={profile} initialPhoto={avatarUrl} readerEnabled={resumeReaderEnabled} />
     </>
   );
