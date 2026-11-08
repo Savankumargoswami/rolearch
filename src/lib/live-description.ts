@@ -5,6 +5,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { publicHttps } from "./feed-check";
+import { dataKey } from "@/lib/supabase/data-key";
 
 const UA = "RolearchBot/0.1 (+https://rolearch.com/bot; admin@rolearch.com)";
 const TIMEOUT_MS = 12_000;
@@ -248,7 +249,7 @@ async function cachedDescription(jobId: string, jobUrl: string, companyKey: stri
 /** The full description of a stored job from the employer's own posting, saved for next time; "" if it can't be read. */
 export async function liveDescription(jobId: string, jobUrl: string): Promise<string> {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const key = dataKey;
   if (!base || !key || !jobUrl) return "";
   let companyKey = "";
   try {

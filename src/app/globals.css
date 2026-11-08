@@ -499,3 +499,46 @@ textarea {
     animation-play-state: running;
   }
 }
+
+/* ---------- Rolearch AI agent dock (components/ai-agent.tsx) ---------- */
+@keyframes agent-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.agent-in {
+  animation: agent-in 420ms var(--ease-out-soft) both;
+}
+@keyframes agent-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(224 163 91 / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgb(224 163 91 / 0);
+  }
+}
+.agent-orb,
+.agent-pulse {
+  animation: agent-breathe 1.8s ease-in-out infinite;
+}
+@keyframes agent-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+.agent-spin {
+  animation: agent-spin 0.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-orb,
+  .agent-pulse,
+  .agent-spin {
+    animation: none;
+  }
+}

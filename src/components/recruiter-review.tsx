@@ -4,6 +4,7 @@ import { BrainCircuit, Check, Loader2, MessageCircleQuestion, Sparkles } from "l
 import { useState, useTransition } from "react";
 import { reviewForJob, strengthenBullet, type AtsTarget } from "@/app/ats/actions";
 import { t, type MessageKey } from "@/i18n";
+import { useAgentTask } from "./ai-agent";
 import type { AtsDoc } from "@/lib/ats-doc";
 import type { BulletReview, Review } from "@/lib/resume-coach";
 
@@ -19,6 +20,7 @@ export function RecruiterReview({ target, doc, onApply }: { target: AtsTarget; d
   const [error, setError] = useState("");
   const [busy, start] = useTransition();
   const [all, setAll] = useState(false);
+  useAgentTask("review", busy);
 
   const run = () =>
     start(async () => {

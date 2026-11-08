@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { dailyPost, topicFor, TOPICS, type Digest } from "@/lib/daily-post";
+import { dataKey } from "@/lib/supabase/data-key";
 
 // Vercel Cron calls this every day (vercel.json) with "Authorization: Bearer $CRON_SECRET".
 // It summarises the day's new US jobs for the day's topic and publishes an official Rolearch post.
@@ -7,7 +8,7 @@ import { dailyPost, topicFor, TOPICS, type Digest } from "@/lib/daily-post";
 export const maxDuration = 120;
 
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
-const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const KEY = dataKey;
 const DAY = 86_400_000;
 
 async function rpc<T>(name: string, body: object): Promise<T> {

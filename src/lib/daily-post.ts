@@ -1,6 +1,7 @@
 // Daily Rolearch posts and the weekly newsletter: templated from jobs_digest (db/024_daily_posts.sql), no AI.
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
+import { dataKey } from "@/lib/supabase/data-key";
 
 export const SITE = "https://www.rolearch.com";
 
@@ -128,7 +129,7 @@ export async function todayDigest(topicKey: string): Promise<Digest | null> {
   cacheLife("hours");
   cacheTag("jobs");
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const key = dataKey;
   const secret = process.env.POST_REVIEW_SECRET;
   if (!base || !key || !secret || !TOPICS.some((t) => t.key === topicKey)) return null;
   // Rounded to the hour so the hour's cache entry and the query agree.

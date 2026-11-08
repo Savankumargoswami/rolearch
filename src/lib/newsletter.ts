@@ -1,8 +1,9 @@
 // The weekly newsletter's one-click unsubscribe, shared by the email header endpoint and the unsubscribe page.
 import "server-only";
+import { dataKey } from "@/lib/supabase/data-key";
 
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
-const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const KEY = dataKey;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function unsubscribe(token: string) {

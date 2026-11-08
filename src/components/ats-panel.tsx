@@ -2,10 +2,11 @@
 
 import { resumeText } from "@/lib/ats";
 import { ApplicationChecklist } from "./application-checklist";
-import { applyChoices, evidenceProblem, replaceText, unsupported, withEvidence, type SkillEvidence } from "@/lib/tailor-evidence";
+import { applyChoices, evidenceProblem, replaceText, unsupported, withEvidence, workEvidence, type SkillEvidence } from "@/lib/tailor-evidence";
 import { mentions } from "@/lib/skills";
 import { FitReportView } from "./fit-report";
 import { RecruiterReview } from "./recruiter-review";
+import { AgentDock, AgentStatus, useAgentTask } from "./ai-agent";
 import { CircleAlert, CircleHelp, Check, Download, FileText, FileUp, Loader2, Lock, Save, ScanSearch, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -74,6 +75,8 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
   const [optimizing, startOptimize] = useTransition();
   const [downloading, startDownload] = useTransition();
   const [saving, startSave] = useTransition();
+  useAgentTask("scan", checking);
+  useAgentTask("tailor", optimizing);
   const [checked, setChecked] = useState<AtsTarget>(target);
   const resumed = useRef(false);
 
@@ -345,7 +348,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
               better={better}
               source={result.source} onDownload={(f, r) => download(r, f)} onSave={saveToProfile} downloading={downloading} saving={saving}
               target={checked} jobTitle={jobTitle} company={company} confirmed={confirmed}
-              originalText={resumeText(withEvidence(result.resume, evidence))} places={result.resume}
+              originalText={workEvidence(withEvidence(result.resume, evidence), (result.fit?.skills ?? []).filter((s) => s.tier === "verified").map((s) => s.name))} places={result.resume}
               onAgain={(more) => optimize(more)} optimizing={optimizing} />
           )}
           {actionError && (
@@ -388,13 +391,22 @@ function UploadField({ file, onFile }: { file: File | null; onFile: (f: File | n
 
 function Shell({ children, lead }: { children: React.ReactNode; lead?: string }) {
   return (
-    <section aria-labelledby="ats-h" className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
-      <h2 id="ats-h" className="flex items-center gap-2 font-display text-xl font-semibold">
-        <ScanSearch aria-hidden="true" className="size-5 text-signal-ink" />
-        {t("ats.title")}
-      </h2>
-      <p className="mt-1 text-sm text-muted">{lead ?? t("ats.lead")}</p>
+    <section
+      aria-labelledby="ats-h"
+      className="rounded-3xl border border-line bg-surface p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_2px_rgba(14,31,47,0.06),0_28px_70px_-24px_rgba(14,31,47,0.3)] sm:p-7"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h2 id="ats-h" className="flex items-center gap-3 font-display text-xl font-semibold sm:text-2xl">
+          <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-ink text-signal shadow-[0_8px_20px_-8px_rgba(14,31,47,0.6)]">
+            <ScanSearch aria-hidden="true" className="size-5" />
+          </span>
+          {t("ats.title")}
+        </h2>
+        <AgentStatus />
+      </div>
+      <p className="mt-2 text-sm text-muted">{lead ?? t("ats.lead")}</p>
       {children}
+      <AgentDock />
     </section>
   );
 }
@@ -1093,6 +1105,7 @@ function Improved({
 function CoverLetter({ target, resume, contact, onError }: { target: AtsTarget; resume: AtsDoc; contact: { email: string; phone: string }; onError: (m: string) => void }) {
   const [text, setText] = useState("");
   const [busy, start] = useTransition();
+  useAgentTask("letter", busy);
   const make = (format: Format) =>
     start(async () => {
       const res = await coverLetter(target, resume, contact, format).catch(() => ({ ok: false as const, message: t("ats.errUnexpected") }));

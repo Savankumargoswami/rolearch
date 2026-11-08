@@ -75,3 +75,21 @@ export function withEvidence(doc: AtsDoc, evidence: SkillEvidence[]): AtsDoc {
   }
   return { ...doc, resume: { ...r, experience, projects } };
 }
+
+/**
+ * What counts as evidence of a skill: the work itself (roles, their bullets, projects, certifications, education)
+ * and skills verified by a Rolearch skill test. The skills list, skill groups, headline and summary are the person's
+ * own claims, so a skill that appears only there can stay listed but is never written into a role or the summary.
+ */
+export function workEvidence(doc: AtsDoc, verified: string[] = []): string {
+  const r = doc.resume;
+  return [
+    ...r.experience.flatMap((e) => [e.title, e.company, ...e.bullets]),
+    ...r.projects.flatMap((p) => [p.name, p.summary]),
+    ...r.certifications.map((c) => `${c.name} ${c.issuer}`),
+    ...r.education.map((e) => `${e.degree} ${e.field} ${e.school}`),
+    ...verified,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}

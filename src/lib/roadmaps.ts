@@ -4,6 +4,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { createClient, supabaseKey, supabaseUrl } from "./supabase/server";
+import { dataKey } from "@/lib/supabase/data-key";
 
 export type Resource = { title: string; url: string; provider: string; kind: string };
 export type RoadmapSkill = {
@@ -48,7 +49,7 @@ export async function roadmapList(): Promise<RoadmapEntry[]> {
   cacheTag("roadmaps");
   if (!supabaseUrl || !supabaseKey) return [];
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/roadmap_list`, { method: "POST", headers: { apikey: supabaseKey, "Content-Type": "application/json" }, body: "{}", cache: "no-store" });
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/roadmap_list`, { method: "POST", headers: { apikey: dataKey, "Content-Type": "application/json" }, body: "{}", cache: "no-store" });
     return res.ok ? ((await res.json()) as RoadmapEntry[]) : [];
   } catch {
     return [];
@@ -62,7 +63,7 @@ export async function roadmapEntry(slug: string): Promise<RoadmapEntry | null> {
   cacheTag("roadmaps");
   if (!/^[a-z0-9-]{1,120}$/.test(slug) || !supabaseUrl || !supabaseKey) return null;
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/roadmap_list?slug=eq.${slug}`, { method: "POST", headers: { apikey: supabaseKey, "Content-Type": "application/json" }, body: "{}", cache: "no-store" });
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/roadmap_list?slug=eq.${slug}`, { method: "POST", headers: { apikey: dataKey, "Content-Type": "application/json" }, body: "{}", cache: "no-store" });
     if (!res.ok) return null;
     const [row] = (await res.json()) as RoadmapEntry[];
     return row ?? null;
@@ -96,7 +97,7 @@ export async function roadmapForTitle(title: string): Promise<{ slug: string; ro
   const key = normalTitle(title);
   if (!key || !supabaseUrl || !supabaseKey) return null;
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/role_titles?select=slug&title=eq.${encodeURIComponent(key)}`, { headers: { apikey: supabaseKey }, cache: "no-store" });
+    const res = await fetch(`${supabaseUrl}/rest/v1/role_titles?select=slug&title=eq.${encodeURIComponent(key)}`, { headers: { apikey: dataKey }, cache: "no-store" });
     if (!res.ok) return null;
     const [row] = (await res.json()) as { slug: string }[];
     if (!row) return null;

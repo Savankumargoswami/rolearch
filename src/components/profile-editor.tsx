@@ -296,7 +296,7 @@ export function ProfileEditor({ initial, initialPhoto, readerEnabled }: { initia
       </Section>
 
       <Section title={t("profile.skills")}>
-        <Area label={t("profile.skillsAll")} hint={t("profile.commaHint")} value={r.skills} onChange={(v) => setResume({ skills: v })} rows={3} />
+        <Area label={t("profile.skillsAll")} hint={t("profile.skillsAllHint")} value={r.skills} onChange={(v) => setResume({ skills: v })} rows={3} />
       </Section>
 
       <div className="sticky bottom-0 -mx-4 flex flex-wrap items-center gap-3 border-t border-line bg-paper/95 px-4 py-3 backdrop-blur-sm sm:-mx-6 sm:px-6">

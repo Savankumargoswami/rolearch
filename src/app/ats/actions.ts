@@ -24,7 +24,7 @@ import { SKILLS } from "@/lib/skill-tests";
 import { allow } from "@/lib/rate-limit";
 import { band, track } from "@/lib/events";
 import { systemFromUrl } from "@/lib/ats-system";
-import { keepOriginal, unsupported } from "@/lib/tailor-evidence";
+import { keepOriginal, unsupported, workEvidence } from "@/lib/tailor-evidence";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -256,9 +256,11 @@ async function optimizeForJobInner(
       }
     }
   }
-  // Evidence check: an edit that brings in a job keyword the original resume never shows (and the person hasn't
-  // confirmed) is undone, and the keyword becomes a question for the person instead.
-  const originalText = resumeText(parsed);
+  // Evidence check: an edit that brings in a job keyword the person's work never shows is undone, and the keyword
+  // becomes a question instead. Work means roles, projects, certifications and education, plus skills verified by a
+  // Rolearch test; a skill typed only into the skills list or summary is a claim, not evidence.
+  const verified = (await loadBadges(await createClient(), tailorer.id)).map((b) => SKILLS.find((s) => s.id === b.skill)?.name ?? b.skill);
+  const originalText = workEvidence(parsed, verified);
   const keywordNames = before.keywords.map((k) => k.name);
   const asked = new Set<string>();
   const kept: Change[] = [];

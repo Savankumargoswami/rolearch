@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { newsletterHtml, SITE, TOPICS, type Digest, type Section } from "@/lib/daily-post";
+import { dataKey } from "@/lib/supabase/data-key";
 
 // Vercel Cron calls this every Monday (vercel.json) with "Authorization: Bearer $CRON_SECRET".
 // It builds the week's sections once per category members chose, and sends through Resend in batches of 100.
@@ -7,7 +8,7 @@ import { newsletterHtml, SITE, TOPICS, type Digest, type Section } from "@/lib/d
 export const maxDuration = 300;
 
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
-const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const KEY = dataKey;
 const WEEK = 7 * 86_400_000;
 
 type Recipient = { email: string; category: string; token: string };

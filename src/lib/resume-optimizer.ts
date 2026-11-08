@@ -99,7 +99,10 @@ export async function optimizeResume(input: {
       const roleNumbers = new Set(numbers([role.title, ...role.bullets].join(" ")));
       // Reject any bullet carrying a number the original role didn't have.
       const safe = next.bullets.map((b) => b.trim()).filter((b) => b && numbers(b).every((n) => roleNumbers.has(n)));
-      const skills = next.skills.filter((s) => mentions(s, original) > 0 || input.confirmed.includes(s));
+      // A role's skills must show in that role's own text (or be confirmed): a skill only in the skills list never
+      // becomes something this job used.
+      const own = [role.title, ...role.bullets, ...role.skills].join(" ");
+      const skills = next.skills.filter((s) => mentions(s, own) > 0 || input.confirmed.includes(s));
       return { ...role, bullets: (input.mode === "onepage" ? safe.length >= Math.min(1, role.bullets.length) : safe.length >= role.bullets.length) ? safe : role.bullets, skills: skills.length ? skills : role.skills };
     });
     const projects = resume.resume.projects.map((pr, i) => {

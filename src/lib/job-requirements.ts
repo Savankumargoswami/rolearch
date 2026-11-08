@@ -5,6 +5,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { supabaseKey, supabaseUrl } from "./supabase/server";
+import { dataKey } from "@/lib/supabase/data-key";
 
 export type Education = "none" | "high_school" | "associate" | "bachelor" | "master" | "doctorate";
 export type JobRequirements = {
@@ -45,7 +46,7 @@ function clean(list: string[], max: number): string[] {
 async function stored(id: string): Promise<JobRequirements | null> {
   if (!supabaseUrl || !supabaseKey) return null;
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/jobs?select=requirements&id=eq.${encodeURIComponent(id)}`, { headers: { apikey: supabaseKey }, cache: "no-store" });
+    const res = await fetch(`${supabaseUrl}/rest/v1/jobs?select=requirements&id=eq.${encodeURIComponent(id)}`, { headers: { apikey: dataKey }, cache: "no-store" });
     if (!res.ok) return null;
     const [row] = (await res.json()) as { requirements: JobRequirements | null }[];
     return row?.requirements ?? null;
@@ -59,7 +60,7 @@ async function save(id: string, req: JobRequirements) {
   if (!secret || !supabaseUrl || !supabaseKey) return;
   await fetch(`${supabaseUrl}/rest/v1/rpc/save_job_requirements`, {
     method: "POST",
-    headers: { apikey: supabaseKey, "Content-Type": "application/json" },
+    headers: { apikey: dataKey, "Content-Type": "application/json" },
     body: JSON.stringify({ p_secret: secret, p_id: id, p_requirements: req }),
     cache: "no-store",
   }).catch(() => undefined);
@@ -111,7 +112,7 @@ export async function storedRequirements(ids: string[]): Promise<Map<string, Job
   try {
     const inList = list.map((id) => `"${id}"`).join(",");
     const res = await fetch(`${supabaseUrl}/rest/v1/jobs?select=id,requirements&requirements=not.is.null&id=in.(${encodeURIComponent(inList)})`, {
-      headers: { apikey: supabaseKey },
+      headers: { apikey: dataKey },
       cache: "no-store",
     });
     if (!res.ok) return out;

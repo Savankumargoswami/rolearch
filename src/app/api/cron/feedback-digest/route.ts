@@ -1,11 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { digestHtml, summarise, type FeedbackRow } from "@/lib/feedback-digest";
+import { dataKey } from "@/lib/supabase/data-key";
 
 // Vercel Cron calls this every Monday (vercel.json) with "Authorization: Bearer $CRON_SECRET".
 // It reads the last 7 days of feedback, summarises it, and emails the digest through Resend.
 
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
-const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const KEY = dataKey;
 const WEEK = 7 * 86_400_000;
 
 export async function GET(request: NextRequest) {

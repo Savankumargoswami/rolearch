@@ -5,6 +5,7 @@ import "server-only";
 import { systemFromUrl } from "./ats-system";
 import { supabaseKey, supabaseUrl } from "./supabase/server";
 import type { TrackedJob } from "./tracker";
+import { dataKey } from "@/lib/supabase/data-key";
 
 export type Rate = { key: string; sent: number; responses: number; interviews: number };
 export type Outcomes = {
@@ -29,7 +30,7 @@ async function facts(ids: string[]): Promise<Map<string, JobFacts>> {
   if (!list.length || !supabaseUrl || !supabaseKey) return out;
   try {
     const inList = encodeURIComponent(list.map((id) => `"${id}"`).join(","));
-    const res = await fetch(`${supabaseUrl}/rest/v1/jobs?select=id,category,skills,source&id=in.(${inList})`, { headers: { apikey: supabaseKey }, cache: "no-store" });
+    const res = await fetch(`${supabaseUrl}/rest/v1/jobs?select=id,category,skills,source&id=in.(${inList})`, { headers: { apikey: dataKey }, cache: "no-store" });
     if (!res.ok) return out;
     for (const r of (await res.json()) as { id: string; category: string | null; skills: string[] | null; source: string | null }[]) {
       out.set(r.id, { category: r.category ?? "other", skills: r.skills ?? [], source: r.source ?? "" });

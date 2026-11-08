@@ -7,9 +7,10 @@ import { cacheLife, cacheTag } from "next/cache";
 import feed from "./feed.json";
 import { sampleJobs } from "./sample-jobs";
 import type { Job, JobLite, Level, Region, Workplace } from "./types";
+import { dataKey } from "@/lib/supabase/data-key";
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
-const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const KEY = dataKey;
 const PAGE = 1000; // PostgREST's default max rows per request
 const DAY = 86_400_000;
 
