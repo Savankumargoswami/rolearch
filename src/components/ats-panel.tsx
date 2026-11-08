@@ -5,6 +5,7 @@ import { ApplicationChecklist } from "./application-checklist";
 import { applyChoices, evidenceProblem, replaceText, unsupported, withEvidence, workEvidence, type SkillEvidence } from "@/lib/tailor-evidence";
 import { mentions } from "@/lib/skills";
 import { FitReportView } from "./fit-report";
+import { TrackApplication } from "./track-application";
 import { RecruiterReview } from "./recruiter-review";
 import { AgentDock, AgentStatus, useAgentTask } from "./ai-agent";
 import { CircleAlert, CircleHelp, Check, Download, FileText, FileUp, Loader2, Lock, Save, ScanSearch, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
@@ -271,6 +272,7 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
       {report && result && (
         <div className="mt-6 border-t border-line pt-5" aria-live="polite">
           {result.fit && <FitReportView fit={result.fit} jobTitle={jobTitle} jobId={typeof checked === "string" ? checked : undefined} />}
+          {result.fit && <TrackApplication target={checked} company={company} />}
           <h3 className="mt-6 font-display text-lg font-semibold">{t("ats.scannerTitle")}</h3>
           <p className="mb-3 text-sm text-muted">{t("ats.scannerLead")}</p>
           <ScoreHeader score={report.score} before={better?.before} system={report.system} />

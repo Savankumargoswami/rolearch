@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { t, type MessageKey } from "@/i18n";
-import { LOG_KINDS, REJECTION_REASONS, TRACKER_STATUSES, type NextStep, type TrackedJob, type TrackerStatus } from "@/lib/tracker";
+import { jobPage, LOG_KINDS, REJECTION_REASONS, TRACKER_STATUSES, type NextStep, type TrackedJob, type TrackerStatus } from "@/lib/tracker";
 import { withdrawApplication } from "../jobs/[id]/apply/actions";
 import { addLogEntry, untrackJob, updateManager, updateTracked } from "./actions";
 
@@ -60,7 +60,7 @@ export function TrackerItem({
                 <ArrowUpRight aria-hidden="true" className="size-4" />
               </a>
             ) : (
-              <Link href={job.url || `/jobs/${job.jobId}`} className="hover:underline">{job.title}</Link>
+              <Link href={job.url || jobPage(job)} className="hover:underline">{job.title}</Link>
             )}
           </h3>
           <p className="text-sm text-muted">

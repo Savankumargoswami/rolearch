@@ -1530,6 +1530,15 @@ const en = {
     outcomesMore: "See what works",
     outcomesSmall: "Outcome trends appear after 3 or more applications (you have {n}). With small numbers, treat any rate as a rough signal.",
   },
+  trackApp: {
+    title: "Track this application",
+    lead: "Applying, or planning to? Add it to your tracker with this fit check, and get the next step, follow-up dates and your interview rates.",
+    applied: "I applied, track it",
+    later: "Save to apply later",
+    doneApplied: "Tracked as applied.",
+    doneSaved: "Saved to your tracker.",
+    open: "Open tracker",
+  },
   fitEvidence: {
     title: "How accurate is the job-fit score?",
     lead: "Checked against {n} real applications from members who share their outcomes: applications scoring {highBand} got interviews {high} of the time, versus {low} for scores of {lowBand}.",

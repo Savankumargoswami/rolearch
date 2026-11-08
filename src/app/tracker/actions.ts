@@ -1,5 +1,6 @@
 "use server";
 
+import { createHash } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { getJob } from "@/data/db";
 import { t } from "@/i18n";
@@ -137,6 +138,48 @@ export async function addLogEntry(jobId: string, entry: { kind: string; text: st
   const log = [...(((data?.log as LogEntry[] | undefined) ?? []).slice(-199)), { at: new Date().toISOString(), kind: entry.kind as LogEntry["kind"], text }];
   const { error } = await db.from("tracked_jobs").update({ log, updated_at: new Date().toISOString() }).eq("user_id", viewer.id).eq("job_id", jobId);
   if (error) return { ok: false, message: t("tracker.errSave") };
+  revalidatePath("/tracker");
+  return { ok: true };
+}
+
+type CheckedJob = string | { title: string; description: string; company?: string; url?: string };
+
+/**
+ * "Track this application" after a job-fit check: a Rolearch job is tracked by its id; a pasted job description by
+ * the same key its fit analysis was saved under (see jobFor in ats/actions.ts), so the verdict and the outcome link up.
+ */
+export async function trackFromCheck(target: CheckedJob, status: "applied" | "saved"): Promise<TrackResult> {
+  if (status !== "applied" && status !== "saved") return { ok: false, message: t("tracker.errSave") };
+  if (typeof target === "string") return trackJob(target, status);
+  const viewer = await loadViewer();
+  if (!viewer) return { ok: false, message: t("profile.errSignedOut") };
+  const title = String(target?.title ?? "").trim().slice(0, 200);
+  const description = String(target?.description ?? "").trim().slice(0, 50000);
+  if (!title || description.length < 200) return { ok: false, message: t("tracker.errSave") };
+  const key = `pasted-${createHash("sha256").update(`${title}\n${description}`).digest("hex").slice(0, 32)}`;
+  const raw = String(target.url ?? "").trim();
+  const url = /^https?:\/\/[^\s]{3,500}$/.test(raw) ? raw : "";
+  const db = await createClient();
+  const now = new Date().toISOString();
+  const { data: cur } = await db.from("tracked_jobs").select("status,log").eq("user_id", viewer.id).eq("job_id", key).maybeSingle();
+  const prev = cur as { status: string; log: LogEntry[] } | null;
+  const log = prev && prev.status !== status && Array.isArray(prev.log) ? [...prev.log.slice(-199), { at: now, kind: "status" as const, text: `${prev.status}→${status}` }] : undefined;
+  const { error } = await db.from("tracked_jobs").upsert(
+    {
+      user_id: viewer.id,
+      job_id: key,
+      ...(log ? { log } : {}),
+      status,
+      title,
+      company: String(target.company ?? "").trim().slice(0, 120),
+      url,
+      updated_at: now,
+      ...(status === "applied" ? { applied_at: now } : {}),
+    },
+    { onConflict: "user_id,job_id" },
+  );
+  if (error) return { ok: false, message: t("tracker.errSave") };
+  await track(viewer.id, "application_saved", { status, job_family: "pasted" });
   revalidatePath("/tracker");
   return { ok: true };
 }

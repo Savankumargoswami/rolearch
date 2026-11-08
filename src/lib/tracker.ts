@@ -68,13 +68,13 @@ export function nextStep(j: TrackedJob, now: number): NextStep | null {
   const d = (iso: string) => days(now, iso);
   if (j.status === "saved") {
     if (j.deadline && d(j.deadline) < 0) return { id: "deadlinePassed", values: {}, urgent: false };
-    if (j.deadline && d(j.deadline) <= 3) return { id: "applySoon", values: { n: Math.max(0, d(j.deadline)) }, urgent: true, href: `/jobs/${j.jobId}#ats-h` };
-    return { id: "checkFit", values: {}, urgent: false, href: `/jobs/${j.jobId}#ats-h` };
+    if (j.deadline && d(j.deadline) <= 3) return { id: "applySoon", values: { n: Math.max(0, d(j.deadline)) }, urgent: true, href: jobPage(j, "#ats-h") };
+    return { id: "checkFit", values: {}, urgent: false, href: jobPage(j, "#ats-h") };
   }
-  if (j.status === "analyzing") return { id: "finishFit", values: {}, urgent: false, href: `/jobs/${j.jobId}#ats-h` };
+  if (j.status === "analyzing") return { id: "finishFit", values: {}, urgent: false, href: jobPage(j, "#ats-h") };
   if (j.status === "ready") {
-    if (j.deadline && d(j.deadline) <= 3 && d(j.deadline) >= 0) return { id: "applySoon", values: { n: d(j.deadline) }, urgent: true, href: `/jobs/${j.jobId}` };
-    return { id: "applyNow", values: {}, urgent: true, href: `/jobs/${j.jobId}` };
+    if (j.deadline && d(j.deadline) <= 3 && d(j.deadline) >= 0) return { id: "applySoon", values: { n: d(j.deadline) }, urgent: true, href: jobPage(j) };
+    return { id: "applyNow", values: {}, urgent: true, href: jobPage(j) };
   }
   if (j.status === "screen") return { id: "prepareScreen", values: {}, urgent: true, href: `/interview?job=${encodeURIComponent(j.jobId)}` };
   if (j.status === "applied") {
@@ -148,3 +148,10 @@ export function funnel(jobs: TrackedJob[], viewed: Set<string> = new Set()): Fun
 
 /** The current time, for next steps (kept out of components so rendering stays pure). */
 export const nowMs = () => Date.now();
+
+/** Where a tracked job lives: its Rolearch page, or for a pasted job description (tracked from a fit check) the
+ *  employer's link if one was given, otherwise the fit check. */
+export function jobPage(j: Pick<TrackedJob, "jobId" | "url">, hash = "") {
+  if (j.jobId.startsWith("pasted-")) return j.url || "/ats";
+  return `/jobs/${j.jobId}${hash}`;
+}
