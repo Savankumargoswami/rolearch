@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { m, t } from "@/i18n";
+import { FitEvidence } from "@/components/fit-evidence";
 import { loadViewer } from "@/lib/profile";
 import { FreeCheck } from "./free-check";
 
@@ -30,6 +31,7 @@ export default function AtsPage() {
         {/* The form renders once; only the scan panel waits for who's viewing (so nothing typed is ever re-mounted). */}
         <FreeCheck viewer={viewerStatus()} />
       </div>
+      <FitEvidence />
       <p className="mt-8 max-w-[80ch] text-xs leading-relaxed text-muted">{t("ats.disclaimer")}</p>
     </div>
   );

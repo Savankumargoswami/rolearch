@@ -66,6 +66,7 @@ const sections: LegalSection[] = [
           "To run hiring on Rolearch: sending your application to the employer you chose, showing you its status, and giving employers their pipeline and job statistics.",
           "To review job posts before they're published, so only genuine, lawful jobs appear.",
           "To send account emails, such as confirming your email address (see “Emails from Rolearch” below). We don't send marketing email without your consent.",
+          "Only if you turn on “Share my outcomes anonymously”: to add your tracked applications to anonymised totals across members (counts of applications, replies, interviews and offers by job-fit verdict, industry, role and whether the resume was tailored). The totals never include your name, resume, notes, employers or contacts, are shown only for groups of 10 or more members, and are rebuilt nightly, so turning it off removes your applications from the next update.",
           "To prevent abuse, fix problems and keep the service secure.",
         ]}
       />
@@ -237,7 +238,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy Policy"
-      updated="October 20, 2026"
+      updated="November 8, 2026"
       summary={[
         "We collect what the service needs: your account, profile, posts and the resumes you upload.",
         "Your profile and posts are visible to signed-in members only; your resume file is private.",

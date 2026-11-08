@@ -55,3 +55,16 @@ export async function deleteMyAccount(confirmEmail: string): Promise<{ ok: boole
   await db.auth.signOut();
   return { ok: true };
 }
+
+/** Opt in or out of adding my application outcomes to Rolearch's anonymised totals (db/041). */
+export async function setOutcomeSharing(share: boolean): Promise<{ ok: boolean; message?: string }> {
+  const viewer = await loadViewer();
+  if (!viewer) return { ok: false, message: t("profile.errSignedOut") };
+  const db = await createClient();
+  const { error } = await db.from("outcome_consent").upsert({ user_id: viewer.id, share: Boolean(share), updated_at: new Date().toISOString() });
+  if (error) {
+    console.error("[outcomes] consent save failed:", error.message);
+    return { ok: false, message: t("outcomeShare.errSave") };
+  }
+  return { ok: true };
+}

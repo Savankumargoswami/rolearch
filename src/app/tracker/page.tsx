@@ -8,6 +8,8 @@ import { requireMember } from "@/lib/require-member";
 import { createClient } from "@/lib/supabase/server";
 import { fromRow, funnel, nextStep, nowMs, TRACKER_STATUSES } from "@/lib/tracker";
 import { outcomes, type Rate } from "@/lib/outcomes";
+import { benchmarks, rate, sharesOutcomes, type Benchmark } from "@/lib/outcome-data";
+import { OutcomeSharing } from "../account/privacy/outcome-sharing";
 import { FeedbackPrompt } from "@/components/feedback-prompt";
 import { TrackerItem } from "./tracker-item";
 
@@ -104,6 +106,7 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
   };
   const top = Math.max(1, ...steps.map((x) => x.n));
   const o = f.applied >= 3 ? await outcomes(tracked, labels, versionOf) : null;
+  const [shares, bench] = f.applied > 0 ? await Promise.all([sharesOutcomes(viewer.id), benchmarks()]) : [true, [] as Benchmark[]];
   return (
     <>
       {heading}
@@ -201,6 +204,12 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
         </section>
       ) : (
         f.applied > 0 && <p className="mt-4 text-sm text-muted">{t("outcomes.notYet")}</p>
+      )}
+      {f.applied > 0 && <MemberBenchmarks rows={bench} mine={o ? { sent: o.sent, interviews: o.interviews } : null} />}
+      {f.applied > 0 && !shares && (
+        <div className="mt-4 rounded-2xl border border-dashed border-line bg-surface p-4">
+          <OutcomeSharing initial={false} compact />
+        </div>
       )}
       {/* Search, status filter, list or board, and CSV export (blueprint 2.2 F, 7.4). */}
       <form action="/tracker" className="mt-6 flex flex-col gap-2 rounded-2xl border border-line bg-surface p-3 sm:flex-row sm:items-end">
@@ -359,5 +368,48 @@ function RateTable({ title, rows, label }: { title: string; rows: Rate[]; label:
         <p className="mt-1 text-sm text-muted">{t("outcomes.none")}</p>
       )}
     </div>
+  );
+}
+
+const VERDICTS = ["strong", "potential", "stretch", "poor", "not_checked"] as const;
+
+/** Interview rates across members who share their outcomes (anonymised totals, db/041), next to the member's own. */
+function MemberBenchmarks({ rows, mine }: { rows: Benchmark[]; mine: { sent: number; interviews: number } | null }) {
+  const all = rows.find((r) => r.dimension === "all");
+  if (!all) return null;
+  const byVerdict = VERDICTS.flatMap((v) => rows.filter((r) => r.dimension === "verdict" && r.key === v));
+  const tailored = ["tailored", "not_tailored"].flatMap((k) => rows.filter((r) => r.dimension === "tailored" && r.key === k));
+  const bar = (r: Benchmark) => rate(r.interviews, r.sent);
+  return (
+    <section aria-labelledby="bench-h" className="mt-6 rounded-3xl border border-line bg-surface p-5 sm:p-6">
+      <h2 id="bench-h" className="font-display text-lg font-semibold">
+        {t("outcomeShare.benchTitle")}
+      </h2>
+      <p className="text-sm text-muted">{t("outcomeShare.benchLead", { members: all.members, sent: all.sent })}</p>
+      <p className="mt-3 text-sm">
+        {t("outcomeShare.benchAll", { n: bar(all) })}
+        {mine && mine.sent > 0 && <> {t("outcomeShare.benchMine", { n: rate(mine.interviews, mine.sent) })}</>}
+      </p>
+      {byVerdict.length > 1 && (
+        <div className="mt-4">
+          <h3 className="font-medium">{t("outcomeShare.byVerdict")}</h3>
+          <ul className="mt-2 flex flex-col gap-1.5">
+            {byVerdict.map((r) => (
+              <li key={r.key} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-3 text-sm">
+                <span>{t(`outcomeShare.v_${r.key}` as MessageKey)}</span>
+                <span className="h-2 overflow-hidden rounded-full bg-ink-soft">
+                  <span className="block h-full rounded-full bg-signal" style={{ width: `${Math.max(2, bar(r))}%` }} />
+                </span>
+                <span className="text-end tabular-nums">{bar(r)}%</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {tailored.length === 2 && (
+        <p className="mt-4 text-sm text-muted">{t("outcomeShare.benchTailored", { a: bar(tailored[0]), b: bar(tailored[1]) })}</p>
+      )}
+      <p className="mt-3 text-xs text-muted">{t("outcomeShare.benchNote")}</p>
+    </section>
   );
 }

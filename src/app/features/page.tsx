@@ -1,6 +1,7 @@
 import { ArrowRight, Check } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FitEvidence } from "@/components/fit-evidence";
 import { HomeShowcase } from "@/components/home-showcase";
 import { CANDIDATE_FEATURES, EMPLOYER_FEATURES, FAQ, NOT_OFFERED, type Feature } from "@/lib/features";
 
@@ -67,6 +68,8 @@ export default function FeaturesPage() {
           ))}
         </dl>
       </section>
+
+      <FitEvidence />
 
       <section className="mt-14 rounded-3xl border border-line bg-surface p-6">
         <h2 className="font-display text-xl font-semibold">What Rolearch doesn&apos;t do</h2>

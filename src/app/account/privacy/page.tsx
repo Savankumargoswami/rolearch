@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { t } from "@/i18n";
+import { sharesOutcomes } from "@/lib/outcome-data";
 import { requireMember } from "@/lib/require-member";
+import { OutcomeSharing } from "./outcome-sharing";
 import { PrivacyControls } from "./privacy-controls";
 
 export const metadata: Metadata = { title: "Settings and privacy", robots: { index: false } };
 
-const POINTS = ["stored", "private", "ai", "noTraining", "scores", "employers"] as const;
+const POINTS = ["stored", "private", "outcomes", "ai", "noTraining", "scores", "employers"] as const;
 
 export default function PrivacyPage() {
   return (
@@ -29,6 +31,13 @@ export default function PrivacyPage() {
 }
 
 async function Gate() {
-  await requireMember("/account/privacy");
-  return <PrivacyControls />;
+  const viewer = await requireMember("/account/privacy");
+  return (
+    <>
+      <div className="mt-6">
+        <OutcomeSharing initial={await sharesOutcomes(viewer.id)} />
+      </div>
+      <PrivacyControls />
+    </>
+  );
 }
