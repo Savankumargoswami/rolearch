@@ -70,14 +70,23 @@ export function PathNetwork({ routes }: { routes: Route[] }) {
           .filter((r) => r.id !== chosen.id)
           .flatMap((r) => edges(r).map((e, i) => <path key={`${r.id}-${i}`} d={curve(e[0], e[1])} fill="none" stroke="currentColor" strokeOpacity="0.28" strokeWidth="1.5" strokeDasharray="4 5" />))}
         {edges(chosen).map((e, i) => (
-          <path key={`c-${i}`} d={curve(e[0], e[1])} fill="none" stroke="var(--color-signal)" strokeWidth="3" />
+          <path
+            key={`${chosen.id}-${i}`}
+            d={curve(e[0], e[1])}
+            pathLength={1}
+            fill="none"
+            stroke="var(--color-signal)"
+            strokeWidth="3"
+            className="st-draw"
+            style={{ "--delay": `${200 + i * 420}ms` } as React.CSSProperties}
+          />
         ))}
         {[...pos.entries()].map(([key, [x, yy]]) => {
           const col = Number(key[0]);
           const name = key.slice(2);
           const on = onChosen(col, name);
           return (
-            <g key={key}>
+            <g key={on ? `${chosen.id}-${key}` : key} className={on ? "st-pop" : undefined} style={on ? ({ "--delay": `${chosen.steps.indexOf(name) * 420}ms` } as React.CSSProperties) : undefined}>
               <circle cx={x} cy={yy} r={on ? 15 : 11} fill={on ? "var(--color-signal)" : "currentColor"} fillOpacity={on ? 1 : 0.18} />
               {on && (
                 <text x={x} y={yy + 4} textAnchor="middle" className="fill-[#0e1f2f] text-[11px] font-bold">
@@ -105,18 +114,24 @@ export function PathNetwork({ routes }: { routes: Route[] }) {
       </ol>
 
       <h3 className="mt-5 text-xs font-semibold tracking-[0.12em] uppercase opacity-70">{t("gaps.netInfo")}</h3>
-      <ul className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-2">
+      <ul className="mt-2 flex flex-col gap-1.5">
         {routes.map((r) => (
           <li key={r.id}>
             <button
               type="button"
               onClick={() => setSel(r.id)}
-              className={`h-full w-full cursor-pointer rounded-xl p-3 text-start text-sm ${r.id === chosen.id ? "bg-white/[0.12] ring-1 ring-signal" : "bg-white/[0.06] hover:bg-white/10"}`}
+              aria-pressed={r.id === chosen.id}
+              className={`grid w-full cursor-pointer grid-cols-[1fr_auto] items-center gap-x-3 rounded-xl px-3 py-2.5 text-start text-sm transition-colors duration-200 ${r.id === chosen.id ? "bg-white/[0.12] ring-1 ring-signal" : "bg-white/[0.05] hover:bg-white/10"}`}
             >
-              <span className="block font-semibold">{r.kind === "nearby" ? r.steps[r.steps.length - 1] : t(`gaps.net_${r.kind}`)}</span>
-              <span className="mt-0.5 block text-xs text-[#c9d2de]">{r.steps.join(" → ")}</span>
+              <span className="min-w-0">
+                <span className="block font-semibold">{r.kind === "nearby" ? r.steps[r.steps.length - 1] : t(`gaps.net_${r.kind}`)}</span>
+                <span className="block truncate text-xs text-[#c9d2de]">{r.steps.join(" → ")}</span>
+              </span>
               {r.carries.length > 0 && (
-                <span className="mt-1.5 block text-xs text-[#dfe5ec]">{t("gaps.netOverlap", { n: r.overlap, have: r.have.length, total: r.carries.length })}</span>
+                <span className="text-end" title={t("gaps.netOverlap", { n: r.overlap, have: r.have.length, total: r.carries.length })}>
+                  <span className="block font-display text-lg leading-none font-semibold tabular-nums">{r.overlap}%</span>
+                  <span className="block text-[0.65rem] text-[#c9d2de]">{t("gaps.netOverlapShort", { have: r.have.length, total: r.carries.length })}</span>
+                </span>
               )}
             </button>
           </li>

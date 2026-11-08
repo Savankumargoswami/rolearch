@@ -58,7 +58,7 @@ function write(m: Memory) {
 const TONE = { strong: "text-[#1f7a4d]", potential: "text-[#2c5585]", stretch: "text-signal-ink", poor: "text-[#b4532a]", insufficient: "text-muted" } as const;
 const ringTone = (n: number) => (n >= 75 ? "#1f7a4d" : n >= 50 ? "#2c5585" : "var(--color-signal-ink)");
 
-export function Ring({ value, label }: { value: number; label: string }) {
+export function Ring({ value, label, delay = 0 }: { value: number; label: string; delay?: number }) {
   const r = 22;
   const c = 2 * Math.PI * r;
   const v = Math.max(0, Math.min(100, Math.round(value)));
@@ -74,8 +74,11 @@ export function Ring({ value, label }: { value: number; label: string }) {
           stroke={ringTone(v)}
           strokeWidth="5"
           strokeLinecap="round"
-          strokeDasharray={`${(v / 100) * c} ${c}`}
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - v / 100)}
           transform="rotate(-90 28 28)"
+          className="st-sweep"
+          style={{ "--c": c, "--off": c * (1 - v / 100), "--delay": `${delay}ms` } as React.CSSProperties}
         />
         <text x="28" y="32" textAnchor="middle" className="fill-current text-[11px] font-semibold tabular-nums">
           {v}%

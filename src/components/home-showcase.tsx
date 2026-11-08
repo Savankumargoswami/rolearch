@@ -4,6 +4,7 @@ import { ArrowRight, Bookmark, Briefcase, Building2, Check, Flag, Hammer, Map as
 import Link from "next/link";
 import { PathNetwork } from "@/app/gaps/path-network";
 import { Ring } from "@/app/discover/discovery-queue";
+import { Stage } from "@/components/stage";
 import { t } from "@/i18n";
 import { transitionNetwork } from "@/lib/transitions";
 
@@ -68,12 +69,25 @@ const BLOCKS: Block[] = [
   },
 ];
 
-function Sample({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+/** A sample screen: its title and the "Sample" label share one row, then the content. */
+function Sample({ title, sub, children, dark = false }: { title: string; sub?: string; children: React.ReactNode; dark?: boolean }) {
   return (
-    <div className={`@container relative overflow-hidden rounded-3xl p-4 shadow-[0_18px_50px_rgba(14,31,47,0.12)] sm:p-6 ${dark ? "bg-ink text-paper" : "border border-line bg-surface"}`}>
-      <span className={`absolute end-3 top-3 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold tracking-[0.12em] uppercase ${dark ? "bg-white/10 text-[#c9d2de]" : "bg-ink-soft text-muted"}`}>
-        {t("show.sample")}
-      </span>
+    <div
+      className={`@container overflow-hidden rounded-3xl p-5 sm:p-6 ${
+        dark
+          ? "glass-ink text-paper"
+          : "border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_1px_2px_rgba(14,31,47,0.06),0_24px_60px_-16px_rgba(14,31,47,0.22)]"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-display text-lg leading-tight font-semibold text-balance">{title}</p>
+          {sub && <p className={`mt-0.5 text-xs ${dark ? "text-[#c9d2de]" : "text-muted"}`}>{sub}</p>}
+        </div>
+        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[0.65rem] font-semibold tracking-[0.12em] uppercase ${dark ? "bg-white/10 text-[#c9d2de]" : "bg-ink-soft text-muted"}`}>
+          {t("show.sample")}
+        </span>
+      </div>
       {children}
     </div>
   );
@@ -82,8 +96,7 @@ function Sample({ children, dark = false }: { children: React.ReactNode; dark?: 
 function SampleA() {
   const routes = transitionNetwork("Manufacturing engineer", "Data analyst", ["Excel", "Root cause analysis", "Statistics", "Process improvement"]);
   return (
-    <Sample dark>
-      <p className="font-display text-lg font-semibold">{t("gaps.netTitle")}</p>
+    <Sample dark title={t("gaps.netTitle")}>
       <PathNetwork routes={routes} />
     </Sample>
   );
@@ -91,12 +104,10 @@ function SampleA() {
 
 function SampleB() {
   return (
-    <Sample>
-      <p className="font-mono text-xs font-semibold tracking-[0.14em] text-signal-ink uppercase">{t("ats.reviewable")}</p>
-      <p className="mt-1 font-display text-lg font-semibold">{t("ats.groundedTitle")}</p>
-      <ul className="mt-2 mb-4 flex flex-wrap gap-1.5">
-        {(["chipGaps", "chipExport", "chipVersions"] as const).map((k) => (
-          <li key={k} className="rounded-md border border-line px-2 py-0.5 font-mono text-[0.65rem] tracking-[0.08em] uppercase">
+    <Sample title={t("ats.groundedTitle")}>
+      <ul className="mt-2 mb-5 flex flex-wrap gap-1.5">
+        {(["reviewable", "chipGaps", "chipExport", "chipVersions"] as const).map((k, i) => (
+          <li key={k} className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${i === 0 ? "bg-signal/25" : "bg-ink-soft"}`}>
             {t(`ats.${k}`)}
           </li>
         ))}
@@ -112,7 +123,7 @@ function SampleB() {
       <p className="mt-4 text-xs font-semibold tracking-[0.12em] text-muted uppercase">{t("show.bKeywords")}</p>
       <ul className="mt-2 flex flex-wrap gap-1.5">
         {["onboarding", "funnel", "SQL", "activation"].map((k, i) => (
-          <li key={k} className={`rounded-md px-1.5 py-0.5 font-mono text-xs ${i < 3 ? "bg-[#3b6ea5]/12 text-[#2c5585]" : "border border-dashed border-muted/60 text-muted"}`}>
+          <li key={k} style={{ "--delay": `${250 + i * 110}ms` } as React.CSSProperties} className={`st-pop rounded-md px-1.5 py-0.5 font-mono text-xs ${i < 3 ? "bg-[#3b6ea5]/12 text-[#2c5585]" : "border border-dashed border-muted/60 text-muted"}`}>
             {k}
           </li>
         ))}
@@ -133,11 +144,7 @@ function SampleB() {
 
 function SampleC() {
   return (
-    <Sample>
-      <p className="text-xs text-muted">{t("discover.queueEyebrow", { n: 44 })}</p>
-      <p className="mt-1 font-display text-xl font-semibold tracking-[-0.01em]">
-        {t("discover.titleA")} <em className="font-normal text-signal-ink">{t("discover.titleB")}</em>
-      </p>
+    <Sample title={`${t("discover.titleA")} ${t("discover.titleB")}`} sub={t("discover.queueEyebrow", { n: 44 })}>
       <div className="mt-4 grid gap-4 @xl:grid-cols-[1.3fr_1fr]">
         <div>
           <p className="font-display text-lg font-semibold">Operations Data Analyst</p>
@@ -172,21 +179,21 @@ function SampleC() {
           </div>
         </div>
         <div className="rounded-2xl bg-paper/40 p-3">
-          <p className="font-display text-4xl font-semibold text-[#1f7a4d] tabular-nums">
+          <p className="st-fade font-display text-4xl font-semibold text-[#1f7a4d] tabular-nums">
             86<span className="text-xl">%</span>
           </p>
           <p className="text-sm font-semibold text-[#1f7a4d]">
             {t("fit.verdict_strong")} · {t("fit.short_strong")}
           </p>
           <div className="mt-2 flex justify-between gap-1">
-            <Ring value={85} label={t("discover.ringLocation")} />
-            <Ring value={82} label={t("discover.ringExperience")} />
-            <Ring value={90} label={t("discover.ringAlignment")} />
+            <Ring value={85} label={t("discover.ringLocation")} delay={150} />
+            <Ring value={82} label={t("discover.ringExperience")} delay={300} />
+            <Ring value={90} label={t("discover.ringAlignment")} delay={450} />
           </div>
           <p className="mt-3 text-xs font-semibold">{t("discover.momentum")}</p>
           <p className="text-xs text-muted">{t("discover.momentumCount", { n: 1, goal: 3 })}</p>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-ink-soft">
-            <div className="h-full w-1/3 rounded-full bg-signal" />
+            <div className="grow-x h-full w-1/3 rounded-full bg-signal" style={{ "--delay": "700ms" } as React.CSSProperties} />
           </div>
         </div>
       </div>
@@ -208,12 +215,10 @@ function SampleD() {
     { n: "Stakeholder communication", p: 30, l: "level_beginner" },
   ] as const;
   return (
-    <Sample>
-      <p className="font-display text-lg font-semibold">{t("gaps.roadmapTitle")}</p>
-      <p className="text-xs text-muted">{t("gaps.roadmapLead", { role: "Data analyst" })}</p>
+    <Sample title={t("gaps.roadmapTitle")} sub={t("gaps.roadmapLead", { role: "Data analyst" })}>
       <ol className="mt-4 grid grid-cols-4 gap-2">
-        {stages.map(({ id, icon: Icon, state }) => (
-          <li key={id} className="flex flex-col items-center text-center">
+        {stages.map(({ id, icon: Icon, state }, i) => (
+          <li key={id} className="st-pop flex flex-col items-center text-center" style={{ "--delay": `${i * 140}ms` } as React.CSSProperties}>
             <span
               className={`grid size-10 place-items-center rounded-full border-2 ${state === "done" ? "border-[#1f7a4d] bg-[#1f7a4d] text-white" : state === "now" ? "border-signal bg-signal/20 text-signal-ink" : "border-dashed border-line text-muted"}`}
             >
@@ -226,11 +231,11 @@ function SampleD() {
       </ol>
       <p className="mt-5 text-sm font-semibold">{t("gaps.skillsTitle")}</p>
       <ul className="mt-2 flex flex-col gap-2">
-        {skills.map((s) => (
+        {skills.map((s, i) => (
           <li key={s.n} className="grid grid-cols-[minmax(0,8.5rem)_1fr_2.25rem_auto] items-center gap-2 text-xs sm:text-sm">
             <span className="truncate">{s.n}</span>
             <span aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-ink-soft">
-              <span className="block h-full rounded-full bg-ink" style={{ width: `${s.p}%` }} />
+              <span className="grow-x block h-full rounded-full bg-ink" style={{ width: `${s.p}%`, "--delay": `${600 + i * 120}ms` } as React.CSSProperties} />
             </span>
             <span className="text-end text-muted tabular-nums">{s.p}%</span>
             <span className="rounded-full bg-ink-soft px-2 py-0.5 text-[0.65rem] font-semibold">{t(`gaps.${s.l}`)}</span>
@@ -258,17 +263,16 @@ function SampleE() {
     { k: "Company site", p: 12 },
   ].sort((a, b) => b.p - a.p);
   return (
-    <Sample dark>
-      <p className="font-display text-lg font-semibold">{t("tracker.funnelTitle")}</p>
-      <p className="text-xs text-[#c9d2de]">
-        {t("tracker.funnel30")} · {t("tracker.funnelAcross")}
-      </p>
+    <Sample dark title={t("tracker.funnelTitle")} sub={`${t("tracker.funnel30")} · ${t("tracker.funnelAcross")}`}>
       <ul className="mt-3 flex flex-col gap-2">
-        {funnel.map((x) => (
+        {funnel.map((x, i) => (
           <li key={x.l} className="grid grid-cols-[8rem_1fr_2.5rem] items-center gap-2 text-xs sm:text-sm">
             <span className="text-[#c9d2de]">{x.l}</span>
             <span className="h-6 overflow-hidden rounded-md bg-white/10">
-              <span className="flex h-full items-center rounded-md bg-signal px-2 font-semibold text-ink tabular-nums" style={{ width: `${Math.max(10, (x.n / 42) * 100)}%` }}>
+              <span
+                className="grow-x flex h-full items-center rounded-md bg-signal px-2 font-semibold text-ink tabular-nums"
+                style={{ width: `${Math.max(10, (x.n / 42) * 100)}%`, "--delay": `${i * 120}ms` } as React.CSSProperties}
+              >
                 {x.n}
               </span>
             </span>
@@ -282,10 +286,10 @@ function SampleE() {
           <span className="text-[0.65rem] text-[#c9d2de]">{t("outcomes.higherBetter")}</span>
         </div>
         <ul className="mt-3 flex h-28 items-end gap-2">
-          {platforms.map((d) => (
+          {platforms.map((d, i) => (
             <li key={d.k} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
               <span className="text-[0.65rem] font-semibold tabular-nums">{d.p}%</span>
-              <span className="w-full max-w-10 rounded-t-md bg-signal" style={{ height: `${(d.p / 25) * 100}%` }} />
+              <span className="st-grow-y w-full max-w-10 rounded-t-md bg-signal" style={{ height: `${(d.p / 25) * 100}%`, "--delay": `${650 + i * 90}ms` } as React.CSSProperties} />
               <span className="w-full truncate text-center text-[0.6rem] font-semibold tracking-[0.06em] text-[#c9d2de] uppercase">{d.k}</span>
             </li>
           ))}
@@ -300,49 +304,70 @@ const SAMPLES: Record<string, () => React.ReactNode> = { A: SampleA, B: SampleB,
 /** The five core features, each with a sample of the real screen. */
 export function HomeShowcase() {
   return (
-    <section aria-labelledby="show-h" className="mx-auto mt-24 max-w-6xl px-4 sm:px-6">
-      <p className="text-xs font-semibold tracking-[0.14em] text-signal-ink uppercase">{t("show.eyebrow")}</p>
-      <h2 id="show-h" className="mt-2 max-w-[22ch] font-display text-3xl font-semibold leading-[1.05] tracking-[-0.025em] text-balance sm:text-5xl">
+    <section id="what" aria-labelledby="show-h" className="mx-auto mt-24 max-w-6xl scroll-mt-20 px-4 sm:px-6">
+      <h2 id="show-h" className="max-w-[20ch] font-display text-3xl font-semibold leading-[1.05] tracking-[-0.025em] text-balance sm:text-5xl">
         {t("show.title")}
       </h2>
       <p className="mt-4 max-w-[62ch] text-lg text-muted text-pretty">{t("show.lead")}</p>
-      <ol className="mt-12 flex flex-col gap-16 sm:gap-20">
+      <nav aria-label={t("show.jump")} className="mt-8 border-y border-line">
+        <ol className="grid sm:grid-cols-5 sm:divide-x sm:divide-line">
+          {BLOCKS.map((b) => (
+            <li key={b.letter} className="border-b border-line last:border-b-0 sm:border-b-0">
+              <a
+                href={`#feature-${b.letter.toLowerCase()}`}
+                className="group flex min-h-14 items-center gap-3 px-1 py-3 transition-colors duration-200 hover:bg-surface sm:flex-col sm:items-start sm:gap-1 sm:px-4 sm:py-4"
+              >
+                <span className="font-display text-xl font-semibold text-signal-ink tabular-nums">{b.letter}</span>
+                <span className="text-sm leading-snug font-medium text-pretty group-hover:underline group-hover:underline-offset-4">{b.name}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+      <ol className="mt-16 flex flex-col gap-20 sm:gap-28">
         {BLOCKS.map((b, i) => {
           const S = SAMPLES[b.letter];
           return (
             <li key={b.letter} id={`feature-${b.letter.toLowerCase()}`} className="grid scroll-mt-24 gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
               <div className={i % 2 ? "lg:order-2" : ""}>
-                <p className="flex items-center gap-3">
-                  <span className="grid size-10 place-items-center rounded-full bg-ink font-display text-lg font-semibold text-paper">{b.letter}</span>
-                  <span className="rounded-full bg-signal/25 px-3 py-1 text-xs font-semibold">{b.tag}</span>
+                <h3 className="font-display text-2xl font-semibold tracking-[-0.02em] text-balance sm:text-3xl">
+                  <span className="text-signal-ink">{b.letter}.</span> {b.name}
+                </h3>
+                <p className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
+                  <span className="text-sm font-semibold text-signal-ink">{b.sub}</span>
+                  <span className="rounded-full bg-signal/25 px-3 py-1 text-xs font-semibold whitespace-nowrap">{b.tag}</span>
                 </p>
-                <h3 className="mt-4 font-display text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">{b.name}</h3>
-                <p className="mt-1 text-sm font-semibold text-signal-ink">{b.sub}</p>
-                <p className="mt-3 text-muted text-pretty">{b.lead}</p>
-                <ul className="mt-4 flex flex-col gap-2">
+                <p className="mt-4 max-w-[52ch] text-muted text-pretty">{b.lead}</p>
+                <ul className="mt-5 flex flex-col gap-2.5">
                   {b.points.map((p) => (
-                    <li key={p} className="flex gap-2.5 text-sm">
-                      <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-signal text-ink">
-                        <Check aria-hidden="true" className="size-3" strokeWidth={3} />
-                      </span>
+                    <li key={p} className="flex gap-2.5 text-[0.95rem] text-pretty">
+                      <Check aria-hidden="true" className="mt-1 size-4 shrink-0 text-signal-ink" strokeWidth={2.5} />
                       {p}
                     </li>
                   ))}
                 </ul>
-                <Link href={b.href} className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover">
+                <Link
+                  href={b.href}
+                  className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-[background-color,scale] duration-200 hover:bg-ink-hover active:scale-[0.96]"
+                >
                   {b.cta}
                   <ArrowRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
                 </Link>
               </div>
               <div className={`min-w-0 ${i % 2 ? "lg:order-1" : ""}`}>
-                <S />
+                <Stage>
+                  <S />
+                </Stage>
               </div>
             </li>
           );
         })}
       </ol>
       <p className="mt-14 text-center">
-        <Link href="/features" className="inline-flex min-h-11 items-center gap-2 rounded-full border border-ink px-5 font-medium transition-colors duration-200 hover:bg-ink hover:text-paper">
+        <Link
+          href="/features"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-ink px-5 font-medium transition-[background-color,color,scale] duration-200 hover:bg-ink hover:text-paper active:scale-[0.96]"
+        >
           {t("show.all")}
           <ArrowRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
         </Link>

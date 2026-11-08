@@ -13,6 +13,7 @@ import type { AccountProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { transitionNetwork } from "@/lib/transitions";
 import { JobRow } from "./job-row";
+import { Reveal } from "./reveal";
 
 /** Roles to explore, most relevant first: what they're aiming for, what they do now, and where that commonly leads. */
 async function suggestedRoles(viewer: AccountProfile): Promise<{ main: string; roles: string[] }> {
@@ -65,7 +66,8 @@ export async function BestRoles({ viewer, limit = 5, heading = "h2" }: { viewer:
   }
 
   return (
-    <section aria-labelledby="best-h" className="mt-8 rounded-3xl border border-line bg-surface p-5 sm:p-6">
+    <Reveal className="mt-8">
+      <section aria-labelledby="best-h" className="rounded-3xl border border-line bg-surface p-5 sm:p-6">
       <p className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.14em] text-muted uppercase">
         <Sparkles aria-hidden="true" className="size-4 text-signal-ink" />
         {t("fit.eyebrow")}
@@ -94,15 +96,15 @@ export async function BestRoles({ viewer, limit = 5, heading = "h2" }: { viewer:
       <p className="mt-5 text-sm font-medium">{main ? t("best.jobsTitle", { role: main }) : t("best.jobsTitleAny")}</p>
       {ranked.length ? (
         <ul className="-mx-3 mt-1 divide-y divide-line sm:-mx-4">
-          {ranked.map(({ job, fit }) => (
-            <li key={job.id}>
+          {ranked.map(({ job, fit }, i) => (
+            <Reveal as="li" key={job.id} delay={i * 80}>
               <JobRow job={job} fit={fit} />
               <p className="-mt-2 px-3 pb-3 text-sm text-muted sm:px-4">
                 {[t("fit.listTitle", { strong: fit.strong, total: fit.total }), fit.transfer ? t("fit.listTransfer", { what: fit.transfer }) : "", fit.missing ? t("fit.listMissing", { what: fit.missing }) : ""]
                   .filter(Boolean)
                   .join(" · ")}
               </p>
-            </li>
+            </Reveal>
           ))}
         </ul>
       ) : (
@@ -117,6 +119,7 @@ export async function BestRoles({ viewer, limit = 5, heading = "h2" }: { viewer:
           {t("best.prefs")}
         </Link>
       </div>
-    </section>
+      </section>
+    </Reveal>
   );
 }

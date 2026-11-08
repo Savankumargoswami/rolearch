@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-07T00:00:00Z",
+  "title": "Design System: Rolearch",
+  "extensions": {
+    "colorMeta": {
+      "atlas-ink": { "role": "primary", "displayName": "Atlas Ink" },
+      "signal-amber": { "role": "secondary", "displayName": "Signal Amber" },
+      "signal-amber-ink": { "role": "secondary", "displayName": "Signal Amber Ink" },
+      "fit-strong": { "role": "tertiary", "displayName": "Fit Strong" },
+      "fit-potential": { "role": "tertiary", "displayName": "Fit Potential" },
+      "fit-poor": { "role": "tertiary", "displayName": "Fit Poor" },
+      "paper": { "role": "neutral", "displayName": "Paper" },
+      "glass-surface": { "role": "neutral", "displayName": "Glass Surface" },
+      "slate-muted": { "role": "neutral", "displayName": "Slate Muted" },
+      "hairline": { "role": "neutral", "displayName": "Hairline" },
+      "ink-wash": { "role": "neutral", "displayName": "Ink Wash" }
+    },
+    "shadows": [
+      { "name": "header-float", "value": "0 1px 0 rgb(14 31 47 / 0.08), 0 8px 24px -16px rgb(14 31 47 / 0.25)", "purpose": "Sticky frosted header." },
+      { "name": "sample-lift", "value": "inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(14,31,47,0.06), 0 24px 60px -16px rgba(14,31,47,0.22)", "purpose": "Homepage sample screens." },
+      { "name": "smoked-glass", "value": "inset 0 1px 0 rgb(255 255 255 / 0.12), 0 1px 2px rgb(14 31 47 / 0.2), 0 24px 60px -12px rgb(14 31 47 / 0.45)", "purpose": "Dark sample panels." },
+      { "name": "card-rest", "value": "0 1px 2px rgba(14,31,47,0.04), 0 12px 32px -18px rgba(14,31,47,0.25)", "purpose": "Profile portfolio cards." }
+    ],
+    "motion": [
+      { "name": "ease-out-soft", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Every entrance and data animation." },
+      { "name": "data-reveal", "value": "400-1100ms, stagger ~100ms, once", "purpose": "Routes draw, rings sweep, bars fill, columns rise when a sample scrolls into view." },
+      { "name": "press", "value": "scale(0.96), 200ms", "purpose": "Button press feedback." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ],
+    "glass": {
+      "backdropFilter": "blur(20px) saturate(170%)",
+      "edge": "rgb(255 255 255 / 0.7)",
+      "fallbackSurface": "rgb(255 255 255 / 0.92)",
+      "ambient": "radial amber (rgb(224 163 91 / 0.42)) top left, navy-blue (rgb(59 110 165 / 0.30)) right, fixed"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action on light grounds.",
+      "html": "<button class=\"ds-btn-primary\">Find my best-fit roles</button>",
+      "css": ".ds-btn-primary { background: #0e1f2f; color: #f4f5f1; height: 44px; padding: 0 20px; border: none; border-radius: 9999px; font: 500 1rem Geist, system-ui, sans-serif; transition: background-color 200ms, scale 200ms; cursor: pointer; } .ds-btn-primary:hover { background: #1d3247; } .ds-btn-primary:active { scale: 0.96; } .ds-btn-primary:focus-visible { outline: 2px solid #0e1f2f; outline-offset: 2px; }"
+    },
+    {
+      "name": "Signal Button",
+      "kind": "button",
+      "refersTo": "button-signal",
+      "description": "The headline action on dark bands.",
+      "html": "<div class=\"ds-band\"><button class=\"ds-btn-signal\">Check my resume free</button></div>",
+      "css": ".ds-band { background: #0e1f2f; padding: 24px; border-radius: 24px; } .ds-btn-signal { background: #e0a35b; color: #0e1f2f; height: 56px; padding: 0 28px; border: none; border-radius: 9999px; font: 600 1.125rem Geist, system-ui, sans-serif; box-shadow: 0 8px 30px rgba(217,163,91,0.35); cursor: pointer; transition: background-color 200ms; } .ds-btn-signal:hover { background: #ebb877; } .ds-btn-signal:focus-visible { outline: 2px solid #e0a35b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Popular searches, skills and keyword tags.",
+      "html": "<span class=\"ds-chip\">Data analyst</span> <span class=\"ds-chip ds-chip-on\">SQL</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 9999px; border: 1px solid rgb(14 31 47 / 0.18); color: #0e1f2f; font: 400 0.875rem Geist, system-ui, sans-serif; } .ds-chip-on { background: #0e1f2f; color: #f4f5f1; border-color: #0e1f2f; }"
+    },
+    {
+      "name": "Glass Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Every raised surface: frosted glass over the ambient light.",
+      "html": "<div class=\"ds-ground\"><div class=\"ds-card\"><p class=\"ds-card-title\">Operations Data Analyst</p><p class=\"ds-card-sub\">at Northwind Logistics</p></div></div>",
+      "css": ".ds-ground { padding: 32px; background: radial-gradient(30rem 20rem at 0% 0%, rgb(224 163 91 / 0.42), transparent 62%), radial-gradient(30rem 20rem at 100% 40%, rgb(59 110 165 / 0.30), transparent 62%), #f4f5f1; } .ds-card { background: rgb(255 255 255 / 0.46); backdrop-filter: blur(20px) saturate(170%); -webkit-backdrop-filter: blur(20px) saturate(170%); border: 1px solid rgb(255 255 255 / 0.7); border-radius: 24px; padding: 24px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 24px 60px -16px rgba(14,31,47,0.22); } .ds-card-title { margin: 0; font: 600 1.25rem 'Bricolage Grotesque', system-ui, sans-serif; color: #0e1f2f; } .ds-card-sub { margin: 4px 0 0; color: #4b5a6e; font: 400 0.95rem Geist, system-ui, sans-serif; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Fields keep a visible hairline border; no glass edge.",
+      "html": "<label class=\"ds-field\"><span>What role do you want next?</span><input class=\"ds-input\" placeholder=\"e.g. Data Analyst\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 4px; font: 500 0.875rem Geist, system-ui, sans-serif; color: #0e1f2f; } .ds-input { height: 44px; padding: 0 12px; border: 1px solid rgb(14 31 47 / 0.18); border-radius: 12px; background: rgb(255 255 255 / 0.46); color: #0e1f2f; caret-color: #8f5b12; font: 400 0.95rem Geist, system-ui, sans-serif; } .ds-input:focus-visible { outline: 2px solid #0e1f2f; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Atlas Under Glass",
+    "keyCharacteristics": [
+      "Frosted glass surfaces over a fixed amber and navy ambient light.",
+      "Deep ink text and pill-shaped ink buttons; amber reserved for signal.",
+      "Bricolage Grotesque display with tight tracking; Geist for everything you read.",
+      "One-time, data-driven motion: routes draw, rings sweep, bars fill."
+    ],
+    "rules": [
+      { "name": "The One Warm Light Rule", "body": "Amber is the only warm colour and marks a decision, a selection or progress. Never use it for body text (use Signal Amber Ink) or as a large flat fill on light grounds.", "section": "colors" },
+      { "name": "The Verdict Colours Rule", "body": "Green, blue and rust mean strong, potential and poor fit. They are not decoration and never appear outside fit, outcome or status.", "section": "colors" },
+      { "name": "The Heading Speaks Rule", "body": "No eyebrow labels above headings. Context such as a tag sits beside or under the heading.", "section": "typography" },
+      { "name": "The Something Behind The Glass Rule", "body": "Glass only works over light. Keep the fixed ambient gradients on the body; browsers without backdrop-filter get near-opaque surfaces.", "section": "elevation" },
+      { "name": "The Visible Field Rule", "body": "Form fields keep a visible Hairline border; the white glass edge is for cards, never inputs.", "section": "elevation" }
+    ]
+  }
+}

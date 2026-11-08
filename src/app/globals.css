@@ -8,14 +8,15 @@
 */
 @theme {
   --color-paper: #f4f5f1;
-  --color-surface: #ffffff;
+  /* Glass: raised surfaces are frosted white over the ambient ground (see .bg-surface below). */
+  --color-surface: rgb(255 255 255 / 0.46);
   --color-ink: #0e1f2f;
   --color-ink-hover: #1d3247;
   --color-muted: #4b5a6e;
-  --color-line: #d9ddd4;
+  --color-line: rgb(14 31 47 / 0.18);
   --color-signal: #e0a35b;
   --color-signal-ink: #8f5b12;
-  --color-ink-soft: #e6e9ee;
+  --color-ink-soft: rgb(14 31 47 / 0.07);
 
   --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
@@ -34,12 +35,56 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* The ground the glass sits on: the brand's amber and navy as soft, fixed light. */
 body {
-  background: var(--color-paper);
+  background:
+    radial-gradient(56rem 38rem at 6% -4%, rgb(224 163 91 / 0.42), transparent 62%),
+    radial-gradient(50rem 40rem at 104% 22%, rgb(59 110 165 / 0.30), transparent 62%),
+    radial-gradient(44rem 34rem at 62% 64%, rgb(224 163 91 / 0.18), transparent 64%),
+    radial-gradient(46rem 36rem at 18% 104%, rgb(59 110 165 / 0.18), transparent 60%),
+    var(--color-paper);
+  background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.55;
+}
+
+input,
+textarea {
+  caret-color: var(--color-signal-ink);
+}
+
+/* Frosted glass for every raised surface: blur and lift what's behind, with a light top edge. */
+.bg-surface,
+.glass,
+.glass-ink {
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+}
+/* Glass catches light on its edges. Form fields keep their visible borders. */
+.bg-surface:not(input, textarea, select) {
+  border-color: rgb(255 255 255 / 0.7);
+}
+/* Smoked glass: the dark panels let a little of the ground through. */
+.glass-ink {
+  background: rgb(14 31 47 / 0.86);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    0 1px 2px rgb(14 31 47 / 0.2),
+    0 24px 60px -12px rgb(14 31 47 / 0.45);
+}
+.glass {
+  background: rgb(255 255 255 / 0.5);
+  border-bottom: 1px solid rgb(255 255 255 / 0.55);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --color-surface: rgb(255 255 255 / 0.92);
+  }
+  .glass {
+    background: rgb(244 245 241 / 0.95);
+  }
 }
 
 ::selection {
@@ -366,5 +411,91 @@ body {
   .reveal-wait {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* ---------- Sample stages (components/stage.tsx) ----------
+   Each A-E sample tells its own data story once: the route draws, rings sweep, bars fill, columns rise. The
+   animations run on mount; a stage still below the fold holds them on their first frame until it scrolls into view. */
+@keyframes st-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.st-draw {
+  stroke-dasharray: 1;
+  animation: st-draw 650ms var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes st-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.st-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: st-pop 420ms var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes st-sweep {
+  from {
+    stroke-dashoffset: var(--c);
+  }
+  to {
+    stroke-dashoffset: var(--off);
+  }
+}
+.st-sweep {
+  animation: st-sweep 1100ms var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes st-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: none;
+  }
+}
+.st-grow-y {
+  transform-origin: bottom;
+  animation: st-grow-y 800ms var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+@keyframes st-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.st-fade {
+  animation: st-fade 500ms var(--ease-out-soft) both;
+  animation-delay: var(--delay, 0ms);
+}
+.stage-wait :is(.st-draw, .st-pop, .st-sweep, .st-grow-y, .st-fade, .grow-x) {
+  animation-play-state: paused;
+}
+/* In-page links (the A-E index) glide instead of jumping. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage-wait :is(.st-draw, .st-pop, .st-sweep, .st-grow-y, .st-fade, .grow-x) {
+    animation-play-state: running;
   }
 }

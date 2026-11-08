@@ -10,7 +10,7 @@ import { NavLink } from "./nav-link";
 /** Search, Jobs and Profile stay in view on every screen; everything else lives in the Menu. */
 export function SiteHeader() {
   return (
-    <header style={{ viewTransitionName: "site-header" }} className="relative z-20 border-b border-line/70 bg-paper/90 backdrop-blur-sm">
+    <header style={{ viewTransitionName: "site-header" }} className="glass sticky top-0 z-30 shadow-[0_1px_0_rgb(14_31_47/0.08),0_8px_24px_-16px_rgb(14_31_47/0.25)]">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-3 focus:z-50 focus:rounded-md focus:bg-ink focus:px-3 focus:py-2 focus:text-paper"

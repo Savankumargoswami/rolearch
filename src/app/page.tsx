@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowRight, Check, ScanSearch } from "lucide-react";
+import { ArrowDown, ArrowRight, Check, ScanSearch } from "lucide-react";
 import { CANDIDATE_FEATURES, EMPLOYER_FEATURES } from "@/lib/features";
 import Link from "next/link";
 import { Suspense, ViewTransition } from "react";
@@ -100,18 +100,13 @@ export default async function Home() {
               {t("hero.changers")}
               <ArrowRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
             </Link>
-            <nav aria-label={t("show.jump")} className="rail -mx-4 mt-4 flex items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
-              <span className="shrink-0 text-sm text-muted">{t("show.jump")}</span>
-              {(["a", "b", "c", "d", "e"] as const).map((k) => (
-                <a
-                  key={k}
-                  href={`#feature-${k}`}
-                  className="shrink-0 rounded-full bg-ink-soft px-3.5 py-2 text-sm font-medium transition-colors duration-200 hover:bg-signal/30"
-                >
-                  {t(`show.jump_${k}`)}
-                </a>
-              ))}
-            </nav>
+            <a
+              href="#what"
+              className="mt-4 ms-1 inline-flex min-h-11 items-center gap-1.5 text-sm font-medium underline decoration-ink/30 underline-offset-4 transition-[text-decoration-color] duration-200 hover:decoration-ink"
+            >
+              {t("show.heroLink")}
+              <ArrowDown aria-hidden="true" className="size-4" />
+            </a>
             <div className="rail -mx-4 mt-3 flex items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
               <span className="shrink-0 text-sm text-muted">{t("hero.quick")}</span>
               {quick.map((q) => (
