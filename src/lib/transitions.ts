@@ -36,7 +36,16 @@ export function transitionPath(currentTitle: string, target: string): Transition
   return { from, bridge: "", to, carries: [] };
 }
 
-export type Route = { id: string; kind: "bridge" | "direct" | "nearby"; steps: string[]; carries: string[]; have: string[]; overlap: number };
+export type Route = {
+  id: string;
+  kind: "bridge" | "direct" | "nearby";
+  steps: string[];
+  carries: string[];
+  have: string[];
+  overlap: number;
+  /** 0-100, measured from live jobs (lib/skill-graph.ts): how much the roles' skill demand overlaps. Absent for the hand-written moves. */
+  score?: number;
+};
 
 /**
  * Career path network: the routes from the member's current role, for the explorer graph. The chosen goal via its

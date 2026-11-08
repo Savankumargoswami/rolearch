@@ -112,6 +112,20 @@ class Text(unittest.TestCase):
         self.assertNotIn("Excel", extract_skills("You excel at distributed systems."))
         self.assertIn("Excel", extract_skills("Advanced Excel and SQL."))
 
+    def test_skills_across_industries(self):
+        nurse = extract_skills("Registered Nurse (RN). Patient care, medication administration, BLS and ACLS required. Epic EHR charting.")
+        for s in ["RN license", "Patient care", "Medication administration", "BLS/CPR", "ACLS", "Electronic health records"]:
+            self.assertIn(s, nurse)
+        self.assertIn("CDL", extract_skills("Class A CDL required. Forklift experience a plus."))
+        self.assertIn("Forklift", extract_skills("Class A CDL required. Forklift experience a plus."))
+        self.assertIn("GAAP", extract_skills("Prepare financial statements under GAAP; CPA preferred."))
+
+    def test_skills_ignore_boilerplate(self):
+        text = "Pets may react to new people. We are an equal opportunity employer committed to recruiting diverse talent. Competitive compensation and benefits, including mental health support. Follow us on social media."
+        for s in ["React", "Recruiting", "Compensation", "Mental health", "Social media"]:
+            self.assertNotIn(s, extract_skills(text))
+        self.assertNotIn("RN license", extract_skills("Learn more about our turn-key solutions."))
+
     def test_hybrid_is_not_a_city(self):
         p = parse_location("Hybrid", default_country="US")
         self.assertEqual((p.city, p.country), (None, "US"))

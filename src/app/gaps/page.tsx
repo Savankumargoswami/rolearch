@@ -11,7 +11,8 @@ import { loadPreferences } from "@/lib/preferences";
 import { requireMember } from "@/lib/require-member";
 import { createClient } from "@/lib/supabase/server";
 import { roadmapForTitle } from "@/lib/roadmaps";
-import { transitionNetwork, transitionPath } from "@/lib/transitions";
+import { careerNetwork } from "@/lib/skill-graph";
+import { transitionPath } from "@/lib/transitions";
 import { PathNetwork } from "./path-network";
 
 export const metadata: Metadata = { title: "Career gap-to-action roadmap", robots: { index: false } };
@@ -76,7 +77,7 @@ async function Gaps({ searchParams }: { searchParams: Promise<{ role?: string }>
   // Transferable skill intelligence: the bridge between the member's current role and the target, and the exact
   // experience that supports the move.
   const path = transitionPath(current?.title ?? p.headline, role);
-  const routes = path ? transitionNetwork(path.from, path.to, [...p.resume.skills, ...g.skills.filter((s) => s.tier === "proven" || s.tier === "verified").map((s) => s.name)]) : [];
+  const routes = path ? await careerNetwork(path.from, path.to, [...p.resume.skills, ...g.skills.filter((s) => s.tier === "proven" || s.tier === "verified").map((s) => s.name)]) : [];
   const carries = g.skills.filter((s) => (s.tier === "proven" || s.tier === "verified" || s.tier === "transferable") && (s.quote || s.via)).slice(0, 6);
 
   return (

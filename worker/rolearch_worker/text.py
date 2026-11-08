@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import html
+import json
 import re
+from pathlib import Path
 from html.parser import HTMLParser
 
 
@@ -67,29 +69,28 @@ def summarize(text: str, limit: int = 280) -> str:
     return pick
 
 
-# Canonical skill name -> regex. Order is irrelevant; ranking is by mention count.
-SKILLS: dict[str, str] = {
-    "Python": r"\bpython\b", "SQL": r"\bsql\b", "Spark": r"\b(apache )?spark\b|\bpyspark\b", "Kafka": r"\bkafka\b",
-    "Airflow": r"\bairflow\b", "dbt": r"\bdbt\b", "Snowflake": r"\bsnowflake\b", "BigQuery": r"\bbigquery\b",
-    "Redshift": r"\bredshift\b", "Databricks": r"\bdatabricks\b", "AWS": r"\baws\b|amazon web services",
-    "GCP": r"\bgcp\b|google cloud", "Azure": r"\bazure\b", "Kubernetes": r"\bkubernetes\b|\bk8s\b", "Docker": r"\bdocker\b",
-    "Terraform": r"\bterraform\b", "Go": r"\bgolang\b|\bgo(?= ?(,|/|and\b|or\b|\)))", "Java": r"\bjava\b(?!script)",
-    "Scala": r"\bscala\b", "Rust": r"\brust\b", "TypeScript": r"\btypescript\b", "React": r"\breact\b",
-    "PyTorch": r"\bpytorch\b", "TensorFlow": r"\btensorflow\b", "scikit-learn": r"scikit-learn|\bsklearn\b",
-    "Pandas": r"\bpandas\b", "Tableau": r"\btableau\b", "Looker": r"\blooker\b", "Power BI": r"\bpower ?bi\b",
-    "Statistics": r"\bstatistic(s|al)\b", "Machine learning": r"\bmachine learning\b", "Deep learning": r"\bdeep learning\b",
-    "LLMs": r"\bllms?\b|large language models?", "NLP": r"\bnlp\b|natural language processing",
-    "Computer vision": r"\bcomputer vision\b", "MLOps": r"\bmlops\b", "Flink": r"\bflink\b", "Postgres": r"\bpostgres(ql)?\b",
-    "MongoDB": r"\bmongo(db)?\b", "Elasticsearch": r"\belasticsearch\b", "Delta Lake": r"\bdelta lake\b",
-    "Iceberg": r"\b(apache )?iceberg\b", "Dagster": r"\bdagster\b", "MLflow": r"\bmlflow\b", "A/B testing": r"\ba/b test",
-    "Excel": r"(?-i:\bExcel\b)(?! (at|in)\b)",
-}
-_skill_re = {k: re.compile(v, re.I) for k, v in SKILLS.items()}
+# Canonical skill -> regex, from data/skills.json: the same list the database backfill uses (db/040_skill_graph.sql),
+# across every industry so career paths can be measured for nurses and electricians as well as engineers.
+# A string pattern ignores case; {"cs": ...} parts match by case (acronyms like RN, CDL), {"ci": ...} parts ignore it.
+_SKILLS_FILE = json.loads((Path(__file__).parent / "data" / "skills.json").read_text(encoding="utf-8"))["skills"]
 
 
-def extract_skills(text: str, limit: int = 6) -> list[str]:
-    counts = {k: len(r.findall(text)) for k, r in _skill_re.items()}
-    found = [k for k, n in sorted(counts.items(), key=lambda kv: -kv[1]) if n]
+def _compile(spec) -> list[re.Pattern]:
+    if isinstance(spec, str):
+        return [re.compile(spec, re.I)]
+    out = [re.compile(spec["cs"])]
+    if spec.get("ci"):
+        out.append(re.compile(spec["ci"], re.I))
+    return out
+
+
+SKILLS: dict[str, list[re.Pattern]] = {name: _compile(spec) for name, spec in _SKILLS_FILE.items()}
+
+
+def extract_skills(text: str, limit: int = 12) -> list[str]:
+    """The skills a job mentions, most-mentioned first."""
+    counts = {k: sum(len(r.findall(text)) for r in rs) for k, rs in SKILLS.items()}
+    found = [k for k, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])) if n]
     return found[:limit]
 
 

@@ -11,7 +11,7 @@ import { fitsFor, type ListFit } from "@/lib/fit-list";
 import { loadPreferences } from "@/lib/preferences";
 import type { AccountProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
-import { transitionNetwork } from "@/lib/transitions";
+import { careerNetwork } from "@/lib/skill-graph";
 import { JobRow } from "./job-row";
 import { Reveal } from "./reveal";
 
@@ -22,7 +22,7 @@ async function suggestedRoles(viewer: AccountProfile): Promise<{ main: string; r
   const now = coreTitle(current?.title ?? "") || coreTitle(p.headline);
   const prefs = await loadPreferences(await createClient());
   const main = prefs.targetRoles[0] || now;
-  const nearby = now ? transitionNetwork(now, main || now, p.resume.skills).filter((r) => r.kind === "nearby").map((r) => r.steps[r.steps.length - 1]) : [];
+  const nearby = now ? (await careerNetwork(now, main || now, p.resume.skills)).filter((r) => r.kind === "nearby").map((r) => r.steps[r.steps.length - 1]) : [];
   const seen = new Set<string>();
   const roles = [...prefs.targetRoles, now, ...nearby].filter((r) => {
     const k = r.trim().toLowerCase();

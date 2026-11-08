@@ -126,6 +126,7 @@ export function PathNetwork({ routes }: { routes: Route[] }) {
               <span className="min-w-0">
                 <span className="block font-semibold">{r.kind === "nearby" ? r.steps[r.steps.length - 1] : t(`gaps.net_${r.kind}`)}</span>
                 <span className="block truncate text-xs text-[#c9d2de]">{r.steps.join(" → ")}</span>
+                {r.score !== undefined && r.score > 0 && <span className="block text-[0.7rem] text-signal">{t("gaps.netMeasured", { n: r.score })}</span>}
               </span>
               {r.carries.length > 0 && (
                 <span className="text-end" title={t("gaps.netOverlap", { n: r.overlap, have: r.have.length, total: r.carries.length })}>

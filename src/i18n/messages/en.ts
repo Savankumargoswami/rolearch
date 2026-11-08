@@ -1315,6 +1315,7 @@ const en = {
     netInfo: "Path information",
     netOverlap: "{n}% skill overlap ({have} of {total} carry-over skills on your profile)",
     netOverlapShort: "{have} of {total} skills",
+    netMeasured: "{n}% skill match in live jobs",
     netCarries: "Skills that carry over on this route",
     moveTitle: "Your transition path",
     moveNow: "Now",
