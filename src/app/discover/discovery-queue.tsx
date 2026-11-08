@@ -100,7 +100,7 @@ function Tile({ icon, label, value, sub }: { icon: React.ReactNode; label: strin
 }
 
 /** One role at a time: the best match first, with Bookmark and Discard, and a daily momentum counter. */
-export function DiscoveryQueue({ items }: { items: QueueItem[] }) {
+export function DiscoveryQueue({ items, found }: { items: QueueItem[]; found: number }) {
   const raw = useSyncExternalStore(subscribe, read, () => "");
   const memory = useMemo(() => parse(raw), [raw]);
   const [pending, start] = useTransition();
@@ -108,7 +108,7 @@ export function DiscoveryQueue({ items }: { items: QueueItem[] }) {
   const done = new Set([...memory.reviewed, ...memory.discarded]);
   const queue = items.filter((x) => !done.has(x.job.id));
   const current = queue[0];
-  const goal = Math.min(5, items.length);
+  const goal = Math.min(3, items.length);
   const reviewed = memory.reviewed.filter((id) => items.some((x) => x.job.id === id)).length;
   const discardedHere = memory.discarded.filter((id) => items.some((x) => x.job.id === id)).length;
 
@@ -173,7 +173,12 @@ export function DiscoveryQueue({ items }: { items: QueueItem[] }) {
   const lastSaved = items.find((x) => x.job.id === memory.saved[memory.saved.length - 1]);
 
   return (
-    <section aria-labelledby="queue-h" className="mt-6 overflow-hidden rounded-3xl border border-line bg-surface">
+    <>
+    <p className="mt-6 text-sm text-muted">
+      {t("discover.queueEyebrow", { n: found })}
+    </p>
+    <p className="mt-1 max-w-[70ch] text-sm text-muted">{t("discover.queueLead")}</p>
+    <section aria-labelledby="queue-h" className="mt-3 overflow-hidden rounded-3xl border border-line bg-surface">
       <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3 sm:px-6">
         <h2 id="queue-h" className="text-xs font-semibold tracking-[0.14em] text-muted uppercase">
           {t("discover.queueTitle")}
@@ -273,5 +278,6 @@ export function DiscoveryQueue({ items }: { items: QueueItem[] }) {
         </aside>
       </div>
     </section>
+    </>
   );
 }

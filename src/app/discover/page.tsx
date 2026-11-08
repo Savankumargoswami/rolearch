@@ -90,7 +90,7 @@ async function Queue({ searchParams }: { searchParams: Promise<{ role?: string }
         <p className="mt-8 text-muted">{t("discover.none", { role })}</p>
       ) : (
         <>
-          <DiscoveryQueue items={queueOf(ranked, prefs)} />
+          <DiscoveryQueue items={queueOf(ranked, prefs)} found={ranked.length} />
           <h2 id="all" className="mt-12 scroll-mt-20 font-display text-2xl font-semibold">
             {t("discover.allTitle")}
           </h2>

@@ -11,16 +11,17 @@ export const CANDIDATE_FEATURES: Feature[] = [
     points: [
       "Separate scores for skills, transferable capabilities, experience, industry, education and location or eligibility",
       "Every requirement marked as proven in a role, verified by a skill test, partly shown, transferable, not found, or a confirmed gap, with the resume line that shows it",
-      "A clear verdict: strong fit, potential fit, stretch role, low fit, or not enough information yet",
+      "A clear decision: strong fit, apply; potential fit, address specific gaps; stretch role, build skills first; poor fit, don't waste application time; or not enough information yet",
       "Correct anything that's wrong, and the analysis updates",
     ],
     href: "/ats",
   },
   {
     id: "tailoring",
-    name: "Evidence-based resume tailoring and cover letters",
+    name: "Evidence-backed AI: evidence-based resume tailoring and cover letters",
     summary: "Tailor your resume and write a cover letter for each job without inventing anything.",
     points: [
+      "AI Recruiter Review: every bullet scored for the job, requirements you meet in other words found and quoted, and questions that turn weak bullets into strong ones using your own answers",
       "Every suggested edit shows the job requirement and your original line, with Accept, Edit, Rewrite or Keep original",
       "Skills your resume doesn't show are never added; you're asked instead",
       "Saved resume versions per job, PDF and Word downloads, and a plain-text preview of what scanners read",
@@ -42,11 +43,11 @@ export const CANDIDATE_FEATURES: Feature[] = [
   },
   {
     id: "discovery",
-    name: "Job discovery ranked by fit",
+    name: "Job application decision engine",
     summary: "Live jobs from employers' own careers pages, ranked around your real experience.",
     points: [
       "Jobs from company career pages, refreshed daily, with pay shown when the employer publishes it",
-      "Every job labelled strong, potential, stretch or low fit for you, with the reason",
+      "Every job classified as strong, potential, stretch or poor fit for you, with the reason",
       "Search by role, skill, country, remote work, visa sponsorship and pay",
     ],
     href: "/jobs",
@@ -64,7 +65,7 @@ export const CANDIDATE_FEATURES: Feature[] = [
   },
   {
     id: "manager",
-    name: "AI application manager",
+    name: "AI application manager and application outcome intelligence",
     summary: "Every application in one place, with the next step for each.",
     points: [
       "Statuses from interested to offer, with a timestamped history",

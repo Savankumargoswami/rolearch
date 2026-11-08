@@ -8,6 +8,7 @@ export const LIMITS = {
   read: { max: 20, minutes: 60 },
   tailor: { max: 10, minutes: 60 },
   rewrite: { max: 40, minutes: 60 },
+  review: { max: 10, minutes: 60 },
   letter: { max: 10, minutes: 60 },
   prep: { max: 10, minutes: 60 },
   feedback: { max: 40, minutes: 60 },

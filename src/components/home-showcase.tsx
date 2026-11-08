@@ -7,13 +7,14 @@ import { Ring } from "@/app/discover/discovery-queue";
 import { t } from "@/i18n";
 import { transitionNetwork } from "@/lib/transitions";
 
-type Block = { letter: string; tag: string; name: string; lead: string; points: string[]; href: string; cta: string };
+type Block = { letter: string; tag: string; name: string; sub: string; lead: string; points: string[]; href: string; cta: string };
 
 const BLOCKS: Block[] = [
   {
     letter: "A",
     tag: "Core differentiator",
     name: "Transferable skill intelligence",
+    sub: "Career Path Network Explorer",
     lead: "Understand skills across industries, not just exact keywords. See every route from your current role and exactly which experience supports the move.",
     points: ["Manufacturing process improvement → operations analytics → business analytics", "Bridge roles, direct moves and nearby roles, side by side", "Skill overlap from what your profile actually shows"],
     href: "/gaps",
@@ -22,25 +23,34 @@ const BLOCKS: Block[] = [
   {
     letter: "B",
     tag: "Trust advantage",
-    name: "Evidence-based resume tailoring",
-    lead: "Every suggested edit rests on your actual work history, projects or verified skills. If there's no evidence, Rolearch asks you instead of inventing it.",
-    points: ["The job requirement, your original line and the suggested edit, together", "Accept, Edit, Rewrite or Keep original for every change", "Skills you haven't used are never added"],
+    name: "Evidence-backed AI",
+    sub: "Evidence-based resume tailoring",
+    lead: "A powerful AI resume system that reads your resume like a senior recruiter and tailors it to each job, while every statement stays sourced in your actual work history, projects or verified skills. If there's no evidence, it asks you instead of inventing it.",
+    points: [
+      "AI Recruiter Review: every bullet scored for this job, with the reasons",
+      "Finds requirements you meet in different words, quoting your resume",
+      "Asks you for the facts behind weak bullets, then rewrites them with your answer",
+      "Accept, Edit, Rewrite or Keep original for every change",
+      "Skills you haven't used are never added",
+    ],
     href: "/ats",
     cta: "Tailor your resume",
   },
   {
     letter: "C",
-    tag: "Job application decision engine",
-    name: "RoleArch Job-Fit Intelligence",
-    lead: "Instead of ranking jobs by keywords, Rolearch classifies them: strong fit, apply; potential fit, address specific gaps; stretch role, build skills first; low fit, don't waste the application. Every decision is explained.",
-    points: ["Start with the roles most worth your time", "Fit scored on skills, experience, transferable skills, industry, education and location", "Bookmark or discard, and keep today's momentum"],
+    tag: "Decision engine",
+    name: "Job application decision engine",
+    sub: "RoleArch Job-Fit Intelligence",
+    lead: "Instead of just ranking jobs, Rolearch classifies them, and explains every decision.",
+    points: ["Strong fit: Apply.", "Potential fit: Address specific gaps.", "Stretch role: Build skills first.", "Poor fit: Don't waste application time."],
     href: "/discover",
     cta: "Open your discovery queue",
   },
   {
     letter: "D",
-    tag: "Career gap-to-action roadmap",
+    tag: "From gaps to action",
     name: "Career gap-to-action roadmap",
+    sub: "Learning path, practical project, evidence",
     lead: "Missing SQL, Python or domain knowledge? Rolearch doesn't just list missing keywords: it recommends a learning path, a practical project, and the evidence to add once it's done.",
     points: ["Where you are: explore, learn and build, gain experience, land the role", "Skills to build next, ranked by how often jobs ask for them", "Opportunities that fit you now"],
     href: "/gaps",
@@ -48,10 +58,11 @@ const BLOCKS: Block[] = [
   },
   {
     letter: "E",
-    tag: "Application outcome intelligence",
-    name: "AI application manager",
-    lead: "Track what actually happens. Which resume version gets interviews, which job types respond, which platforms work, and where applications stop.",
-    points: ["Your funnel from applications sent to offers", "Interview rate by platform, resume version and job type", "Next steps, follow-ups and interviews in one dashboard"],
+    tag: "Outcome data",
+    name: "Application outcome intelligence",
+    sub: "AI application manager",
+    lead: "Track what actually happens.",
+    points: ["Which resume version gets interviews?", "Which job categories generate responses?", "Which skills correlate with better outcomes?", "Where are candidates getting rejected?"],
     href: "/tracker",
     cta: "Open your tracker",
   },
@@ -81,6 +92,15 @@ function SampleA() {
 function SampleB() {
   return (
     <Sample>
+      <p className="font-mono text-xs font-semibold tracking-[0.14em] text-signal-ink uppercase">{t("ats.reviewable")}</p>
+      <p className="mt-1 font-display text-lg font-semibold">{t("ats.groundedTitle")}</p>
+      <ul className="mt-2 mb-4 flex flex-wrap gap-1.5">
+        {(["chipGaps", "chipExport", "chipVersions"] as const).map((k) => (
+          <li key={k} className="rounded-md border border-line px-2 py-0.5 font-mono text-[0.65rem] tracking-[0.08em] uppercase">
+            {t(`ats.${k}`)}
+          </li>
+        ))}
+      </ul>
       <p className="text-xs font-semibold tracking-[0.12em] text-muted uppercase">{t("ats.evRequirement")}</p>
       <p className="mt-1">Own onboarding analytics and reduce activation drop-off.</p>
       <p className="mt-4 text-xs font-semibold tracking-[0.12em] text-muted uppercase">{t("ats.evOriginal")}</p>
@@ -114,7 +134,7 @@ function SampleB() {
 function SampleC() {
   return (
     <Sample>
-      <p className="text-xs font-semibold tracking-[0.14em] text-muted uppercase">{t("discover.queueTitle")}</p>
+      <p className="text-xs text-muted">{t("discover.queueEyebrow", { n: 44 })}</p>
       <p className="mt-1 font-display text-xl font-semibold tracking-[-0.01em]">
         {t("discover.titleA")} <em className="font-normal text-signal-ink">{t("discover.titleB")}</em>
       </p>
@@ -155,7 +175,9 @@ function SampleC() {
           <p className="font-display text-4xl font-semibold text-[#1f7a4d] tabular-nums">
             86<span className="text-xl">%</span>
           </p>
-          <p className="text-sm font-semibold text-[#1f7a4d]">{t("fit.verdict_strong")}</p>
+          <p className="text-sm font-semibold text-[#1f7a4d]">
+            {t("fit.verdict_strong")} · {t("fit.short_strong")}
+          </p>
           <div className="mt-2 flex justify-between gap-1">
             <Ring value={85} label={t("discover.ringLocation")} />
             <Ring value={82} label={t("discover.ringExperience")} />
@@ -176,7 +198,7 @@ function SampleD() {
   const stages = [
     { id: "explore", icon: Telescope, state: "done" },
     { id: "learn", icon: MapIcon, state: "now" },
-    { id: "experience", icon: Hammer, state: "later" },
+    { id: "experience", icon: Hammer, state: "next" },
     { id: "land", icon: Flag, state: "later" },
   ] as const;
   const skills = [
@@ -187,7 +209,8 @@ function SampleD() {
   ] as const;
   return (
     <Sample>
-      <p className="font-display text-lg font-semibold">{t("show.dRoadmap")}</p>
+      <p className="font-display text-lg font-semibold">{t("gaps.roadmapTitle")}</p>
+      <p className="text-xs text-muted">{t("gaps.roadmapLead", { role: "Data analyst" })}</p>
       <ol className="mt-4 grid grid-cols-4 gap-2">
         {stages.map(({ id, icon: Icon, state }) => (
           <li key={id} className="flex flex-col items-center text-center">
@@ -197,7 +220,7 @@ function SampleD() {
               {state === "done" ? <Check aria-hidden="true" className="size-4" /> : <Icon aria-hidden="true" className="size-4" />}
             </span>
             <span className="mt-1 text-xs font-medium">{t(`gaps.stage_${id}`)}</span>
-            <span className="text-[0.65rem] text-muted">{state === "done" ? t("gaps.done") : state === "now" ? t("gaps.now") : t("gaps.later")}</span>
+            <span className="text-[0.65rem] text-muted">{state === "done" ? t("gaps.done") : state === "now" ? t("gaps.now") : state === "next" ? t("gaps.next") : t("gaps.later")}</span>
           </li>
         ))}
       </ol>
@@ -222,6 +245,7 @@ function SampleD() {
 function SampleE() {
   const funnel = [
     { l: t("tracker.funnelApplied"), n: 42 },
+    { l: t("tracker.funnelViews"), n: 26 },
     { l: t("tracker.funnelResponses"), n: 15 },
     { l: t("tracker.funnelInterviews"), n: 6 },
     { l: t("tracker.funnelOffers"), n: 2 },
@@ -236,9 +260,12 @@ function SampleE() {
   return (
     <Sample dark>
       <p className="font-display text-lg font-semibold">{t("tracker.funnelTitle")}</p>
+      <p className="text-xs text-[#c9d2de]">
+        {t("tracker.funnel30")} · {t("tracker.funnelAcross")}
+      </p>
       <ul className="mt-3 flex flex-col gap-2">
         {funnel.map((x) => (
-          <li key={x.l} className="grid grid-cols-[7.5rem_1fr_2.5rem] items-center gap-2 text-xs sm:text-sm">
+          <li key={x.l} className="grid grid-cols-[8rem_1fr_2.5rem] items-center gap-2 text-xs sm:text-sm">
             <span className="text-[#c9d2de]">{x.l}</span>
             <span className="h-6 overflow-hidden rounded-md bg-white/10">
               <span className="flex h-full items-center rounded-md bg-signal px-2 font-semibold text-ink tabular-nums" style={{ width: `${Math.max(10, (x.n / 42) * 100)}%` }}>
@@ -290,6 +317,7 @@ export function HomeShowcase() {
                   <span className="rounded-full bg-signal/25 px-3 py-1 text-xs font-semibold">{b.tag}</span>
                 </p>
                 <h3 className="mt-4 font-display text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">{b.name}</h3>
+                <p className="mt-1 text-sm font-semibold text-signal-ink">{b.sub}</p>
                 <p className="mt-3 text-muted text-pretty">{b.lead}</p>
                 <ul className="mt-4 flex flex-col gap-2">
                   {b.points.map((p) => (

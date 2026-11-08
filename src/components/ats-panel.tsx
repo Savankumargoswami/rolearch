@@ -5,6 +5,7 @@ import { ApplicationChecklist } from "./application-checklist";
 import { applyChoices, evidenceProblem, replaceText, unsupported, withEvidence, type SkillEvidence } from "@/lib/tailor-evidence";
 import { mentions } from "@/lib/skills";
 import { FitReportView } from "./fit-report";
+import { RecruiterReview } from "./recruiter-review";
 import { CircleAlert, CircleHelp, Check, Download, FileText, FileUp, Loader2, Lock, Save, ScanSearch, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -284,6 +285,13 @@ export function AtsPanel({ target, jobTitle, company, signedIn, hasProfile, next
             <Checks key={part} part={part} checks={report.checks.filter((c) => c.part === part)} jobTitle={jobTitle} report={report} />
           ))}
           <ShareScore before={better?.before ?? null} after={report.score} title={jobTitle} />
+          {!better && (
+            <RecruiterReview
+              target={checked}
+              doc={result.resume}
+              onApply={(from, to) => setResult((r) => (r ? { ...r, resume: replaceText(r.resume, from, to) } : r))}
+            />
+          )}
 
           {!better ? (
             <div className="mt-5 rounded-2xl bg-ink p-4 text-paper">
@@ -837,10 +845,18 @@ function Improved({
   }
   return (
     <div ref={ref} className="mt-6 scroll-mt-24 rounded-2xl border border-signal/50 bg-signal/10 p-4">
-      <p className="flex items-center gap-2 font-display font-semibold">
+      <p className="font-mono text-xs font-semibold tracking-[0.14em] text-signal-ink uppercase">{t("ats.reviewable")}</p>
+      <p className="mt-0.5 flex items-center gap-2 font-display font-semibold">
         <Sparkles aria-hidden="true" className="size-4 text-signal-ink" />
-        {t("ats.tailoredTitle")}
+        {t("ats.groundedTitle")}
       </p>
+      <ul className="mt-2 flex flex-wrap gap-1.5">
+        {(["chipGaps", "chipExport", "chipVersions"] as const).map((k) => (
+          <li key={k} className="rounded-md border border-line bg-surface px-2 py-0.5 font-mono text-[0.65rem] tracking-[0.08em] uppercase">
+            {t(`ats.${k}`)}
+          </li>
+        ))}
+      </ul>
       <p className="mt-1 text-sm">
         {t("ats.tailoredSummary", { before: better.before, after: better.report.score, n: better.changes.length })}{" "}
         {added > 0 ? t("ats.tailoredAdded", { n: added }) : t("ats.tailoredNoneAdded")}

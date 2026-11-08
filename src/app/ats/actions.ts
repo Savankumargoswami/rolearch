@@ -17,6 +17,7 @@ import { coverLetterDocx, resumeDocx } from "@/lib/resume-docx";
 import { optimizeResume, placeKeywords, rewriteLine, type Change, type TailorMode } from "@/lib/resume-optimizer";
 import { coverLetterPdf, resumePdf } from "@/lib/resume-pdf";
 import { readResume, type Contact } from "@/lib/resume-reader";
+import { reviewResume, strengthenLine, type Review } from "@/lib/resume-coach";
 import { jobScreening, screen, type JobScreening, type Screening } from "@/lib/screening";
 import { signShare } from "@/lib/share-card";
 import { SKILLS } from "@/lib/skill-tests";
@@ -419,6 +420,58 @@ export async function saveVersion(
     return { ok: true, id: data.id };
   } catch (e) {
     console.error("[ats] saveVersion failed:", e instanceof Error ? e.stack ?? e.message : e);
+    return { ok: false, message: t("ats.errUnexpected") };
+  }
+}
+
+/** AI Recruiter Review: every bullet scored for this job, hidden matches, and questions for weak bullets. */
+export async function reviewForJob(target: AtsTarget, resume: AtsDoc): Promise<{ ok: true; review: Review } | { ok: false; message: string }> {
+  try {
+    const user = await signedIn();
+    if (!user) return { ok: false, message: t("profile.errSignedOut") };
+    if (!(await allow(user.id, "review"))) return { ok: false, message: t("ats.errLimit") };
+    const parsed = fitted(resume);
+    if (!parsed) return { ok: false, message: t("profile.errInvalid") };
+    const found = await jobFor(target);
+    if ("error" in found) return { ok: false, message: found.error };
+    const review = await reviewResume({ resume: parsed, job: { title: found.job.title, company: found.job.company, description: found.description } });
+    if (!review) return { ok: false, message: t("ats.errReview") };
+    return { ok: true, review };
+  } catch (e) {
+    console.error("[ats] reviewForJob failed:", e instanceof Error ? e.stack ?? e.message : e);
+    return { ok: false, message: t("ats.errUnexpected") };
+  }
+}
+
+/** A weak bullet made stronger with the candidate's own answer (no facts beyond the bullet and the answer). */
+export async function strengthenBullet(
+  target: AtsTarget,
+  input: { original: string; question: string; answer: string; requirement: string },
+): Promise<{ ok: true; after: string } | { ok: false; message: string }> {
+  try {
+    const user = await signedIn();
+    if (!user) return { ok: false, message: t("profile.errSignedOut") };
+    if (!(await allow(user.id, "rewrite"))) return { ok: false, message: t("ats.errLimit") };
+    const original = String(input.original ?? "").slice(0, 600);
+    const answer = String(input.answer ?? "").slice(0, 600);
+    if (!original.trim()) return { ok: false, message: t("ats.errRewrite") };
+    const found = await jobFor(target);
+    if ("error" in found) return { ok: false, message: found.error };
+    const line = await strengthenLine({
+      original,
+      question: String(input.question ?? "").slice(0, 300),
+      answer,
+      requirement: String(input.requirement ?? "").slice(0, 200),
+      job: { title: found.job.title, description: found.description },
+    });
+    if (!line) return { ok: false, message: t("ats.errRewrite") };
+    // No job skill the bullet and the answer don't show.
+    const keywords = (found.job.keywords?.hard ?? found.job.skills).slice(0, 40);
+    const bad = unsupported({ section: "", before: original, after: line, why: "" }, `${original}\n${answer}`, keywords, []);
+    if (bad.length) return { ok: false, message: t("ats.errRewriteEvidence", { what: bad.slice(0, 3).join(", ") }) };
+    return { ok: true, after: line };
+  } catch (e) {
+    console.error("[ats] strengthenBullet failed:", e instanceof Error ? e.stack ?? e.message : e);
     return { ok: false, message: t("ats.errUnexpected") };
   }
 }

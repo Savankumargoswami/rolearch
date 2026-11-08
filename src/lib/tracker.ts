@@ -96,6 +96,8 @@ export function nextStep(j: TrackedJob, now: number): NextStep | null {
 export type Funnel = {
   saved: number;
   applied: number;
+  /** Applications a recruiter is known to have opened: viewed through Rolearch, or any that got a reply. */
+  views: number;
   /** Applications the employer replied to: a screen, an interview, an offer, a logged conversation or a stated rejection. */
   responses: number;
   interviewing: number;
@@ -108,7 +110,7 @@ export type Funnel = {
 };
 
 /** Application outcomes: how far applications get, and why they stop. Anything past "saved" counts as sent. */
-export function funnel(jobs: TrackedJob[]): Funnel {
+export function funnel(jobs: TrackedJob[], viewed: Set<string> = new Set()): Funnel {
   const sent = jobs.filter((j) => j.appliedAt || ["applied", "screen", "interviewing", "offer", "rejected", "withdrawn"].includes(j.status));
   const interviewed = sent.filter((j) => j.status === "interviewing" || j.status === "offer" || j.interviewAt || j.rejectionReason === "after_interview");
   const offers = sent.filter((j) => j.status === "offer");
@@ -118,6 +120,15 @@ export function funnel(jobs: TrackedJob[]): Funnel {
   return {
     saved: jobs.filter((j) => j.status === "saved" || j.status === "analyzing" || j.status === "ready").length,
     applied: sent.length,
+    views: sent.filter(
+      (j) =>
+        viewed.has(j.jobId) ||
+        interviewed.includes(j) ||
+        j.status === "screen" ||
+        j.status === "offer" ||
+        j.log.some((e) => e.kind !== "status") ||
+        (j.status === "rejected" && j.rejectionReason !== "" && j.rejectionReason !== "no_response"),
+    ).length,
     responses: sent.filter(
       (j) =>
         interviewed.includes(j) ||

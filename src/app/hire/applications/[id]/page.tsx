@@ -45,6 +45,11 @@ async function Applicant({ params }: { params: PageProps<"/hire/applications/[id
   if (!app) notFound();
   const job = await companyJob(db, viewer.id, app.jobId);
   if (!job) notFound();
+  // Recruiter view: the first time the company opens the application (db/036; ignored before it runs).
+  await db.rpc("mark_application_viewed", { p_id: app.id }).then(
+    () => undefined,
+    () => undefined,
+  );
   const history = (await events(db, [app.id])).get(app.id) ?? [];
   const s = app.snapshot;
   const resume = withDefaults({ resume: (s.resume as ProfileData["resume"]) ?? undefined }).resume;

@@ -13,7 +13,7 @@ import { TrackerItem } from "./tracker-item";
 
 export const metadata: Metadata = { title: "Job tracker", robots: { index: false } };
 
-type Search = Promise<{ view?: string; q?: string; status?: string }>;
+type Search = Promise<{ view?: string; q?: string; status?: string; period?: string }>;
 
 export default function TrackerPage({ searchParams }: { searchParams: Search }) {
   return (
@@ -33,6 +33,7 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
   const view = sp.view === "board" ? "board" : "list";
   const query = String(sp.q ?? "").trim().toLowerCase().slice(0, 80);
   const only = (TRACKER_STATUSES as readonly string[]).includes(String(sp.status)) ? String(sp.status) : "";
+  const allTime = sp.period === "all";
   const viewer = await requireMember("/tracker");
   const db = await createClient();
   const [{ data }, apps] = await Promise.all([
@@ -49,6 +50,12 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
   const labels = new Map((versions ?? []).map((v: { id: string; label: string }) => [v.id, v.label]));
   const appByJob = new Map(apps.map((a) => [a.jobId, a]));
   const history = await events(db, apps.map((a) => a.id));
+  // Recruiter views of applications sent through Rolearch (db/036; empty before it runs).
+  const { data: viewRows } = await db.rpc("my_application_views").then(
+    (r) => r,
+    () => ({ data: null }),
+  );
+  const viewed = new Set(((viewRows ?? []) as { job_id: string }[]).map((r) => r.job_id));
   const heading = (
     <>
       <p className="text-xs font-semibold tracking-[0.14em] text-muted uppercase">{t("tracker.managerTitle")}</p>
@@ -75,14 +82,26 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
   const shown = tracked.filter(
     (j) => (!only || j.status === only) && (!query || `${j.title} ${j.company} ${j.notes} ${j.contactName}`.toLowerCase().includes(query)),
   );
-  const f = funnel(tracked);
+  // Your Application Funnel: the last 30 days by default, or all time.
+  const cutoff = now - 30 * 86_400_000;
+  const inPeriod = allTime ? tracked : tracked.filter((j) => Date.parse(j.appliedAt ?? j.updatedAt) >= cutoff);
+  const f = funnel(inPeriod, viewed);
   const steps = [
-    { n: f.saved, label: t("tracker.funnelSaved"), of: false },
     { n: f.applied, label: t("tracker.funnelApplied"), of: false },
+    { n: f.views, label: t("tracker.funnelViews"), of: true },
     { n: f.responses, label: t("tracker.funnelResponses"), of: true },
     { n: f.interviewing, label: t("tracker.funnelInterviews"), of: true },
     { n: f.offer, label: t("tracker.funnelOffers"), of: true },
   ];
+  const periodHref = (all: boolean) => {
+    const q = new URLSearchParams();
+    if (view === "board") q.set("view", "board");
+    if (query) q.set("q", query);
+    if (only) q.set("status", only);
+    if (all) q.set("period", "all");
+    const s = q.toString();
+    return `/tracker${s ? `?${s}` : ""}#funnel-h`;
+  };
   const top = Math.max(1, ...steps.map((x) => x.n));
   const o = f.applied >= 3 ? await outcomes(tracked, labels, versionOf) : null;
   return (
@@ -91,7 +110,14 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
       <section aria-labelledby="funnel-h" className="mt-6 grid gap-5 rounded-3xl bg-ink p-5 text-paper sm:p-6 md:grid-cols-[1.3fr_1fr]">
         <div>
           <h2 id="funnel-h" className="font-display text-lg font-semibold">{t("tracker.funnelTitle")}</h2>
-          <p className="text-xs text-[#c9d2de]">{t("tracker.funnelLead")}</p>
+          <p className="flex flex-wrap items-center gap-x-2 text-xs text-[#c9d2de]">
+            <span>{allTime ? t("tracker.funnelAll") : t("tracker.funnel30")}</span>
+            <span aria-hidden="true">·</span>
+            <span>{t("tracker.funnelAcross")}</span>
+            <Link href={periodHref(!allTime)} className="ms-auto font-medium text-signal underline underline-offset-4">
+              {allTime ? t("tracker.funnelShow30") : t("tracker.funnelShowAll")}
+            </Link>
+          </p>
           <ul className="mt-3 flex flex-col gap-2">
             {steps.map((x) => (
               <li key={x.label} className="grid grid-cols-[6.5rem_1fr_2.75rem] items-center gap-3 text-sm">
@@ -105,6 +131,7 @@ async function Tracker({ searchParams }: { searchParams: Search }) {
               </li>
             ))}
           </ul>
+          <p className="mt-2 text-xs text-[#9fb0c3]">{t("tracker.funnelViewsNote")}</p>
           {f.applied > 0 && (
             <p className="mt-3 text-sm text-[#dfe5ec]">
               {t("tracker.interviewRate", { n: f.interviewRate })} · {t("tracker.offerRate", { n: f.offerRate })}

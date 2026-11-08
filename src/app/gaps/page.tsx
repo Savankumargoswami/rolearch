@@ -113,9 +113,11 @@ async function Gaps({ searchParams }: { searchParams: Promise<{ role?: string }>
           {/* Career roadmap: where the member is on the path to the role. */}
           <section aria-labelledby="path-h" className="mt-8 rounded-3xl border border-line bg-surface p-5 sm:p-6">
             <h2 id="path-h" className="font-display text-xl font-semibold">
-              {t("gaps.pathTitle", { role })}
+              {t("gaps.roadmapTitle")}
             </h2>
-            <p className="text-sm text-muted">{t("gaps.pathLead", { n: g.jobs })}</p>
+            <p className="text-sm text-muted">
+              {t("gaps.roadmapLead", { role })} {t("gaps.pathLead", { n: g.jobs })}
+            </p>
             <ol className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
               {STAGES.map((s, i) => {
                 const done = i < stageAt;
@@ -129,7 +131,7 @@ async function Gaps({ searchParams }: { searchParams: Promise<{ role?: string }>
                       {done ? <Check aria-hidden="true" className="size-5" /> : <Icon aria-hidden="true" className="size-5" />}
                     </span>
                     <span className="mt-2 font-medium">{t(`gaps.stage_${s.id}`)}</span>
-                    <span className="text-xs text-muted">{done ? t("gaps.done") : now ? t("gaps.now") : t("gaps.later")}</span>
+                    <span className="text-xs text-muted">{done ? t("gaps.done") : now ? t("gaps.now") : i === stageAt + 1 ? t("gaps.next") : t("gaps.later")}</span>
                   </li>
                 );
               })}
@@ -183,7 +185,7 @@ async function Gaps({ searchParams }: { searchParams: Promise<{ role?: string }>
                 ))}
               </ul>
               <Link href={`/discover?role=${encodeURIComponent(role)}`} className="mt-2 inline-flex items-center gap-1 text-sm font-medium underline underline-offset-4">
-                {t("fit.discoverLink")}
+                {t("gaps.viewAll")}
                 <ArrowUpRight aria-hidden="true" className="size-3.5" />
               </Link>
             </section>
