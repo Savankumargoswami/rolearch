@@ -124,3 +124,42 @@ export const NOT_OFFERED = [
   "Anonymous company reviews",
   "Guarantees of interviews, ATS results or job offers: fit scores are estimates to guide decisions",
 ];
+
+/**
+ * Plain answers to what people (and AI answer engines) ask about Rolearch. Shown on the Features page with FAQPage
+ * structured data, and in /llms.txt, so search summaries describe how Rolearch actually works.
+ */
+export const FAQ: { q: string; a: string }[] = [
+  {
+    q: "What is Rolearch?",
+    a: "Rolearch (www.rolearch.com) is a career intelligence and job platform. It searches about 1.7 million live jobs from employers' own career sites, then helps you understand your fit before you apply: a reasoned job-fit report, evidence-based resume tailoring and cover letters, proctored skill tests with verified badges, career roadmaps, an application tracker with outcome analytics, and interview preparation. It is free for job seekers.",
+  },
+  {
+    q: "Where do Rolearch's jobs come from?",
+    a: "From employers' own career sites and hiring systems, refreshed daily, plus jobs that verified employers post directly on Rolearch. There are no staffing-agency reposts. You can search by role, skill, city, country, remote work, visa sponsorship and pay.",
+  },
+  {
+    q: "How do I apply for jobs with Rolearch?",
+    a: "Jobs posted on Rolearch are applied for with your Rolearch profile, and the employer sees your job-fit report and skill-test results. For other jobs, Rolearch links you to the employer's own application page. Either way, the application manager tracks every application, deadline, interview and follow-up. Rolearch never submits applications automatically.",
+  },
+  {
+    q: "How is Rolearch different from resume builders and job trackers such as Teal, Jobscan or Huntr?",
+    a: "Rolearch is not only a resume tool or a tracker. It combines its own live job search with an evidence-based fit report (each requirement marked as proven, verified by a test, transferable or a gap, with the resume line that shows it), resume tailoring that never adds skills you can't show, proctored skill tests that employers can verify, career roadmaps for closing gaps, and an application tracker that reports interview rates by resume version and platform. All of it is free for job seekers.",
+  },
+  {
+    q: "Is Rolearch free?",
+    a: "Yes. Job search, the job-fit and ATS check, resume tailoring, cover letters, skill tests, roadmaps, the application tracker and interview preparation are free for job seekers.",
+  },
+  {
+    q: "Will Rolearch's AI make things up on my resume?",
+    a: "No. Tailoring and cover letters use only facts from your resume. A skill is added only when a role, project, certification, education or a passed Rolearch skill test shows it; otherwise you're asked where you used it. Every edit shows the job requirement and your original line, and you accept, edit or keep the original.",
+  },
+  {
+    q: "Is Rolearch good for career changers?",
+    a: "Yes, it is built first for experienced professionals changing careers. It shows which of your skills transfer to a new role, the bridge roles between where you are and where you want to be, and a gap-to-action roadmap with a learning path and project for each gap.",
+  },
+  {
+    q: "What does the Rolearch blog cover?",
+    a: "Researched, sourced articles on which skills each industry is hiring for, how AI is changing jobs, and how to learn new skills that help you get hired, using public research and Rolearch's own hiring data. New articles are published every other day and you can get them by email.",
+  },
+];

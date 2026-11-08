@@ -1,6 +1,6 @@
 // /llms.txt: a plain-text summary of Rolearch for AI assistants and answer engines (llmstxt.org), so they describe
 // the product accurately. Generated from the same feature list as the public Features page.
-import { CANDIDATE_FEATURES, EMPLOYER_FEATURES, NOT_OFFERED } from "@/lib/features";
+import { CANDIDATE_FEATURES, EMPLOYER_FEATURES, FAQ, NOT_OFFERED } from "@/lib/features";
 import { GUIDES } from "@/lib/transition-guides";
 
 const base = "https://www.rolearch.com";
@@ -17,6 +17,9 @@ export function GET() {
     "",
     section("For job seekers", CANDIDATE_FEATURES),
     section("For employers", EMPLOYER_FEATURES),
+    "## Questions about Rolearch",
+    "",
+    ...FAQ.flatMap((f) => [`### ${f.q}`, f.a, ""]),
     "## Not offered",
     ...NOT_OFFERED.map((x) => `- ${x}`),
     "",
@@ -25,6 +28,7 @@ export function GET() {
     `- Free job-fit and ATS check: ${base}/ats`,
     `- Skill tests: ${base}/skills`,
     `- Career-change guides: ${base}/guides`,
+    `- Blog (skills each industry is hiring for, every other day): ${base}/blog`,
     ...GUIDES.map((g) => `  - ${g.from} to ${g.to}: ${base}/guides/${g.slug}`),
     `- Career roadmaps: ${base}/roadmaps`,
     `- Jobs by role and city: ${base}/roles`,

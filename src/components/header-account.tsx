@@ -13,6 +13,9 @@ const common: MenuItem[] = [
   { href: "/skills", label: t("nav.skills"), icon: "skills" },
   { href: "/ats", label: t("nav.ats"), icon: "ats" },
   { href: "/roadmaps", label: t("nav.roadmaps"), icon: "roadmaps" },
+  { href: "/guides", label: t("nav.guides"), icon: "guides" },
+  { href: "/blog", label: t("nav.blog"), icon: "blog" },
+  { href: "/features", label: t("nav.features"), icon: "features" },
 ];
 
 /** Shown to visitors who aren't signed in, and as the placeholder while the session is read. */
@@ -26,6 +29,7 @@ export function GuestLinks() {
       <MobileMenu
         items={[
           { href: "/signup", label: t("nav.signUp"), icon: "join", primary: true },
+          { href: "/discover", label: t("nav.discover"), icon: "discover" },
           ...common,
           { href: "/feed", label: t("nav.posts"), icon: "posts" },
           { href: "/employers", label: t("nav.companies"), icon: "companies" },

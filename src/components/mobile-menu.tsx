@@ -1,11 +1,11 @@
 "use client";
 
-import { BadgeCheck, Compass, FileStack, LayoutDashboard, Route, ShieldCheck, UserSearch, Building2, ChartNoAxesColumn, FileSearch, Map, Menu, MessageSquare, MessagesSquare, UserPlus, X } from "lucide-react";
+import { BadgeCheck, BookOpenText, Compass, LayoutGrid, Newspaper, FileStack, LayoutDashboard, Route, ShieldCheck, UserSearch, Building2, ChartNoAxesColumn, FileSearch, Map, Menu, MessageSquare, MessagesSquare, UserPlus, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { t } from "@/i18n";
 
-const ICONS = { talent: UserSearch, dashboard: LayoutDashboard, privacy: ShieldCheck, gaps: Route, versions: FileStack, discover: Compass, interview: MessagesSquare, skills: BadgeCheck, ats: FileSearch, roadmaps: Map, companies: Building2, posts: MessageSquare, tracker: ChartNoAxesColumn, hiring: Building2, join: UserPlus };
+const ICONS = { talent: UserSearch, dashboard: LayoutDashboard, privacy: ShieldCheck, gaps: Route, versions: FileStack, discover: Compass, interview: MessagesSquare, skills: BadgeCheck, ats: FileSearch, roadmaps: Map, companies: Building2, posts: MessageSquare, tracker: ChartNoAxesColumn, hiring: Building2, join: UserPlus, features: LayoutGrid, blog: Newspaper, guides: BookOpenText };
 export type MenuItem = { href: string; label: string; icon: keyof typeof ICONS; primary?: boolean };
 
 /** The header's menu, on every screen size: everything that isn't search, Jobs or Profile. Closes on a link, a tap outside, or Escape. */
@@ -36,7 +36,8 @@ export function MobileMenu({ items }: { items: MenuItem[] }) {
         <X aria-hidden="true" className="hidden size-5 group-open:block" />
         <span className="hidden sm:inline">{t("nav.menu")}</span>
       </summary>
-      <ul className="absolute end-0 top-13 z-30 w-[min(17rem,calc(100vw-2rem))] rounded-2xl border border-line bg-surface p-2 shadow-[0_18px_40px_-18px_rgba(14,31,47,0.45)]">
+      {/* Solid, not glass: the header already blurs, and a blur nested inside it can't see the page, so a see-through panel let page text show through. */}
+      <ul className="absolute end-0 top-13 z-30 max-h-[calc(100dvh-5rem)] w-[min(17rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-2xl border border-line bg-[#fbfbf9] p-2 shadow-[0_18px_40px_-18px_rgba(14,31,47,0.45)]">
         {items.map((l) => {
           const Icon = ICONS[l.icon];
           return (

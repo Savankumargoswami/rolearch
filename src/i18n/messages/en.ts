@@ -8,7 +8,7 @@ const en = {
     title: "Rolearch: Understand your fit before you apply",
     titleTemplate: "%s · Rolearch",
     description:
-      "Understand your fit before you apply. Rolearch gives you a reasoned job-fit report, evidence-based resume tailoring and cover letters, proctored skill tests with verified badges, jobs ranked by fit, career roadmaps, an application manager and interview prep. Free for job seekers.",
+      "Understand your fit before you apply. Rolearch searches 1.7 million live jobs from employers' own career sites and gives you a reasoned job-fit report, evidence-based resume tailoring and cover letters, proctored skill tests with verified badges, career roadmaps, an application tracker and interview prep. Free for job seekers.",
   },
   nav: {
     ats: "ATS check",
@@ -33,6 +33,9 @@ const en = {
     gaps: "Career roadmap",
     versions: "Resume versions",
     privacy: "Settings and privacy",
+    guides: "Career-change guides",
+    blog: "Blog",
+    features: "All features",
   },
   hero: {
     title: "Your skills. Your next opportunity.",

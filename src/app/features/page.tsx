@@ -2,7 +2,7 @@ import { ArrowRight, Check } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HomeShowcase } from "@/components/home-showcase";
-import { CANDIDATE_FEATURES, EMPLOYER_FEATURES, NOT_OFFERED, type Feature } from "@/lib/features";
+import { CANDIDATE_FEATURES, EMPLOYER_FEATURES, FAQ, NOT_OFFERED, type Feature } from "@/lib/features";
 
 export const metadata: Metadata = {
   title: "Features",
@@ -43,6 +43,30 @@ export default function FeaturesPage() {
           </li>
         ))}
       </ul>
+
+      <section aria-labelledby="faq-h" className="mt-16">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: FAQ.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+            }).replace(/</g, "\\u003c"),
+          }}
+        />
+        <h2 id="faq-h" className="font-display text-3xl font-semibold tracking-[-0.02em]">
+          Questions about Rolearch
+        </h2>
+        <dl className="mt-6 grid gap-x-10 gap-y-6 md:grid-cols-2">
+          {FAQ.map((f) => (
+            <div key={f.q}>
+              <dt className="font-semibold text-balance">{f.q}</dt>
+              <dd className="mt-1.5 text-muted">{f.a}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
 
       <section className="mt-14 rounded-3xl border border-line bg-surface p-6">
         <h2 className="font-display text-xl font-semibold">What Rolearch doesn&apos;t do</h2>
