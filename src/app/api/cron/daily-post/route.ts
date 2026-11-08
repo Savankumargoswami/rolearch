@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { once } from "@/lib/job-runs";
 import { dailyPost, topicFor, TOPICS, type Digest } from "@/lib/daily-post";
 import { dataKey } from "@/lib/supabase/data-key";
 
@@ -22,7 +23,7 @@ async function rpc<T>(name: string, body: object): Promise<T> {
   return (await res.json()) as T;
 }
 
-export async function GET(request: NextRequest) {
+async function run(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -45,4 +46,9 @@ export async function GET(request: NextRequest) {
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 502 });
   }
+}
+
+// At most once per day: Vercel Schedules can deliver a run twice (lib/job-runs.ts).
+export function GET(request: NextRequest) {
+  return once("daily-post", "day", request, (r) => run(r as NextRequest));
 }

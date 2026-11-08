@@ -1,21 +1,25 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "crons": [
-    {
+  "schedules": {
+    "feedback-digest": {
+      "schedule": "0 14 * * 1",
       "path": "/api/cron/feedback-digest",
-      "schedule": "0 14 * * 1"
+      "requestMethod": "GET"
     },
-    {
+    "daily-post": {
+      "schedule": "0 13 * * *",
       "path": "/api/cron/daily-post",
-      "schedule": "0 13 * * *"
+      "requestMethod": "GET"
     },
-    {
+    "newsletter": {
+      "schedule": "30 14 * * 1",
       "path": "/api/cron/newsletter",
-      "schedule": "30 14 * * 1"
+      "requestMethod": "GET"
     },
-    {
+    "blog": {
+      "schedule": "0 12 */2 * *",
       "path": "/api/cron/blog",
-      "schedule": "0 12 */2 * *"
+      "requestMethod": "GET"
     }
-  ]
+  }
 }

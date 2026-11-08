@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { once } from "@/lib/job-runs";
 import { digestHtml, summarise, type FeedbackRow } from "@/lib/feedback-digest";
 import { dataKey } from "@/lib/supabase/data-key";
 
@@ -9,7 +10,7 @@ const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "")
 const KEY = dataKey;
 const WEEK = 7 * 86_400_000;
 
-export async function GET(request: NextRequest) {
+async function run(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -44,4 +45,9 @@ export async function GET(request: NextRequest) {
   });
   if (!send.ok) return NextResponse.json({ error: `send failed: ${send.status} ${await send.text()}` }, { status: 502 });
   return NextResponse.json({ ok: true, responses: rows.length, summarised: Boolean(summary) });
+}
+
+// At most once per week: Vercel Schedules can deliver a run twice (lib/job-runs.ts).
+export function GET(request: NextRequest) {
+  return once("feedback-digest", "week", request, (r) => run(r as NextRequest));
 }
