@@ -3,7 +3,7 @@
 **Name:** Rolearch: Job Fit Check
 
 **Summary (132 characters max):**
-See how your resume fits any job on LinkedIn, Indeed or a careers page: your match, missing skills and what to fix. Free.
+See how your resume fits the job posting you're looking at: your match, the skills you're missing, and what to fix. Free.
 
 **Category:** Productivity (or Tools)
 
@@ -17,7 +17,9 @@ Rolearch reads the posting you're on and opens it in our free job-fit check, alr
 
 Save any job to your Rolearch tracker so every application is in one place.
 
-Works on LinkedIn, Indeed, Glassdoor, Greenhouse, Lever, Workday, Ashby and most company careers pages. If a page is unusual, select the job description with your mouse and click again.
+Works on most job sites and company careers pages. If a page is unusual, select the job description with your mouse and click the button again.
+
+Private by design: the extension reads a page only when you click it, and only the tab you're on. It never reads your browsing history or other tabs.
 
 Free for job seekers.
 
@@ -32,4 +34,6 @@ Send the job posting on the current tab to Rolearch's job-fit check.
 
 **Data use (privacy form):** collects "Website content" (the job posting the user chose) only to provide the feature; not sold, not used for ads or credit. Privacy policy: https://www.rolearch.com/privacy
 
-**Screenshots needed (1280x800):** the popup on a LinkedIn job; the filled-in check on rolearch.com/ats; a job-fit result.
+**Screenshots needed (1280x800):** the popup on a job posting; the filled-in check on rolearch.com/ats; a job-fit result.
+
+**Store rule (Nov 9 2026 rejection, 'Yellow Argon'):** don't list other sites' names (LinkedIn, Indeed, ...) in the description, summary or images; it counts as keyword spam.

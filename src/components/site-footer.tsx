@@ -31,6 +31,7 @@ export function SiteFooter() {
         <div>
           <h2 className="text-sm font-semibold">{t("footer.company")}</h2>
           <ul className="mt-3 space-y-2 text-muted">
+            <li><Link className="hover:text-ink" href="/about">About us</Link></li>
             <li><Link className="hover:text-ink" href="/feedback">{t("footer.feedback")}</Link></li>
             <li><a className="hover:text-ink" href="mailto:admin@rolearch.com">{t("footer.contact")}</a></li>
             <li><Link className="hover:text-ink" href="/privacy">{t("footer.privacy")}</Link></li>

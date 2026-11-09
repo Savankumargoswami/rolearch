@@ -25,6 +25,7 @@ export function GET() {
     "",
     "## Key pages",
     `- Features: ${base}/features`,
+    `- About: ${base}/about`,
     `- Free job-fit and ATS check: ${base}/ats`,
     `- Skill tests: ${base}/skills`,
     `- Career-change guides: ${base}/guides`,

@@ -27,7 +27,7 @@ async function main() {
   if (!job) {
     show(
       el("h1", {}, "Open a job posting first"),
-      el("p", { class: "note" }, "Go to a job on LinkedIn, Indeed, Glassdoor or a company's careers page, then click the Rolearch button again."),
+      el("p", { class: "note" }, "Go to a job posting on any job site or company careers page, then click the Rolearch button again."),
     );
     return;
   }
