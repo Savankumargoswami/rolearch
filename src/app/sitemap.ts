@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
 import { listPosts } from "@/lib/blog";
+import { roadmapList } from "@/lib/roadmaps";
+import { measuredRoles, topLinks } from "@/lib/skill-graph";
+import { reportMonths } from "@/lib/skills-report";
 import { TOPICS } from "@/lib/daily-post";
 import { GUIDES } from "@/lib/transition-guides";
 import { METROS, ROLES, SPECIAL } from "@/lib/seo-pages";
@@ -7,7 +10,8 @@ import { METROS, ROLES, SPECIAL } from "@/lib/seo-pages";
 const base = "https://www.rolearch.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await listPosts(undefined, 1000);
+  const [posts, roadmaps, measured, moves, months] = await Promise.all([listPosts(undefined, 1000), roadmapList(), measuredRoles(), topLinks(10), reportMonths()]);
+  const named = new Set(roadmaps.map((r) => r.slug));
   // Role pages: nationwide, remote, visa sponsorship and each metro (pages with too few jobs mark themselves noindex).
   const roles: MetadataRoute.Sitemap = ROLES.flatMap((r) => [
     { url: `${base}/roles/${r.slug}`, changeFrequency: "daily" as const, priority: 0.7 },
@@ -30,5 +34,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/terms`, changeFrequency: "yearly", priority: 0.2 },
     ...TOPICS.map((t) => ({ url: `${base}/today/${t.key}`, changeFrequency: "hourly" as const, priority: 0.7 })),
     ...roles,
+    ...roadmaps.map((r) => ({ url: `${base}/roadmaps/${r.slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
+    { url: `${base}/careers`, changeFrequency: "weekly", priority: 0.8 },
+    ...measured.filter((r) => named.has(r.slug)).map((r) => ({ url: `${base}/careers/${r.slug}`, changeFrequency: "weekly" as const, priority: 0.7 })),
+    ...moves
+      .filter((m) => named.has(m.from) && named.has(m.to))
+      .map((m) => ({ url: `${base}/careers/${m.from}/to/${m.to}`, changeFrequency: "weekly" as const, priority: 0.6 })),
+    ...months.map((m) => ({ url: `${base}/reports/skills/${m}`, changeFrequency: "monthly" as const, priority: 0.7 })),
   ];
 }

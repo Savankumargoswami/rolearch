@@ -1,10 +1,12 @@
-import { BadgeCheck, CircleCheck, CircleX, ShieldAlert } from "lucide-react";
+import { BadgeCheck, CircleCheck, CircleX, ExternalLink, ShieldAlert } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { t, type MessageKey } from "@/i18n";
+import { badgeCode, badgeTitle, linkedInAddUrl } from "@/lib/badge";
 import { requireMember } from "@/lib/require-member";
+import { utm } from "@/lib/utm";
 import { ATTEMPT_COLUMNS, PASS_MARK, RETRY_HOURS, callAssess, deadlinePassed, levelName, skillName, type Attempt, type Review } from "@/lib/skill-tests";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,6 +49,7 @@ async function Result({ params }: { params: Promise<{ id: string }> }) {
         {t("skills.resultTitle", { skill: skillName(attempt.skill), level: levelName(attempt.level) })}
       </h1>
       <Outcome attempt={attempt} own={own} />
+      {own && attempt.passed && <BadgeShare attemptId={attempt.id} skill={skillName(attempt.skill)} level={levelName(attempt.level)} issued={attempt.submitted_at ?? attempt.started_at} />}
       {own ? <p className="mt-6 text-sm text-muted">{t("skills.privateNote")}</p> : <CompanyReview attempt={attempt} />}
     </>
   );
@@ -180,5 +183,41 @@ async function CompanyReview({ attempt }: { attempt: Attempt }) {
         </ol>
       </section>
     </>
+  );
+}
+
+/** A passed test: add the badge to LinkedIn as a certification, or share its public page. */
+function BadgeShare({ attemptId, skill, level, issued }: { attemptId: string; skill: string; level: string; issued: string }) {
+  const code = badgeCode(attemptId);
+  const page = `https://www.rolearch.com/badge/${code}`;
+  const badge = { id: attemptId, skill, level, score: 0, issued };
+  const btn = "inline-flex min-h-11 items-center gap-2 rounded-full px-5 text-sm font-medium transition-transform active:scale-[0.96]";
+  return (
+    <section aria-labelledby="badge-share-h" className="mt-6 rounded-3xl border border-line bg-surface p-5 sm:p-6">
+      <h2 id="badge-share-h" className="font-display text-xl font-semibold">
+        Show it on LinkedIn
+      </h2>
+      <p className="mt-1 text-sm text-muted">
+        Adds &ldquo;{badgeTitle(badge)}&rdquo; to your Licenses &amp; certifications, linked to a page that confirms your result without showing your name.
+      </p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <a href={linkedInAddUrl(badge, utm(page, "linkedin", "certification", "skill-badge"))} target="_blank" rel="noopener noreferrer" className={`${btn} bg-ink text-paper hover:bg-ink-hover`}>
+          <BadgeCheck aria-hidden="true" className="size-4" />
+          Add to LinkedIn profile
+        </a>
+        <a
+          href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(utm(page, "linkedin", "social", "skill-badge"))}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${btn} border border-line hover:border-ink`}
+        >
+          Post about it
+        </a>
+        <a href={`/badge/${code}`} target="_blank" rel="noopener noreferrer" className={`${btn} border border-line hover:border-ink`}>
+          <ExternalLink aria-hidden="true" className="size-4" />
+          View badge page
+        </a>
+      </div>
+    </section>
   );
 }

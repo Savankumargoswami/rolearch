@@ -4,6 +4,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { dataKey } from "@/lib/supabase/data-key";
+import { utm } from "@/lib/utm";
 
 export const SITE = "https://www.rolearch.com";
 const BASE = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
@@ -136,7 +137,7 @@ export function confirmEmail(token: string) {
 }
 
 export function postEmail(p: Pick<Post, "slug" | "title" | "description" | "key_points">, token: string) {
-  const link = postUrl(p.slug);
+  const link = utm(postUrl(p.slug), "blog-email", "email", p.slug.slice(0, 60)).replaceAll("&", "&amp;");
   const points = p.key_points.map((k) => `<li style="margin:0 0 6px">${esc(k)}</li>`).join("");
   return {
     subject: p.title,

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { once } from "@/lib/job-runs";
+import { tagEmailLinks } from "@/lib/utm";
 import { newsletterHtml, SITE, TOPICS, type Digest, type Section } from "@/lib/daily-post";
 import { dataKey } from "@/lib/supabase/data-key";
 
@@ -52,7 +53,7 @@ async function run(request: NextRequest) {
       const keys = [...(topic(category) && !["new", "remote", "pay"].includes(category) ? [category] : []), "new", "remote", "pay"];
       const sections: Section[] = await Promise.all(keys.map(async (k) => ({ topic: topic(k)!, digest: await digest(k) })));
       const skills = sections[0].digest.skills.slice(0, 8);
-      return newsletterHtml(sections, skills, `${SITE}/newsletter/unsubscribe?t=${token}`);
+      return tagEmailLinks(newsletterHtml(sections, skills, `${SITE}/newsletter/unsubscribe?t=${token}`), "newsletter", "weekly");
     };
 
     let sent = 0;

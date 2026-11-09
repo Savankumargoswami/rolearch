@@ -46,8 +46,9 @@ const sections: LegalSection[] = [
           ]}
         />
         <p>
-          We don&rsquo;t use advertising cookies, tracking pixels or third-party analytics. Job-page views on jobs posted on Rolearch are counted per day
-          without recording who viewed them.
+          We don&rsquo;t use advertising cookies or tracking pixels. We count page visits with Vercel Web Analytics, run by our hosting provider: it
+          uses no cookies, doesn&rsquo;t follow you across sites and doesn&rsquo;t identify you, and we see only totals per page, referring site, device type
+          and country. Job-page views on jobs posted on Rolearch are counted per day without recording who viewed them.
         </p>
       </>
     ),

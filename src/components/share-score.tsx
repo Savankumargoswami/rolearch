@@ -4,6 +4,7 @@ import { Check, Download, Link2, Loader2, Share2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { shareLink } from "@/app/ats/actions";
 import { t } from "@/i18n";
+import { utm } from "@/lib/utm";
 
 /** After a check: a public score card ("Resume scored 54 → 87 for Data Engineer") to post or send. */
 export function ShareScore({ before, after, title }: { before: number | null; after: number; title: string }) {
@@ -49,13 +50,13 @@ export function ShareScore({ before, after, title }: { before: number | null; af
           {/* eslint-disable-next-line @next/next/no-img-element -- the generated card itself */}
           <img src={`${new URL(url).pathname}/card.png`} alt={text} width={1200} height={630} className="w-full rounded-xl border border-line" />
           <div className="flex flex-wrap gap-2">
-            <a className={btn} href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer">
+            <a className={btn} href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(utm(url, "linkedin", "social", "ats-share"))}`} target="_blank" rel="noopener noreferrer">
               LinkedIn
             </a>
-            <a className={btn} href={`https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer">
+            <a className={btn} href={`https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(utm(url, "x", "social", "ats-share"))}`} target="_blank" rel="noopener noreferrer">
               X
             </a>
-            <a className={btn} href={`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`} target="_blank" rel="noopener noreferrer">
+            <a className={btn} href={`https://wa.me/?text=${encodeURIComponent(`${text} ${utm(url, "whatsapp", "social", "ats-share")}`)}`} target="_blank" rel="noopener noreferrer">
               WhatsApp
             </a>
             <button type="button" onClick={copy} className={btn}>

@@ -20,6 +20,8 @@ export function SiteFooter() {
             <li><Link className="hover:text-ink" href="/skills">{t("nav.skills")}</Link></li>
             <li><Link className="hover:text-ink" href="/guides">Career-change guides</Link></li>
             <li><Link className="hover:text-ink" href="/blog">Blog</Link></li>
+            <li><Link className="hover:text-ink" href="/careers">Career paths</Link></li>
+            <li><Link className="hover:text-ink" href="/reports/skills">Skills Report</Link></li>
             <li><Link className="hover:text-ink" href="/roles">Jobs by role and city</Link></li>
             <li><Link className="hover:text-ink" href="/roadmaps">Career roadmaps</Link></li>
             <li><Link className="hover:text-ink" href="/employers">{t("nav.companies")}</Link></li>

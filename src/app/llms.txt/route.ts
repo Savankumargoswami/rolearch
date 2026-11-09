@@ -29,6 +29,8 @@ export function GET() {
     `- Skill tests: ${base}/skills`,
     `- Career-change guides: ${base}/guides`,
     `- Blog (skills each industry is hiring for, every other day): ${base}/blog`,
+    `- Career paths (the skills each role's live job postings ask for, and the roles they carry over to, measured nightly): ${base}/careers`,
+    `- Skills Report (monthly: most-asked skills, AI skill demand by industry, rising and falling skills): ${base}/reports/skills`,
     ...GUIDES.map((g) => `  - ${g.from} to ${g.to}: ${base}/guides/${g.slug}`),
     `- Career roadmaps: ${base}/roadmaps`,
     `- Jobs by role and city: ${base}/roles`,

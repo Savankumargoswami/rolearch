@@ -80,6 +80,32 @@ export async function memberRoadmap(slug: string): Promise<Roadmap | null> {
   return (data?.data as Roadmap | undefined) ?? null;
 }
 
+export type RoadmapPreview = { first: Pick<RoadmapStage, "level" | "goal" | "weeks"> & { skills: { name: string; why: string }[] }; stages: number; weeks: number; interview: number };
+
+/** What visitors see before signing up: the first stage's skills and the shape of the rest (server key, read-only). */
+export async function roadmapPreview(slug: string): Promise<RoadmapPreview | null> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("roadmaps");
+  if (!/^[a-z0-9-]{1,120}$/.test(slug) || !supabaseUrl || !dataKey) return null;
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/roadmaps?select=data&slug=eq.${slug}`, { headers: { apikey: dataKey }, cache: "no-store" });
+    if (!res.ok) return null;
+    const [row] = (await res.json()) as { data: Roadmap }[];
+    const r = row?.data;
+    const s = r?.stages?.[0];
+    if (!r || !s) return null;
+    return {
+      first: { level: s.level, goal: s.goal, weeks: s.weeks, skills: s.skills.map((k) => ({ name: k.name, why: k.why })) },
+      stages: r.stages.length,
+      weeks: r.stages.reduce((n, x) => n + (x.weeks || 0), 0),
+      interview: r.interview?.length ?? 0,
+    };
+  } catch {
+    return null;
+  }
+}
+
 // Same clean-up as the title mapping: no seniority, shift or schedule words, no place or team after a dash.
 const SENIORITY =
   /\b(senior|sr|junior|jr|staff|lead|principal|associate|entry[- ]level|intern(ship)?|i{1,3}|iv|v|\d+|part[- ]time|full[- ]time|ft|pt|prn|per diem|temporary|seasonal|remote|hybrid|onsite|on[- ]site|night|nights|days|weekend|weekends|shift|mid[- ]level|level)\b\.?/g;
