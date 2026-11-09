@@ -50,6 +50,11 @@ const sections: LegalSection[] = [
           uses no cookies, doesn&rsquo;t follow you across sites and doesn&rsquo;t identify you, and we see only totals per page, referring site, device type
           and country. Job-page views on jobs posted on Rolearch are counted per day without recording who viewed them.
         </p>
+        <p>
+          <strong>Rolearch browser extension:</strong> it reads a page only when you click its button, and only the tab you&rsquo;re on. It takes the job
+          title, company, link and description from that page and opens them in the free job-fit check on rolearch.com. It doesn&rsquo;t read your
+          browsing history, other tabs, or anything on pages where you don&rsquo;t click it, and it sends nothing anywhere else.
+        </p>
       </>
     ),
   },

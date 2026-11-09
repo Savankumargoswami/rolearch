@@ -774,6 +774,10 @@ const en = {
     descOk: "Looks good.",
     panelLead: "Now add your resume and run the check.",
     panelWaiting: "Paste the job on the left first, then add your resume.",
+    fromExtension: "Filled in from the Rolearch extension. Check it looks right, then run the check.",
+    saveTracker: "Save to my tracker",
+    savedTracker: "Saved to your tracker",
+    saveSignIn: "Sign in to save jobs to your tracker.",
   },
   share: {
     title: "Share your score",

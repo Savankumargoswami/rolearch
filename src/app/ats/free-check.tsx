@@ -1,7 +1,8 @@
 "use client";
 
-import { Suspense, use, useState } from "react";
+import { Suspense, use, useEffect, useState, useTransition } from "react";
 import type { AtsTarget } from "@/app/ats/actions";
+import { trackExternal } from "@/app/tracker/actions";
 import { AtsPanel } from "@/components/ats-panel";
 import { t } from "@/i18n";
 
@@ -20,6 +21,36 @@ export function FreeCheck({ viewer }: { viewer: Promise<Viewer> }) {
   const [url, setUrl] = useState("");
   const [description, setDescription] = useState("");
   const ready = title.trim().length > 1 && description.trim().length >= MIN;
+  const [fromExtension, setFromExtension] = useState(false);
+  const [saved, setSaved] = useState<string | null>(null);
+  const [saving, startSave] = useTransition();
+
+  // The Rolearch browser extension hands over the posting the member is looking at. Its bridge script runs in this
+  // page and posts the job here; only messages from this same window and origin are accepted.
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      if (e.source !== window || e.origin !== window.location.origin) return;
+      const d = e.data as { type?: string; job?: Record<string, unknown> } | null;
+      if (d?.type !== "rolearch-extension-job" || !d.job) return;
+      const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+      setTitle(str(d.job.title, 200));
+      setCompany(str(d.job.company, 120));
+      setUrl(str(d.job.url, 500));
+      setDescription(str(d.job.description, 50000));
+      setFromExtension(true);
+      setSaved(null);
+    }
+    window.addEventListener("message", onMessage);
+    window.postMessage({ type: "rolearch-extension-ready" }, window.location.origin);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+
+  function save() {
+    startSave(async () => {
+      const r = await trackExternal({ title: title.trim(), company: company.trim(), url: url.trim() });
+      setSaved(r.ok ? t("atsFree.savedTracker") : r.message);
+    });
+  }
 
   function restore(target: AtsTarget) {
     if (typeof target === "string") return;
@@ -38,6 +69,24 @@ export function FreeCheck({ viewer }: { viewer: Promise<Viewer> }) {
           {t("atsFree.jobTitle")}
         </h2>
         <p className="mt-1 text-sm text-muted">{t("atsFree.jobLead")}</p>
+        {fromExtension && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-ink-soft px-4 py-3 text-sm">
+            <p className="max-w-[48ch] text-pretty">{t("atsFree.fromExtension")}</p>
+            {/^https?:\/\//.test(url.trim()) && title.trim() &&
+              (saved ? (
+                <p aria-live="polite" className="font-medium">{saved}</p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={save}
+                  disabled={saving}
+                  className="inline-flex min-h-10 items-center rounded-full bg-ink px-4 font-medium text-paper transition-transform hover:bg-ink-hover active:scale-[0.96] disabled:opacity-60"
+                >
+                  {t("atsFree.saveTracker")}
+                </button>
+              ))}
+          </div>
+        )}
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="font-medium">{t("atsFree.titleLabel")}</span>

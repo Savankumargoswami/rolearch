@@ -47,6 +47,29 @@ export async function trackJob(jobId: string, status: TrackerStatus = "saved"): 
   return { ok: true };
 }
 
+/** Saves a job from another site (the browser extension or the free check) to the member's tracker. */
+export async function trackExternal(job: { title: string; company?: string; url: string }): Promise<TrackResult> {
+  const viewer = await loadViewer();
+  if (!viewer) return { ok: false, message: t("atsFree.saveSignIn") };
+  const title = String(job?.title ?? "").trim().slice(0, 200);
+  const company = String(job?.company ?? "").trim().slice(0, 120);
+  let url = "";
+  try {
+    const u = new URL(String(job?.url ?? ""));
+    if (u.protocol === "https:" || u.protocol === "http:") url = u.toString().slice(0, 1000);
+  } catch {}
+  if (!title || !url) return { ok: false, message: t("tracker.errSave") };
+  const jobId = `ext-${createHash("sha256").update(url).digest("hex").slice(0, 24)}`;
+  const db = await createClient();
+  const { data: cur } = await db.from("tracked_jobs").select("job_id").eq("user_id", viewer.id).eq("job_id", jobId).maybeSingle();
+  if (cur) return { ok: true }; // already there: keep its status and history
+  const { error } = await db.from("tracked_jobs").insert({ user_id: viewer.id, job_id: jobId, status: "saved", title, company, url, updated_at: new Date().toISOString() });
+  if (error) return { ok: false, message: t("tracker.errSave") };
+  await track(viewer.id, "application_saved", { status: "saved", job_family: "external" });
+  revalidatePath("/tracker");
+  return { ok: true };
+}
+
 export async function untrackJob(jobId: string): Promise<TrackResult> {
   const viewer = await loadViewer();
   if (!viewer) return { ok: false, message: t("profile.errSignedOut") };
