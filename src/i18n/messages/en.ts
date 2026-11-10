@@ -1793,6 +1793,8 @@ const en = {
     scoreLine: "{score}% (pass mark 90%)",
     earned: "Badge earned",
     retryNote: "You can retry {when} with a new set of questions.",
+    prepareTitle: "Free ways to prepare for your retake",
+    prepareLead: "Free courses and videos on {skill}, picked for where they actually have lessons on it.",
     review: "Question review",
     yourAnswer: "Your answer",
     correctAnswer: "Correct answer",

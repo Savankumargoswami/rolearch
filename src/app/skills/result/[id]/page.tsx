@@ -1,4 +1,6 @@
-import { BadgeCheck, CircleCheck, CircleX, ExternalLink, ShieldAlert } from "lucide-react";
+import { BadgeCheck, CircleCheck, CircleX, ExternalLink, GraduationCap, ShieldAlert } from "lucide-react";
+import { FreeLearningCard } from "@/components/free-learning";
+import { testResources } from "@/data/learning";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -49,9 +51,28 @@ async function Result({ params }: { params: Promise<{ id: string }> }) {
         {t("skills.resultTitle", { skill: skillName(attempt.skill), level: levelName(attempt.level) })}
       </h1>
       <Outcome attempt={attempt} own={own} />
+      {own && attempt.status !== "in_progress" && !attempt.passed && <Prepare skill={attempt.skill} />}
       {own && attempt.passed && <BadgeShare attemptId={attempt.id} skill={skillName(attempt.skill)} level={levelName(attempt.level)} issued={attempt.submitted_at ?? attempt.started_at} />}
       {own ? <p className="mt-6 text-sm text-muted">{t("skills.privateNote")}</p> : <CompanyReview attempt={attempt} />}
     </>
+  );
+}
+
+/** After a test that wasn't passed: free courses for the skill, before the retake. */
+function Prepare({ skill }: { skill: string }) {
+  const { featured, links } = testResources(skill);
+  if (!featured && !links.length) return null;
+  return (
+    <section aria-labelledby="prepare-h" className="mt-6 rounded-3xl border border-line bg-surface p-5 sm:p-6">
+      <h2 id="prepare-h" className="flex items-center gap-2 font-display text-xl font-semibold">
+        <GraduationCap aria-hidden="true" className="size-5 text-signal-ink" />
+        {t("skills.prepareTitle")}
+      </h2>
+      <p className="mt-1 text-sm text-muted">{t("skills.prepareLead", { skill: skillName(skill) })}</p>
+      <div className="mt-4 max-w-md">
+        <FreeLearningCard featured={featured} links={links} />
+      </div>
+    </section>
   );
 }
 

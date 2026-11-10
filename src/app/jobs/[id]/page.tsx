@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowUpRight, BookOpen, Check, CircleDashed, GraduationCap, Minus, PlayCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Check, CircleDashed, GraduationCap, Minus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,7 +13,8 @@ import { JobRow } from "@/components/job-row";
 import { MatchRing } from "@/components/match-ring";
 import { ExternalApply, TrackButton } from "@/components/track-button";
 import { getJob, getJobFeed, getJobText, searchJobs } from "@/data/db";
-import { freeResources } from "@/data/learning";
+import { freeResources, hasResources } from "@/data/learning";
+import { FreeLearningCard } from "@/components/free-learning";
 import type { Job } from "@/data/types";
 import { t, type MessageKey } from "@/i18n";
 import { place, postedAgo, salaryRange } from "@/lib/format";
@@ -573,7 +574,7 @@ function Requirements({ job, match, req }: { job: Job; match: Match | null; req:
           </div>
         ))}
       </section>
-      {match && match.missing.length > 0 && <Learn skills={match.missing.slice(0, 8)} />}
+      {match && match.missing.some(hasResources) && <Learn skills={match.missing.filter(hasResources).slice(0, 8)} />}
     </>
   );
 }
@@ -589,47 +590,7 @@ function Learn({ skills }: { skills: string[] }) {
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {skills.map((skill) => {
           const { featured, links } = freeResources(skill);
-          return (
-            <div key={skill} className="flex flex-col rounded-2xl bg-paper/60 p-4">
-              <h3 className="font-display text-lg font-semibold">{skill}</h3>
-              {featured && (
-                <a
-                  href={featured.course.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group mt-3 flex items-start gap-3 rounded-xl bg-ink p-3 text-paper transition-transform duration-200 hover:-translate-y-0.5"
-                >
-                  <Sparkles aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-signal" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-xs font-semibold tracking-wide text-signal uppercase">{t("match.featured")}</span>
-                    <span className="block font-medium">{featured.course.name}</span>
-                    <span className="block text-sm text-[#c9d2de]">{featured.course.by}</span>
-                  </span>
-                  <ArrowUpRight aria-hidden="true" className="size-4 shrink-0 transition-transform duration-200 group-hover:rotate-45" />
-                </a>
-              )}
-              <ul className="mt-3 flex flex-col gap-1">
-                {links.map((l) => (
-                  <li key={l.url}>
-                    <a href={l.url} target="_blank" rel="noopener noreferrer" className="flex min-h-10 items-center gap-2.5 rounded-lg px-2 text-[0.95rem] hover:bg-ink-soft">
-                      {l.kind === "video" ? (
-                        <PlayCircle aria-hidden="true" className="size-4 shrink-0 text-[#b4532a]" />
-                      ) : (
-                        <BookOpen aria-hidden="true" className="size-4 shrink-0 text-signal-ink" />
-                      )}
-                      <span className="min-w-0 flex-1 truncate">{l.by}</span>
-                      <ArrowUpRight aria-hidden="true" className="size-3.5 shrink-0 text-muted" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-              {featured?.book && (
-                <p className="mt-3 border-t border-line pt-3 text-sm text-muted">
-                  <span className="font-medium text-ink">{t("match.book")}:</span> {featured.book}
-                </p>
-              )}
-            </div>
-          );
+          return <FreeLearningCard key={skill} title={skill} featured={featured} links={links} />;
         })}
       </div>
     </section>
