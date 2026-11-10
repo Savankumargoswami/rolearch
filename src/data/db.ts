@@ -135,7 +135,7 @@ function fromFile(): JobFeed {
 
 /** The newest open jobs (all fields), plus site-wide totals. Cached for an hour; refreshed in the background after that. */
 export async function getJobFeed(): Promise<JobFeed> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("jobs");
   try {
@@ -172,7 +172,7 @@ export type JobStats = { total: number; updatedAt: string | null; companies: num
 
 /** Site-wide totals only (~100 bytes), for pages that don't show any feed jobs. */
 export async function jobStats(): Promise<JobStats> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("jobs");
   const rows = await rpc<{ jobs: number; companies: number; countries: number; updated_at: string }[]>("job_stats", {});
@@ -289,7 +289,7 @@ export async function searchJobs(f: JobQuery, page = 1, perPage = 40, near: Near
 
 /** How many open jobs each category has, for the browse chips. */
 export async function jobCategories(): Promise<{ category: string; n: number }[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("jobs");
   const rows = await rpc<{ category: string; n: number }[]>("job_categories", {});
@@ -321,7 +321,7 @@ export type MapPin = { city: string; country: string; lat: number; lon: number; 
 
 /** One pin per metro area with how many open jobs it has, for the home page map. */
 export async function jobMap(): Promise<MapPin[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("jobs");
   const rows = await rpc<MapPin[]>("job_map", { max_pins: 80 });
@@ -358,7 +358,7 @@ const FALLBACK_PAGES = 60;
 
 /** How many sitemap files the open jobs fill (db/021_sitemap_pages.sql keeps them prebuilt). */
 export async function jobSitemapPages(): Promise<number> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   const n = await rpc<number>("job_sitemap_count", {});
   if (n == null) {
@@ -370,7 +370,7 @@ export async function jobSitemapPages(): Promise<number> {
 
 /** One sitemap file's open jobs: [id, posted date]. */
 export async function jobSitemap(page: number): Promise<[string, string | null][]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   const rows = await rpc<[string, string | null][]>("job_sitemap", { p_page: page, p_size: SITEMAP_PAGE });
   if (rows == null) {

@@ -25,7 +25,7 @@ async function get<T>(path: string): Promise<T | null> {
 
 /** A role's closest roles by shared skill demand, strongest first. */
 export async function linksFrom(slug: string): Promise<Link[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("skill-graph");
   return (await get<Link[]>(`role_links?select=from_slug,to_slug,score,shared&from_slug=eq.${encodeURIComponent(slug)}&order=score.desc&limit=40`)) ?? [];
@@ -33,7 +33,7 @@ export async function linksFrom(slug: string): Promise<Link[]> {
 
 /** The skills that define a role in today's jobs: frequent there and more common than elsewhere. */
 export async function roleSkills(slug: string, limit = 12): Promise<RoleSkill[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("skill-graph");
   const rows = (await get<RoleSkill[]>(`role_skill_stats?select=skill,share,lift&slug=eq.${encodeURIComponent(slug)}&order=share.desc&limit=40`)) ?? [];
@@ -46,7 +46,7 @@ export async function roleSkills(slug: string, limit = 12): Promise<RoleSkill[]>
 
 /** Every measured role (30+ open jobs with skills) and its job count, biggest first. */
 export async function measuredRoles(): Promise<{ slug: string; jobs: number }[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("skill-graph");
   return (await get<{ slug: string; jobs: number }[]>("role_totals?select=slug,jobs&order=jobs.desc&limit=2000")) ?? [];
@@ -54,7 +54,7 @@ export async function measuredRoles(): Promise<{ slug: string; jobs: number }[]>
 
 /** One role's measured profile: job count and its skills by how often jobs ask for them (share of the role's jobs). */
 export async function roleProfile(slug: string): Promise<{ jobs: number; skills: { skill: string; jobs: number; share: number; lift: number }[] } | null> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("skill-graph");
   if (!/^[a-z0-9-]{1,120}$/.test(slug)) return null;
@@ -68,7 +68,7 @@ export async function roleProfile(slug: string): Promise<{ jobs: number; skills:
 
 /** The strongest `perRole` career moves from every measured role (for the sitemap). */
 export async function topLinks(perRole = 10): Promise<{ from: string; to: string }[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("skill-graph");
   if (!BASE || !dataKey) return [];

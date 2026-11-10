@@ -30,7 +30,7 @@ async function rows(query: string): Promise<Row[]> {
 
 /** Months with a report, newest first ("2026-11"). */
 export async function reportMonths(): Promise<string[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("skills-report");
   const r = await rows("category=eq.all&skill=eq.*&order=month.desc");
@@ -38,7 +38,7 @@ export async function reportMonths(): Promise<string[]> {
 }
 
 export async function skillsReport(month: string): Promise<Report | null> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("skills-report");
   if (!/^\d{4}-\d{2}$/.test(month)) return null;

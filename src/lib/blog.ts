@@ -85,7 +85,7 @@ const CARD = "slug,title,description,industry,reading_minutes,published_at";
 
 /** Newest posts, optionally for one industry. Empty when the blog table isn't there yet. */
 export async function listPosts(ind?: string, limit = 60): Promise<PostCard[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("blog");
   const filter = ind && industry(ind) ? `&industry=eq.${ind}` : "";

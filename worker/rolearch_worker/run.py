@@ -83,8 +83,8 @@ async def pull_one(http: Fetcher, store: Store, company: Company) -> Result:
 
     # A board can keep serving postings whose pages are gone (abandoned ATS account).
     # Spot-check a few new jobs' apply links; if every one is dead, don't import the board.
-    known = store.known_ids(company)
-    fresh = [j for j in jobs if j["id"] not in known]
+    unseen = store.new_ids(company, [j["id"] for j in jobs])
+    fresh = [j for j in jobs if j["id"] in unseen]
     new = random.sample(fresh, min(LINK_CHECKS, len(fresh)))
     if new and all(await asyncio.gather(*(link_dead(http, j["applyUrl"]) for j in new))):
         res.error = f"apply links are dead ({len(new)} checked); board looks abandoned, not imported"

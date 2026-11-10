@@ -40,16 +40,17 @@ export type Roadmap = {
   glossary?: { term: string; meaning: string }[];
   mistakes: string[];
 };
-export type RoadmapEntry = { slug: string; role: string; summary: string; depth: "short" | "deep" };
+// The full list leaves out summaries (they made it ~600 KB per read: database egress); one entry includes its own.
+export type RoadmapEntry = { slug: string; role: string; summary?: string; depth: "short" | "deep" };
 
 /** Every role with a roadmap, for the public index. */
 export async function roadmapList(): Promise<RoadmapEntry[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("roadmaps");
   if (!supabaseUrl || !supabaseKey) return [];
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/roadmap_list`, { method: "POST", headers: { apikey: dataKey, "Content-Type": "application/json" }, body: "{}", cache: "no-store" });
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/roadmap_list?select=slug,role,depth`, { method: "POST", headers: { apikey: dataKey, "Content-Type": "application/json" }, body: "{}", cache: "no-store" });
     return res.ok ? ((await res.json()) as RoadmapEntry[]) : [];
   } catch {
     return [];
@@ -58,12 +59,12 @@ export async function roadmapList(): Promise<RoadmapEntry[]> {
 
 /** One role's list entry. Filtered in the database: the whole list is ~600 KB, and job pages only need one name. */
 export async function roadmapEntry(slug: string): Promise<RoadmapEntry | null> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("roadmaps");
   if (!/^[a-z0-9-]{1,120}$/.test(slug) || !supabaseUrl || !supabaseKey) return null;
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/roadmap_list?slug=eq.${slug}`, { method: "POST", headers: { apikey: dataKey, "Content-Type": "application/json" }, body: "{}", cache: "no-store" });
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/roadmap_list?select=slug,role,summary,depth&slug=eq.${slug}`, { method: "POST", headers: { apikey: dataKey, "Content-Type": "application/json" }, body: "{}", cache: "no-store" });
     if (!res.ok) return null;
     const [row] = (await res.json()) as RoadmapEntry[];
     return row ?? null;
@@ -117,7 +118,7 @@ export function normalTitle(title: string) {
 
 /** The roadmap for a job title, if one is mapped ({slug, role}). */
 export async function roadmapForTitle(title: string): Promise<{ slug: string; role: string } | null> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("roadmaps");
   const key = normalTitle(title);

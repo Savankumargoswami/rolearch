@@ -27,7 +27,7 @@ class Store(Protocol):
     def hours_since_ok(self, company: Company) -> float | None: ...
     def described_ids(self, company: Company) -> set[str]: ...
     def known_urls(self, company: Company) -> dict[str, str]: ...
-    def known_ids(self, company: Company) -> set[str]: ...
+    def new_ids(self, company: Company, ids: list[str]) -> set[str]: ...
     def save(self, company: Company, jobs: list[dict]) -> tuple[int, int, int]: ...
     def record_error(self, company: Company, error: str) -> None: ...
     def retire_companies(self, keep: set[str], since: datetime | None = None) -> int: ...
@@ -54,8 +54,8 @@ class JsonStore:
     def previous_count(self, company: Company) -> int:
         return sum(1 for j in self.data["jobs"].values() if j["companyKey"] == company.key and j["status"] == "open")
 
-    def known_ids(self, company: Company) -> set[str]:
-        return {jid for jid, j in self.data["jobs"].items() if j["companyKey"] == company.key}
+    def new_ids(self, company: Company, ids: list[str]) -> set[str]:
+        return {i for i in ids if i not in self.data["jobs"]}
 
     def save(self, company: Company, jobs: list[dict]) -> tuple[int, int, int]:
         now = _now()
@@ -142,8 +142,9 @@ class PostgresStore:
         self._connect()
 
     def known_urls(self, company: Company) -> dict[str, str]:
+        # Open jobs only: closed ones pile up over time and would be downloaded on every run (database egress).
         with self.conn.cursor() as cur:
-            cur.execute("select job_url, title from jobs where company_key = %s", (company.key,))
+            cur.execute("select job_url, title from jobs where company_key = %s and status = 'open'", (company.key,))
             return {r[0]: r[1] for r in cur.fetchall()}
 
     def described_ids(self, company: Company) -> set[str]:
@@ -162,9 +163,16 @@ class PostgresStore:
             cur.execute("select count(*) from jobs where company_key = %s and status = 'open'", (company.key,))
             return cur.fetchone()[0]
 
-    def known_ids(self, company: Company) -> set[str]:
+    def new_ids(self, company: Company, ids: list[str]) -> set[str]:
+        """Which of these job ids aren't stored yet. The database sends back only the new ones (usually a handful),
+        not every id the company ever had: that full list, read twice per company per run, was most of the egress."""
+        if not ids:
+            return set()
         with self.conn.cursor() as cur:
-            cur.execute("select id from jobs where company_key = %s", (company.key,))
+            cur.execute(
+                "select x from unnest(%s::text[]) as x where not exists (select 1 from jobs where jobs.id = x)",
+                (ids,),
+            )
             return {r[0] for r in cur.fetchall()}
 
     def _company(self, cur, company: Company, count: int | None, error: str | None) -> None:
@@ -199,8 +207,10 @@ class PostgresStore:
         try:
             with self.conn.cursor() as cur:
                 self._company(cur, company, len(jobs), None)
-                cur.execute("select id from jobs where company_key = %s", (company.key,))
-                known = {r[0] for r in cur.fetchall()}
+                # How many of these are already stored: one number back, not every id the company ever had.
+                ids = [r[0] for r in rows]
+                cur.execute("select count(*) from jobs where id = any(%s)", (ids,))
+                existing = cur.fetchone()[0] if ids else 0
                 if rows:
                     cur.executemany(
                         f"""insert into jobs ({cols}) values ({marks})
@@ -236,7 +246,7 @@ class PostgresStore:
         except Exception:
             self.conn.rollback()  # leave the connection usable for the next company
             raise
-        added = sum(1 for j in jobs if j["id"] not in known)
+        added = len(rows) - existing
         return added, len(jobs) + len(touch) - added, closed
 
     def record_error(self, company: Company, error: str) -> None:

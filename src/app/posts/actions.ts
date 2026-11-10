@@ -48,7 +48,7 @@ export async function createPost(form: FormData): Promise<PostResult> {
   const paths: string[] = [];
   for (const [i, img] of images.entries()) {
     const path = `${user.id}/${stamp}-${i}.${img.ext}`;
-    const { error } = await supabase.storage.from("post-images").upload(path, img.bytes, { contentType: img.type });
+    const { error } = await supabase.storage.from("post-images").upload(path, img.bytes, { contentType: img.type, cacheControl: "31536000" });
     if (error) {
       if (paths.length) await supabase.storage.from("post-images").remove(paths);
       return { ok: false, message: t("posts.errSave") };

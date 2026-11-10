@@ -92,7 +92,8 @@ export async function uploadPhoto(form: FormData): Promise<PhotoResult> {
 
   // A new file name each time, so browsers and the image cache never show the old photo.
   const path = `${user.id}/photo-${Date.now()}.${ext}`;
-  const { error } = await supabase.storage.from("avatars").upload(path, Buffer.from(await file.arrayBuffer()), { contentType: file.type });
+  // A unique name never changes content, so it can be cached for a year (fewer Storage downloads: egress).
+  const { error } = await supabase.storage.from("avatars").upload(path, Buffer.from(await file.arrayBuffer()), { contentType: file.type, cacheControl: "31536000" });
   if (error) return { ok: false, message: t("profile.errPhoto") };
   const url = supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
   const { error: saveError } = await supabase.from("profiles").update({ avatar_url: url, updated_at: new Date().toISOString() }).eq("id", user.id);
