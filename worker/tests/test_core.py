@@ -126,6 +126,24 @@ class Text(unittest.TestCase):
             self.assertNotIn(s, extract_skills(text))
         self.assertNotIn("RN license", extract_skills("Learn more about our turn-key solutions."))
 
+    def test_skills_v2_context(self):
+        # legal notices and benefits text are skipped (db/044, same rule in the database)
+        eeo = "We comply with the Americans with Disabilities Act and make reasonable accommodations in compliance with federal regulations."
+        self.assertNotIn("Regulatory compliance", extract_skills(eeo))
+        self.assertIn("Regulatory compliance", extract_skills("Ensure compliance with DOT regulations on every route."))
+        # broad skills need a requirement, not a passing mention
+        self.assertNotIn("Sales", extract_skills("Keep the sales floor stocked. The store has annual sales of $4M."))
+        self.assertIn("Sales", extract_skills("2+ years of B2B sales experience."))
+        self.assertNotIn("Leadership", extract_skills("Partner with our leadership team."))
+        self.assertIn("Leadership", extract_skills("At least 2 years in a leadership position."))
+        self.assertNotIn("Research", extract_skills("Degree in Operations Research."))
+        # new skills, and a language only with a fluency context
+        s = extract_skills("Strong attention to detail and time management. Experience with Jira and SharePoint. Fluent in French and English.")
+        for k in ["Attention to detail", "Time management", "Jira", "SharePoint", "French"]:
+            self.assertIn(k, s)
+        self.assertNotIn("French", extract_skills("Serve French fries and burgers."))
+        self.assertNotIn("ERP systems", extract_skills("A typical workday starts at 9."))
+
     def test_hybrid_is_not_a_city(self):
         p = parse_location("Hybrid", default_country="US")
         self.assertEqual((p.city, p.country), (None, "US"))

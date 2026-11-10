@@ -72,7 +72,16 @@ def summarize(text: str, limit: int = 280) -> str:
 # Canonical skill -> regex, from data/skills.json: the same list the database backfill uses (db/040_skill_graph.sql),
 # across every industry so career paths can be measured for nurses and electricians as well as engineers.
 # A string pattern ignores case; {"cs": ...} parts match by case (acronyms like RN, CDL), {"ci": ...} parts ignore it.
-_SKILLS_FILE = json.loads((Path(__file__).parent / "data" / "skills.json").read_text(encoding="utf-8"))["skills"]
+_SKILLS_DOC = json.loads((Path(__file__).parent / "data" / "skills.json").read_text(encoding="utf-8"))
+_SKILLS_FILE = _SKILLS_DOC["skills"]
+# Legal notices, pay and benefits text: sentences matching this are skipped before counting skills, so an equal
+# opportunity statement doesn't count as "Regulatory compliance". Same rule as private.strip_boilerplate (db/044).
+_BOILERPLATE = re.compile(_SKILLS_DOC["boilerplate"], re.I)
+_PIECES = re.compile(r"\n|[.!?;•]\s+")
+
+
+def strip_boilerplate(text: str) -> str:
+    return "\n".join(p for p in _PIECES.split(text) if p.strip() and not _BOILERPLATE.search(p))
 
 
 def _compile(spec) -> list[re.Pattern]:
@@ -88,7 +97,8 @@ SKILLS: dict[str, list[re.Pattern]] = {name: _compile(spec) for name, spec in _S
 
 
 def extract_skills(text: str, limit: int = 12) -> list[str]:
-    """The skills a job mentions, most-mentioned first."""
+    """The skills a job mentions, most-mentioned first (boilerplate sentences skipped)."""
+    text = strip_boilerplate(text)
     counts = {k: sum(len(r.findall(text)) for r in rs) for k, rs in SKILLS.items()}
     found = [k for k, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])) if n]
     return found[:limit]

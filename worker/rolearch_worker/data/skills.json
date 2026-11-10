@@ -46,7 +46,7 @@
     "A/B testing": "\\ba/b test",
     "Excel": {
       "cs": "\\bExcel\\b(?! (?:at|in)\\b)",
-      "ci": "\\bms excel\\b|\\bmicrosoft excel\\b"
+      "ci": "\\bms excel\\b|\\bmicrosoft excel\\b|\\bvlookups?\\b|\\bxlookup\\b|\\bpivot tables?\\b"
     },
     "Linux": "\\blinux\\b",
     "Git": "\\bgit\\b(?!\\w)|\\bgithub\\b|\\bgitlab\\b",
@@ -57,7 +57,10 @@
     "IT support": "\\bhelp ?desk\\b|\\bservice ?desk\\b|technical support|desktop support",
     "Salesforce": "\\bsalesforce\\b",
     "SAP": "\\bsap\\b(?! ?(?:is|was))",
-    "ERP systems": "\\berp\\b|\\boracle (?:ebs|cloud|fusion|netsuite)\\b|\\bnetsuite\\b|\\bworkday\\b|dynamics 365",
+    "ERP systems": {
+      "cs": "\\bWorkday\\b(?! (?:schedule|hours|shift))",
+      "ci": "\\berp\\b|\\boracle (?:ebs|cloud|fusion|netsuite)\\b|\\bnetsuite\\b|dynamics 365"
+    },
     "Data analysis": "\\bdata analys[ie]s\\b|analy[sz]e data|\\bdata analytics\\b",
     "Data visualization": "\\bdata visuali[sz]ation\\b|\\bdashboards?\\b",
     "Financial modeling": "\\bfinancial model(?:l)?ing\\b|\\bfinancial models?\\b",
@@ -79,7 +82,7 @@
     "Tax preparation": "\\btax (?:preparation|returns?|compliance)\\b",
     "Risk management": "\\brisk management\\b|\\brisk assessments?\\b",
     "QuickBooks": "\\bquickbooks\\b",
-    "Regulatory compliance": "\\bregulatory compliance\\b|\\bcompliance (?:with|requirements|programs?)\\b",
+    "Regulatory compliance": "\\bregulatory (?:compliance|requirements|standards|affairs|guidelines)\\b|\\bcompliance (?:requirements|programs?|monitoring|audits?|regulations|training|reporting)\\b|\\bcompliance with (?:(?:all|applicable|relevant|federal|state|local|industry|government|safety|environmental|health),? (?:and )?)*(?:laws|regulations|regulatory|osha|hipaa|fda|sec|finra|dot)\\b",
     "Project management": "\\bproject management\\b|\\bmanage projects\\b|\\bpmp\\b",
     "Agile": "\\bagile\\b|\\bscrum\\b|\\bkanban\\b",
     "Product management": "\\bproduct management\\b|\\bproduct roadmaps?\\b",
@@ -149,7 +152,7 @@
     },
     "BLS/CPR": "\\bbls\\b|\\bcpr\\b|basic life support",
     "ACLS": "\\bacls\\b|advanced cardiac life support",
-    "Electronic health records": "\\behr\\b|\\bemr\\b|electronic (?:health|medical) records?|\\bepic\\b(?= (?:systems?|ehr|emr))|\\bcerner\\b",
+    "Electronic health records": "\\behr\\b|\\bemr\\b|electronic (?:health|medical) records?|\\bepic\\b(?= (?:systems?|ehr|emr|charting|certif))|\\bcerner\\b|\\bmeditech\\b",
     "Medical terminology": "\\bmedical terminology\\b",
     "Medication administration": "\\bmedication administration\\b|\\badminister(?:ing)? medications?\\b",
     "Vital signs": "\\bvital signs\\b",
@@ -171,14 +174,14 @@
     "Special education": "\\bspecial education\\b|\\biep\\b",
     "Teaching license": "\\bteaching (?:license|certificat(?:e|ion))\\b|\\bstate certification\\b(?= in)",
     "Instructional design": "\\binstructional design\\b|\\be-?learning\\b",
-    "Training and coaching": "\\btrain(?:ing)? (?:new )?(?:staff|employees|team members)\\b|\\bcoach(?:ing)?\\b|\\bmentor(?:ing)?\\b",
+    "Training and coaching": "\\btrain(?:ing)? (?:new )?(?:staff|employees|team members)\\b|\\bcoach(?:ing)?\\b|\\bmentor(?:ing|ship|s)?\\b",
     "Customer service": "\\bcustomer service\\b|\\bguest service\\b",
     "Customer success": "\\bcustomer success\\b|\\baccount management\\b",
-    "Sales": "\\bsales\\b",
+    "Sales": "\\bsales (?:experience|skills|targets?|goals?|quotas?|pipeline|cycles?|process|techniques|representative|rep|associate|executive|professional|role|background|track record|results|activit(?:y|ies)|consultant|specialist|manager|leader|lead|director|engineer|agent|team|growth|revenue)\\b|\\b(?:b2b|b2c|retail|inside|outside|direct|consultative|solutions?|enterprise|field|technical|new business|account) sales\\b|\\bselling\\b|\\bupsell|\\bcross-sell|\\bclos(?:e|ing) (?:deals|sales)\\b|\\bsales and (?:service|marketing|business development)\\b",
     "B2B sales": "\\bb2b\\b|\\benterprise sales\\b",
     "Lead generation": "\\blead generation\\b|\\bprospecting\\b|\\bcold call",
     "CRM": "\\bcrm\\b|\\bhubspot\\b",
-    "Point of sale": "\\bpoint of sale\\b|\\bpos\\b(?= system)|\\bcash handling\\b|\\bcash register\\b",
+    "Point of sale": "\\bpoint of sale\\b|\\bpos\\b(?= system)|\\bcash handling\\b|\\bhandl(?:e|ing) cash\\b|\\bcash (?:register|drawer)s?\\b",
     "Merchandising": "\\bmerchandising\\b|\\bvisual merchandising\\b",
     "Retail operations": "\\bretail (?:operations|store)\\b|\\bstore operations\\b",
     "Food safety": "\\bfood safety\\b|\\bservsafe\\b|\\bfood handler",
@@ -208,14 +211,14 @@
     "Paralegal": "\\bparalegal\\b",
     "Scheduling": "\\bscheduling\\b|\\bcalendar management\\b",
     "Data entry": "\\bdata entry\\b",
-    "Microsoft Office": "\\bmicrosoft office\\b|\\bms office\\b|\\bmicrosoft 365\\b|\\boffice 365\\b|\\bword, excel\\b",
+    "Microsoft Office": "\\bmicrosoft office\\b|\\bms office\\b|\\bmicrosoft 365\\b|\\boffice 365\\b|\\bword, excel\\b|\\bpower ?point\\b|\\b(?:microsoft|ms) (?:word|outlook)\\b|\\bexcel,? (?:and )?outlook\\b|\\boutlook,? (?:and )?(?:excel|word)\\b",
     "Office administration": "\\boffice (?:administration|management)\\b|\\badministrative support\\b|\\breception(?:ist)?\\b",
     "Bilingual Spanish": "\\bbilingual\\b|\\bspanish\\b",
     "Communication": "\\b(?:written and verbal|verbal and written|excellent|strong) communication\\b",
-    "Leadership": "\\bleadership\\b|\\bpeople management\\b|\\bmanage a team\\b|\\bsupervis(?:e|ing|ory)\\b",
+    "Leadership": "\\bleadership (?:skills|experience|abilit(?:y|ies)|qualities|roles?|positions?|responsibilit(?:y|ies))\\b|\\b(?:strong|proven|demonstrated|effective|technical|team|people|thought) leadership\\b|\\bprovides? leadership\\b|\\blead(?:ing)? (?:a )?teams?\\b|\\bpeople management\\b|\\bmanage a team\\b|\\bsupervis(?:e|es|ing|ory)\\b",
     "Team management": "\\bteam (?:management|leadership)\\b|\\bdirect reports\\b",
     "Problem solving": "\\bproblem[- ]solving\\b",
-    "Research": "\\bresearch\\b",
+    "Research": "\\b(?:conduct(?:s|ing)?|perform(?:s|ing)?|lead(?:s|ing)?|carry out|carrying out|independent|original) research\\b|\\bresearch (?:skills|experience|methods|methodolog(?:y|ies)|design|studies|projects?|scientist|assistant|associate|background|papers?|publications?|findings|questions)\\b|\\bresearch,? (?:and )?analytical skills\\b|\\b(?:do|does|doing) research\\b|\\b(?:academic|scientific|quantitative|qualitative|user|ux|laboratory|lab|policy|survey) research\\b",
     "Biology": "\\bbiology\\b|\\bmolecular biology\\b|\\bcell culture\\b",
     "Chemistry": "\\bchemistry\\b|\\bhplc\\b|\\banalytical chemistry\\b",
     "GIS": "\\bgis\\b|\\barcgis\\b",
@@ -226,6 +229,86 @@
     "Construction management": "\\bconstruction management\\b|\\bsite supervision\\b|\\bconstruction (?:projects|sites?)\\b",
     "Security operations": "\\bsecurity (?:guard|officer|patrol)s?\\b|\\baccess control\\b|\\bloss prevention\\b",
     "Driving": "\\bdriver'?s licen[cs]e\\b|\\bclean driving record\\b|\\bdelivery driver\\b",
-    "Cleaning": "\\bjanitorial\\b|\\bcustodial\\b|\\bhousekeeping\\b|\\bsanitation\\b"
-  }
+    "Cleaning": "\\bjanitorial\\b|\\bcustodial\\b|\\bhousekeeping\\b|\\bsanitation\\b",
+    "Teamwork": "\\bteam ?work\\b|\\bteam player\\b|\\bwork(?:ing)? (?:well |effectively )?(?:as part of|in|within) a team\\b|\\bcollaborat(?:e|ion|ing) (?:with|across) (?:cross-functional|other|team|colleagues|peers|stakeholders|departments)",
+    "Time management": "\\btime management\\b|\\bprioritiz(?:e|ing|ation of) (?:multiple|competing|tasks|work|workload)|\\bmeet(?:ing)? (?:tight )?deadlines\\b",
+    "Attention to detail": "\\battention to detail\\b|\\bdetail[- ]oriented\\b",
+    "Multitasking": "\\bmulti-?task(?:ing|s)?\\b",
+    "Adaptability": "\\badaptab(?:le|ility)\\b",
+    "Conflict resolution": "\\bconflict resolution\\b|\\bresolv(?:e|ing) conflicts?\\b|\\bde-?escalat(?:e|ion|ing)\\b",
+    "Critical thinking": "\\bcritical thinking\\b|\\banalytical (?:skills|thinking|mindset)\\b",
+    "Presentation skills": "\\bpresentation skills\\b|\\bpublic speaking\\b|\\bpresent(?:ing)? (?:findings|results|recommendations|insights) to\\b",
+    "Physical stamina": "\\blift(?:ing)? (?:and carry )?(?:up to )?\\d+ ?(?:lbs?|pounds)\\b|\\bstand(?:ing)? (?:and walk(?:ing)? )?for (?:long|extended|prolonged)\\b",
+    "SOPs": {
+      "cs": "\\bSOPs?\\b",
+      "ci": "\\bstandard operating procedures?\\b"
+    },
+    "KPI tracking": {
+      "cs": "\\bKPIs?\\b",
+      "ci": "\\bkey performance indicators?\\b"
+    },
+    "Change management": "\\bchange management\\b",
+    "Strategic planning": "\\bstrategic planning\\b|\\bstrategic plans?\\b",
+    "Operations management": "\\boperations management\\b|\\bmanag(?:e|ing) (?:daily |day-to-day )?operations\\b",
+    "Business development": "\\bbusiness development\\b",
+    "Customer experience": "\\bcustomer experience\\b|\\bguest experience\\b",
+    "Jira": "\\bjira\\b",
+    "Confluence": "\\bconfluence\\b",
+    "SharePoint": "\\bsharepoint\\b",
+    "Google Workspace": "\\bgoogle (?:workspace|suite|sheets|docs)\\b|\\bg ?suite\\b",
+    "ServiceNow": "\\bservicenow\\b",
+    "Oracle": "\\boracle\\b",
+    "Generative AI": "\\bgenerative ai\\b|\\bgen ?ai\\b|\\bchatgpt\\b|\\bai tools\\b|\\bprompt engineering\\b|\\bai-powered tools\\b",
+    "SaaS": {
+      "cs": "\\bSaaS\\b"
+    },
+    "DevOps": "\\bdevops\\b",
+    "Test automation": "\\bselenium\\b|\\btest automation\\b|\\bautomated testing\\b|\\bcypress\\b|\\bplaywright\\b",
+    "Microservices": "\\bmicro-?services?\\b",
+    "GraphQL": "\\bgraphql\\b",
+    "Spring Boot": "\\bspring (?:boot|framework)\\b",
+    "ETL": "\\betl\\b|\\bdata pipelines?\\b",
+    "Data modeling": "\\bdata model(?:l)?ing\\b",
+    "Data governance": "\\bdata governance\\b",
+    "Hazmat": "\\bhaz-?mat\\b|\\bhazardous materials?\\b",
+    "PPE": {
+      "cs": "\\bPPE\\b",
+      "ci": "\\bpersonal protective equipment\\b"
+    },
+    "GMP": {
+      "cs": "\\bc?GMPs?\\b",
+      "ci": "\\bgood manufacturing practices?\\b"
+    },
+    "FDA regulations": {
+      "cs": "\\bFDA\\b"
+    },
+    "DOT regulations": {
+      "cs": "\\bDOT\\b(?! ?com)",
+      "ci": "\\bdepartment of transportation\\b"
+    },
+    "Long-term care": "\\blong[- ]term care\\b(?! insurance)|\\bskilled nursing\\b",
+    "Pediatrics": "\\bpa?ediatrics?\\b",
+    "Oncology": "\\boncology\\b",
+    "Critical care": {
+      "cs": "\\bICU\\b",
+      "ci": "\\bcritical care\\b|\\bintensive care\\b"
+    },
+    "Telemetry": "\\btelemetry\\b",
+    "Wound care": "\\bwound care\\b",
+    "Physical therapy": "\\bphysical therap(?:y|ist)\\b",
+    "Medical devices": "\\bmedical devices?\\b",
+    "Underwriting": "\\bunderwrit(?:ing|ers?)\\b",
+    "Banking": "\\b(?:retail|commercial|investment|consumer) banking\\b|\\bbanking (?:experience|operations|industry|products)\\b",
+    "Real estate": "\\breal estate\\b",
+    "Insurance": "\\binsurance (?:industry|products|sales|claims|license|licensing|agent|experience|underwriting)\\b|\\blicensed insurance agent\\b|\\bp&c\\b",
+    "Event planning": "\\bevent (?:planning|management|coordination)\\b",
+    "Fundraising": "\\bfundrais(?:ing|er)\\b",
+    "Grant writing": "\\bgrant (?:writing|proposals?|applications?)\\b",
+    "French": "\\b(?:fluen(?:t|cy)|proficien(?:t|cy)|bilingual|speak(?:s|ing)?|native|written and (?:spoken|verbal)|language)\\b[^.\\n]{0,40}\\bfrench\\b|\\bfrench[- ](?:speaking|speaker|language|fluency)\\b|\\bfrench and english\\b|\\benglish and french\\b",
+    "German": "\\b(?:fluen(?:t|cy)|proficien(?:t|cy)|bilingual|speak(?:s|ing)?|native|written and (?:spoken|verbal)|language)\\b[^.\\n]{0,40}\\bgerman\\b|\\bgerman[- ](?:speaking|speaker|language|fluency)\\b|\\bgerman and english\\b|\\benglish and german\\b",
+    "Chinese (Mandarin)": "\\b(?:fluen(?:t|cy)|proficien(?:t|cy)|bilingual|speak(?:s|ing)?|native|written and (?:spoken|verbal)|language)\\b[^.\\n]{0,40}\\b(?:mandarin|chinese|cantonese)\\b|\\b(?:mandarin|chinese|cantonese)[- ](?:speaking|speaker|language|fluency)\\b|\\b(?:mandarin|chinese|cantonese) and english\\b|\\benglish and (?:mandarin|chinese|cantonese)\\b",
+    "Japanese": "\\b(?:fluen(?:t|cy)|proficien(?:t|cy)|bilingual|speak(?:s|ing)?|native|written and (?:spoken|verbal)|language)\\b[^.\\n]{0,40}\\bjapanese\\b|\\bjapanese[- ](?:speaking|speaker|language|fluency)\\b|\\bjapanese and english\\b|\\benglish and japanese\\b",
+    "Portuguese": "\\b(?:fluen(?:t|cy)|proficien(?:t|cy)|bilingual|speak(?:s|ing)?|native|written and (?:spoken|verbal)|language)\\b[^.\\n]{0,40}\\bportuguese\\b|\\bportuguese[- ](?:speaking|speaker|language|fluency)\\b|\\bportuguese and english\\b|\\benglish and portuguese\\b"
+  },
+  "boilerplate": "\\bequal (?:employment )?opportunity\\b|\\beeo\\b|\\baffirmative action\\b|\\bamericans with disabilities\\b|\\breasonable accommodations?\\b|\\bregardless of (?:race|age|sex|gender|religion|color|national)|\\bprotected (?:veteran|status|characteristics?|class)\\b|\\bveteran status\\b|\\bsexual orientation\\b|\\bgender identity\\b|\\bfair chance\\b|\\bcriminal (?:history|histories|background)\\b|\\be-verify\\b|\\bpay (?:range|transparency|scale)\\b|\\bsalary range\\b|\\bbase (?:pay|salary)(?: range)?\\b|\\bcompensation (?:range|package)\\b|\\bhourly rate\\b|\\bbenefits (?:include|package|offered)\\b|\\b401\\(?k\\)?|\\bpaid time off\\b|\\bpto\\b|\\b(?:medical|health), dental\\b|\\bdental(?:,| and) vision\\b|\\bemployee assistance\\b|\\btuition (?:reimbursement|assistance)\\b|\\bparental leave\\b|\\blife insurance\\b|\\bdisability insurance\\b|\\bhealth savings\\b|\\bflexible spending\\b|\\bstock purchase\\b|\\bprivacy (?:notice|policy|statement)\\b|\\bnot intended to be (?:an )?(?:all-inclusive|exhaustive|comprehensive)\\b|\\bmay be (?:changed|modified|amended) at any time\\b|\\bthis job description\\b|\\bto request an accommodation\\b|\\bdiverse and inclusive\\b|\\bdiversity,? (?:equity|and inclusion)\\b|\\bwe are proud to be\\b|\\bwe(?: are|'re) committed to (?:creating|building|providing|fostering|diversity|equal)|\\brecruitment (?:agencies|fraud|scam)\\b|\\bai screening\\b|\\b(?:use|uses|using) ai(?: tools)? (?:to|in|for) (?:support |assist (?:with |in )?)?(?:candidate|hiring|recruit|screening|the hiring)|\\bunsolicited resumes?\\b"
 }
