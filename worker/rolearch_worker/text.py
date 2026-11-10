@@ -78,10 +78,14 @@ _SKILLS_FILE = _SKILLS_DOC["skills"]
 # opportunity statement doesn't count as "Regulatory compliance". Same rule as private.strip_boilerplate (db/044).
 _BOILERPLATE = re.compile(_SKILLS_DOC["boilerplate"], re.I)
 _PIECES = re.compile(r"\n|[.!?;•]\s+")
+# "Partner with Sales, Finance and Accounting": department names after a collaboration phrase name a team, not a
+# skill the job asks for, so they're blanked out (db/046 does the same in the database).
+_DEPARTMENTS = re.compile(_SKILLS_DOC["department_mentions"], re.I)
 
 
 def strip_boilerplate(text: str) -> str:
-    return "\n".join(p for p in _PIECES.split(text) if p.strip() and not _BOILERPLATE.search(p))
+    kept = "\n".join(p for p in _PIECES.split(text) if p.strip() and not _BOILERPLATE.search(p))
+    return _DEPARTMENTS.sub(" ", kept)
 
 
 def _compile(spec) -> list[re.Pattern]:

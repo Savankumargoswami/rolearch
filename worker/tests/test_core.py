@@ -144,6 +144,19 @@ class Text(unittest.TestCase):
         self.assertNotIn("French", extract_skills("Serve French fries and burgers."))
         self.assertNotIn("ERP systems", extract_skills("A typical workday starts at 9."))
 
+    def test_skills_v3_context(self):
+        # "a leading team" is an adjective, not leadership experience (db/046)
+        self.assertNotIn("Leadership", extract_skills("Join a leading team where flexibility meets opportunity."))
+        self.assertIn("Leadership", extract_skills("Two years leading a team of five."))
+        # department names after a collaboration phrase name a team, not a skill
+        s = extract_skills("Partner closely with Sales Leadership, Finance, Accounting and Payroll on the monthly close.")
+        for k in ["Accounting", "Payroll", "Sales"]:
+            self.assertNotIn(k, s)
+        s = extract_skills("Collaborate with engineering teams to build Python and SQL services.")
+        self.assertIn("Python", s)
+        self.assertIn("SQL", s)
+        self.assertIn("Accounting", extract_skills("Five years of accounting experience; you will partner with Finance."))
+
     def test_hybrid_is_not_a_city(self):
         p = parse_location("Hybrid", default_country="US")
         self.assertEqual((p.city, p.country), (None, "US"))
