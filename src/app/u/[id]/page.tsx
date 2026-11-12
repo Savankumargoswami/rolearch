@@ -24,7 +24,7 @@ async function Member({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const me = await viewerId(supabase);
-  if (!me) redirect("/signin");
+  if (!me) redirect(`/signin?next=${encodeURIComponent(`/u/${id}`)}`);
   if (me === id) redirect("/account");
   const account = await loadProfile(id);
   if (!account) notFound();

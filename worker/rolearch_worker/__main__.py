@@ -30,6 +30,21 @@ DEFAULTS = {
 }
 
 
+def _revalidate_site() -> None:
+    """Tells the website the jobs changed (POST /api/revalidate-jobs), so pages refresh now instead of within the hour.
+    Needs SITE_URL and CRON_SECRET in the environment; skipped quietly when they aren't set, and never fails the run."""
+    site, secret = os.environ.get("SITE_URL", "").rstrip("/"), os.environ.get("CRON_SECRET", "")
+    if not site or not secret:
+        return
+    try:
+        import httpx
+
+        r = httpx.post(f"{site}/api/revalidate-jobs", headers={"Authorization": f"Bearer {secret}"}, timeout=20)
+        print(f"site caches refreshed ({r.status_code})" if r.is_success else f"site cache refresh failed: HTTP {r.status_code}")
+    except Exception as e:  # the jobs are saved either way; pages then refresh within the hour
+        print(f"site cache refresh failed: {e}")
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="rolearch_worker")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -104,6 +119,7 @@ def main(argv: list[str] | None = None) -> int:
         finally:
             store.close()
         print(f"{len(listed)} companies listed · {retired} jobs closed from companies no longer listed · {stale} unconfirmed for {args.stale_days:g} days closed · site totals refreshed")
+        _revalidate_site()
         return 0
 
     companies = company_file.load(args.companies)
@@ -158,7 +174,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     for r in errors:
         print(f"  ! {r.company.name} ({r.company.ats}:{r.company.token}): {r.error}")
-    return 0 if len(errors) < len(results) else 2
+    if len(errors) == len(results):
+        return 2
+    # A board that can't be read is routine; failing to *save* is a database problem. Flag the run (non-zero exit, so
+    # the scheduled job shows red) when saves fail for 3+ boards or 5%+ of them, not for a single slow company.
+    store_failed = sum(1 for r in errors if r.error.startswith("store failed"))
+    if store_failed and (store_failed >= 3 or store_failed / len(results) >= 0.05):
+        print(f"  !! {store_failed} board(s) failed to save to the database", file=sys.stderr)
+        return 3
+    return 0
 
 
 if __name__ == "__main__":

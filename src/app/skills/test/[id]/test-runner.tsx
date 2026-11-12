@@ -58,7 +58,7 @@ export function TestRunner({ attemptId, title, deadline, questions, saved }: Pro
     const entries = Object.entries(pending.current);
     pending.current = {};
     Object.values(timers.current).forEach(clearTimeout);
-    await Promise.all(entries.map(([i, a]) => saveSkillAnswer(attemptId, Number(i), a)));
+    await Promise.all(entries.map(([i, a]) => saveSkillAnswer(attemptId, Number(i), a).catch(() => ({ ok: false }))));
   }, [attemptId]);
 
   const submit = useCallback(
@@ -182,18 +182,43 @@ export function TestRunner({ attemptId, title, deadline, questions, saved }: Pro
     return () => clearTimeout(id);
   }, [notice]);
 
+  /** Saves one answer; on a network or server failure it stays pending, shows "Not saved", and is retried. */
+  const save = useCallback(
+    async (i: number) => {
+      const v = pending.current[i];
+      if (v === undefined) return;
+      delete pending.current[i];
+      let ok = false;
+      try {
+        ok = (await saveSkillAnswer(attemptId, i, v)).ok;
+      } catch {
+        ok = false;
+      }
+      if (!ok && pending.current[i] === undefined) pending.current[i] = v; // keep it for the retry unless a newer value arrived
+      setSaveState(ok ? (Object.keys(pending.current).length ? "saving" : "saved") : "failed");
+    },
+    [attemptId],
+  );
+
+  // Answers that failed to save are retried when the connection comes back, and every 10 s while any are waiting.
+  useEffect(() => {
+    const retry = () => Object.keys(pending.current).forEach((k) => void save(Number(k)));
+    window.addEventListener("online", retry);
+    const id = setInterval(() => {
+      if (Object.keys(pending.current).length) retry();
+    }, 10_000);
+    return () => {
+      window.removeEventListener("online", retry);
+      clearInterval(id);
+    };
+  }, [save]);
+
   const change = (i: number, value: string) => {
     setAnswers((a) => ({ ...a, [i]: value }));
     pending.current[i] = value;
     clearTimeout(timers.current[i]);
     setSaveState("saving");
-    timers.current[i] = setTimeout(async () => {
-      const v = pending.current[i];
-      if (v === undefined) return;
-      delete pending.current[i];
-      const res = await saveSkillAnswer(attemptId, i, v);
-      setSaveState(res.ok ? "saved" : "failed");
-    }, 700);
+    timers.current[i] = setTimeout(() => void save(i), 700);
   };
 
   const enterFullscreen = async () => {
@@ -224,7 +249,8 @@ export function TestRunner({ attemptId, title, deadline, questions, saved }: Pro
 
   return (
     <div className="min-h-screen bg-paper select-none">
-      <div className="sticky top-0 z-20 border-b border-line bg-paper/95 backdrop-blur">
+      {/* top-16: sits below the site's sticky header (h-16), so the timer stays visible while scrolling */}
+      <div className="sticky top-16 z-20 border-b border-line bg-paper/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <p className="font-display text-lg font-semibold">{title}</p>
           <div className="flex items-center gap-4 text-sm">
@@ -263,12 +289,12 @@ export function TestRunner({ attemptId, title, deadline, questions, saved }: Pro
         </div>
       ) : (
         <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 lg:grid-cols-[1fr_15rem]">
-          <main>
+          <section aria-label={title}>
             <p className="text-sm text-muted">
               {t("skills.question", { n: current + 1, total: questions.length })}
               {q.kind === "code" || q.kind === "numeric" ? ` · ${t("skills.task")}` : ""} · {q.topic}
             </p>
-            <QuestionView q={q} index={current} value={answers[current] ?? ""} onChange={change} />
+            <QuestionView q={q} index={current} total={questions.length} value={answers[current] ?? ""} onChange={change} />
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
@@ -294,7 +320,7 @@ export function TestRunner({ attemptId, title, deadline, questions, saved }: Pro
                 </button>
               )}
             </div>
-          </main>
+          </section>
           <aside className="order-first lg:order-none">
             <ol className="grid grid-cols-7 gap-1.5 lg:grid-cols-4">
               {questions.map((qq, i) => (
@@ -354,11 +380,11 @@ export function TestRunner({ attemptId, title, deadline, questions, saved }: Pro
   );
 }
 
-function QuestionView({ q, index, value, onChange }: { q: PublicQuestion; index: number; value: string; onChange: (i: number, v: string) => void }) {
+function QuestionView({ q, index, total, value, onChange }: { q: PublicQuestion; index: number; total: number; value: string; onChange: (i: number, v: string) => void }) {
   if (q.kind === "output" || q.kind === "mcq") {
     return (
       <fieldset className="mt-3">
-        <legend className="sr-only">{t("skills.question", { n: index + 1, total: index + 1 })}</legend>
+        <legend className="sr-only">{t("skills.question", { n: index + 1, total })}</legend>
         <pre className="overflow-x-auto whitespace-pre-wrap rounded-2xl border border-line bg-surface p-4 font-mono text-[0.85rem] leading-relaxed">{q.text}</pre>
         <div className="mt-4 grid gap-2">
           {(q.options ?? []).map((opt, k) => (

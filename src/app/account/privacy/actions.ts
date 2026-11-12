@@ -68,3 +68,16 @@ export async function setOutcomeSharing(share: boolean): Promise<{ ok: boolean; 
   }
   return { ok: true };
 }
+
+/** Hide or show my profile to other members (db/047 set_profile_hidden). */
+export async function setProfileHidden(hidden: boolean): Promise<{ ok: boolean; message?: string }> {
+  const viewer = await loadViewer();
+  if (!viewer) return { ok: false, message: t("profile.errSignedOut") };
+  const db = await createClient();
+  const { error } = await db.rpc("set_profile_hidden", { p_hidden: Boolean(hidden) });
+  if (error) {
+    console.error("[privacy] visibility save failed:", error.message);
+    return { ok: false, message: t("visibility.errSave") };
+  }
+  return { ok: true };
+}

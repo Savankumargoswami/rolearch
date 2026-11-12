@@ -29,6 +29,9 @@ export function StartButton({ skill, level, skillName, levelName, resume }: { sk
         setError(res.message);
         return;
       }
+      // Close the modal before leaving: the previous page stays mounted (hidden) after navigation, and an open modal
+      // dialog would keep blocking every click and key press on the test page.
+      dialog.current?.close();
       router.push(`/skills/test/${res.attemptId}`);
     });
 

@@ -59,6 +59,12 @@ class Geo(unittest.TestCase):
     def test_default_country(self):
         self.assertEqual(parse_location("Head Office", default_country="DE").country, "DE")
 
+    def test_georgia_state_vs_country(self):
+        self.assertEqual(parse_location("Atlanta, Georgia").country, "US")
+        self.assertEqual(parse_location("Remote, Georgia").country, "US")
+        self.assertEqual(parse_location("Tbilisi, Georgia").country, "GE")
+        self.assertEqual(parse_location("Remote - Georgia", default_country="GE").country, "GE")
+
     def test_remote_without_country_has_none(self):
         self.assertIsNone(parse_location("Remote", default_country="US").country)
 

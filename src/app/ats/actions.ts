@@ -21,6 +21,7 @@ import { reviewResume, strengthenLine, type Review } from "@/lib/resume-coach";
 import { jobScreening, screen, type JobScreening, type Screening } from "@/lib/screening";
 import { signShare } from "@/lib/share-card";
 import { SKILLS } from "@/lib/skill-tests";
+import { looksLikeDocument } from "@/lib/file-check";
 import { allow } from "@/lib/rate-limit";
 import { band, track } from "@/lib/events";
 import { systemFromUrl } from "@/lib/ats-system";
@@ -183,8 +184,9 @@ async function checkUploadInner(target: AtsTarget, form: FormData): Promise<Chec
   if (upload.size > MAX_BYTES) return { ok: false, message: t("profile.errTooBig") };
   const kind = TYPES[upload.type as keyof typeof TYPES];
   if (!kind) return { ok: false, message: t("profile.errType") };
-  if (!(await allow(reader.id, "read"))) return { ok: false, message: t("ats.errLimit") };
   const bytes = Buffer.from(await upload.arrayBuffer());
+  if (!looksLikeDocument(bytes, kind)) return { ok: false, message: t("profile.errUnreadable") };
+  if (!(await allow(reader.id, "read"))) return { ok: false, message: t("ats.errLimit") };
   const [found, read, facts] = await Promise.all([jobFor(target), readResume({ bytes, kind }), kind === "docx" ? docxFacts(bytes) : Promise.resolve(null)]);
   if ("error" in found) return { ok: false, message: found.error };
   await track(reader.id, "resume_uploaded", { file_type: kind, parse_status: "error" in read ? read.error : "ok" });

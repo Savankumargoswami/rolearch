@@ -20,6 +20,10 @@ export async function GET(request: NextRequest) {
       ? await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
       : { error: new Error("missing code") };
 
+  // Password reset links (type=recovery, or sent with next=/reset/new) go to the new-password form, or back to the
+  // reset page when the link has expired.
+  const recovery = type === "recovery" || destination.startsWith("/reset/new");
+  if (recovery) return NextResponse.redirect(new URL(error ? "/reset?error=link" : "/reset/new", origin));
   // A provider that says no (e.g. the person cancelled) sends ?error=... instead of a code.
   if (searchParams.get("error")) return NextResponse.redirect(new URL("/signin?error=oauth", origin));
   return NextResponse.redirect(new URL(error ? "/signin?error=link" : destination, origin));

@@ -1,5 +1,6 @@
 import { BadgeCheck, CircleCheck, CircleX, ExternalLink, GraduationCap, ShieldAlert } from "lucide-react";
 import { FreeLearningCard } from "@/components/free-learning";
+import { LocalTime } from "@/components/local-time";
 import { testResources } from "@/data/learning";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -98,7 +99,16 @@ function Outcome({ attempt, own }: { attempt: Attempt; own: boolean }) {
         own &&
         retry && (
           <p className="mt-3 text-sm text-muted">
-            {t("skills.retryNote", { when: retry.toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }) })}{" "}
+            {(() => {
+              const [before, after] = t("skills.retryNote", { when: "\u0000" }).split("\u0000");
+              return (
+                <>
+                  {before}
+                  <LocalTime iso={retry.toISOString()} />
+                  {after}
+                </>
+              );
+            })()}{" "}
             <Link href="/skills" className="underline">
               {t("skills.title")}
             </Link>

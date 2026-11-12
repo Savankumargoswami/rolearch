@@ -14,7 +14,7 @@ const PULL = 100;
 
 /** The newest US jobs for a role (and place), kept for an hour. A failed search throws, so it isn't kept. */
 async function cachedListing(roleSlug: string, placeSlug: string) {
-  "use cache";
+  "use cache: remote"; // shared across server instances: each instance used to rebuild it (slow pages, extra egress)
   cacheLife("hours");
   cacheTag("jobs");
   const r = findRole(roleSlug)!;
@@ -30,7 +30,7 @@ async function cachedListing(roleSlug: string, placeSlug: string) {
 
 /** Recent listings for the role that publish pay (for the pay insight), kept for an hour. */
 async function cachedPaid(roleSlug: string, placeSlug: string): Promise<JobLite[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("hours");
   cacheTag("jobs");
   const r = findRole(roleSlug)!;

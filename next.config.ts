@@ -13,7 +13,12 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()" },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; upgrade-insecure-requests" },
+  // script-src: only this site's own scripts (Next.js page data is inline, so 'unsafe-inline' stays; per-request nonces
+  // would turn off page caching). No other origin and no eval. vercel.live is Vercel's preview toolbar.
+  {
+    key: "Content-Security-Policy",
+    value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; script-src 'self' 'unsafe-inline' https://vercel.live; upgrade-insecure-requests",
+  },
 ];
 
 const nextConfig: NextConfig = {

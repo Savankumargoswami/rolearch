@@ -211,6 +211,8 @@ _not_city = re.compile(
 )
 
 
+_GE_CITIES = {"tbilisi", "batumi", "kutaisi", "rustavi", "zugdidi", "gori", "poti"}
+
 # A street address part: starts with a house number, or carries a unit/suite marker.
 _STREET = re.compile(r"^\d|#|\b(suite|ste\.?|unit|floor|po box)\b", re.I)
 
@@ -227,6 +229,10 @@ def parse_location(text: str | None, default_country: str | None = None) -> Plac
 
     for tok in reversed(tokens):
         cc = country_code(tok)
+        # "Georgia" is far more often the US state ("Atlanta, Georgia") than the country: only the country when a
+        # Georgian city is named or the board itself is in Georgia.
+        if cc == "GE" and _fold(tok) == "georgia" and default_country != "GE" and not any(_fold(t) in _GE_CITIES for t in tokens):
+            continue
         if cc:
             country = cc
             break

@@ -20,10 +20,10 @@ type Search = Promise<{ view?: string; q?: string; status?: string; period?: str
 export default function TrackerPage({ searchParams }: { searchParams: Search }) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
+      {/* One boundary with a screen-tall placeholder: the list and the feedback box arrive together, and the footer
+          starts below the fold, so nothing visible jumps when the list loads. */}
+      <Suspense fallback={<div className="min-h-[80vh] animate-pulse rounded-3xl bg-ink-soft" aria-hidden="true" />}>
         <Tracker searchParams={searchParams} />
-      </Suspense>
-      <Suspense fallback={null}>
         <FeedbackPrompt />
       </Suspense>
     </div>

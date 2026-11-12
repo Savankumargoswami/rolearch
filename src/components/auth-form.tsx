@@ -136,6 +136,11 @@ export function AuthFormInner({
           hint={signup ? t("auth.passwordHint") : undefined}
           error={errors.password}
         />
+        {!signup && (
+          <Link href="/reset" className="-mt-2 self-start text-sm font-medium underline decoration-line underline-offset-4 hover:decoration-ink">
+            {t("auth.forgot")}
+          </Link>
+        )}
         <button
           type="submit"
           disabled={pending}
@@ -168,7 +173,7 @@ export function AuthFormInner({
   );
 }
 
-function Field({
+export function Field({
   name,
   label,
   hint,

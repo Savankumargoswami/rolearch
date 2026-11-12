@@ -40,13 +40,13 @@ function toAccount(id: string, email: string, data: Record<string, unknown> | nu
   };
 }
 
-/** The signed-in person's profile; sends visitors who aren't signed in to /signin. */
-export async function loadAccount(): Promise<AccountProfile> {
+/** The signed-in person's profile; sends visitors who aren't signed in to /signin, then back to `next`. */
+export async function loadAccount(next = "/account"): Promise<AccountProfile> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/signin");
+  if (!user) redirect(`/signin?next=${encodeURIComponent(next)}`);
   const { data } = await supabase.from("profiles").select(COLUMNS).eq("id", user.id).single();
   return toAccount(user.id, user.email ?? "", data);
 }
@@ -56,7 +56,20 @@ export async function loadProfile(id: string): Promise<AccountProfile | null> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
   const supabase = await createClient();
   const { data } = await supabase.from("profiles").select(COLUMNS).eq("id", id).maybeSingle();
-  return data ? toAccount(id, "", data) : null;
+  if (!data) return null;
+  // A hidden profile (db/047) only opens for a company the member applied to.
+  if (await isProfileHidden(id)) {
+    const { data: applied } = await supabase.rpc("company_can_view_skills", { p_user: id });
+    if (applied !== true) return null;
+  }
+  return toAccount(id, "", data);
+}
+
+/** Whether a member chose "Hide my profile". False when the column doesn't exist yet (before db/047 runs). */
+export async function isProfileHidden(id: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("profiles").select("hidden").eq("id", id).maybeSingle();
+  return !error && Boolean((data as { hidden?: boolean } | null)?.hidden);
 }
 
 /** The signed-in member's profile, or null for visitors. Cached per request so page sections can share it. */

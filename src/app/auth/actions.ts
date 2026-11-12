@@ -96,6 +96,36 @@ export async function resendConfirmation(email: string, next: string): Promise<{
   return error ? { ok: false, message: friendly(error.message) } : { ok: true };
 }
 
+/**
+ * Forgot password: emails a reset link that signs the person in through /auth/confirm and lands on /reset/new.
+ * The reply is the same whether or not the email has an account, so the form can't be used to find accounts.
+ */
+export async function requestPasswordReset(_: AuthState, form: FormData): Promise<AuthState> {
+  if (!authConfigured) return { message: t("auth.errNotConfigured") };
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  if (!emailOk(email)) return { errors: { email: t("auth.errEmail") }, values: { email } };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${await siteOrigin()}/auth/confirm?next=/reset/new` });
+  if (error && /rate limit|too many/i.test(error.message)) return { message: t("auth.errRateLimit"), values: { email } };
+  if (error) console.error("[auth] reset email failed:", error.message);
+  return { sent: email };
+}
+
+/** Sets the new password for the person signed in by the reset link. */
+export async function setNewPassword(_: AuthState, form: FormData): Promise<AuthState> {
+  if (!authConfigured) return { message: t("auth.errNotConfigured") };
+  const password = String(form.get("password") ?? "");
+  if (password.length < 10) return { errors: { password: t("auth.errPassword") } };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { message: t("auth.errResetLink") };
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { message: friendly(error.message) };
+  redirect("/account?password=changed");
+}
+
 export async function signIn(_: AuthState, form: FormData): Promise<AuthState> {
   if (!authConfigured) return { message: t("auth.errNotConfigured") };
   const email = String(form.get("email") ?? "").trim().toLowerCase();
@@ -126,8 +156,9 @@ export async function oauthSignIn(form: FormData): Promise<void> {
   redirect(data.url);
 }
 
+/** Signs out this browser only; other devices stay signed in (Supabase's default would end every session). */
 export async function signOut() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  await supabase.auth.signOut({ scope: "local" });
   redirect("/");
 }

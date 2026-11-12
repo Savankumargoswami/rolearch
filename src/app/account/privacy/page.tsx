@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { t } from "@/i18n";
 import { sharesOutcomes } from "@/lib/outcome-data";
+import { isProfileHidden } from "@/lib/profile";
 import { requireMember } from "@/lib/require-member";
 import { OutcomeSharing } from "./outcome-sharing";
 import { PrivacyControls } from "./privacy-controls";
+import { ProfileVisibility } from "./profile-visibility";
 
 export const metadata: Metadata = { title: "Settings and privacy", robots: { index: false } };
 
@@ -34,6 +36,9 @@ async function Gate() {
   const viewer = await requireMember("/account/privacy");
   return (
     <>
+      <div className="mt-6">
+        <ProfileVisibility initial={await isProfileHidden(viewer.id)} />
+      </div>
       <div className="mt-6">
         <OutcomeSharing initial={await sharesOutcomes(viewer.id)} />
       </div>

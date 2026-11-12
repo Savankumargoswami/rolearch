@@ -247,3 +247,26 @@ export function startsWithAction(bullet: string) {
   const first = bullet.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g, "") ?? "";
   return ACTION.has(first);
 }
+
+// Specific skills that prove a general requirement for job fit ("PostgreSQL" shows "SQL"). Fit only: the ATS check
+// stays literal, because resume scanners match the words themselves.
+const IMPLIED_BY: Record<string, RegExp> = {
+  sql: /\b(postgres(?:ql)?|mysql|sql server|t-sql|pl\/sql|sqlite|snowflake|bigquery|redshift|window functions?|ctes?\b|common table expressions?)/i,
+  "machine learning": /\b(scikit-?learn|sklearn|tensorflow|pytorch|keras|xgboost|lightgbm|gradient boosting|random forests?|neural networks?|deep learning|classification model|regression model|predictive model)/i,
+  github: /github\.com|\bgithub\b/i,
+  git: /github|gitlab|bitbucket|\bgit\b/i,
+  "version control": /\b(git|github|gitlab|bitbucket|svn)\b/i,
+  "data visualization": /\b(tableau|power bi|looker|dashboards?|matplotlib|seaborn|plotly|d3)\b/i,
+  dashboards: /\bdashboards?\b/i,
+  "kpi dashboards": /\bdashboards?\b/i,
+  "data analytics": /\b(data analy[sz](is|t|ed|ing)|sql|tableau|power bi|excel model)/i,
+  analytics: /\banaly(sis|tics|zed|sed|ing)\b/i,
+  manufacturing: /\b(manufactur\w*|extrusion|production lines?|plant floor|assembly lines?|machining|scrap rate|statistical process control|spc)\b/i,
+  "cloud computing": /\b(aws|azure|gcp|google cloud)\b/i,
+};
+
+/** Whether a text shows a general requirement through a specific skill that implies it (for job fit only). */
+export function impliedIn(name: string, text: string): boolean {
+  const re = IMPLIED_BY[name.trim().toLowerCase()];
+  return re ? re.test(text) : false;
+}

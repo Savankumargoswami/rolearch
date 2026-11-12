@@ -2,6 +2,8 @@
 
 import { t } from "@/i18n";
 import { ProfileSaveSchema, type ProfileData } from "@/lib/profile-schema";
+import { looksLikeDocument } from "@/lib/file-check";
+import { allow } from "@/lib/rate-limit";
 import { readResume } from "@/lib/resume-reader";
 import { createClient } from "@/lib/supabase/server";
 
@@ -54,6 +56,10 @@ export async function readResumeAction(_: ReadState, form: FormData): Promise<Re
   if (!kind) return { message: t("profile.errType") };
 
   const bytes = Buffer.from(await file.arrayBuffer());
+  // Checked before anything is stored, so junk files never reach the resumes bucket.
+  if (!looksLikeDocument(bytes, kind)) return { message: t("profile.errUnreadable") };
+  // Resume reading calls Claude: limited per member like the other AI features.
+  if (!(await allow(user.id, "read"))) return { message: t("ats.errLimit") };
   // Keep the original in the person's private folder (storage rules only allow their own user id).
   const path = `${user.id}/resume-${Date.now()}.${kind}`;
   const { error: uploadError } = await supabase.storage.from("resumes").upload(path, bytes, { contentType: file.type });

@@ -33,7 +33,7 @@ const tabClass = (active: boolean) =>
 async function Feed({ searchParams }: { searchParams: Search }) {
   const supabase = await createClient();
   const me = await viewerId(supabase);
-  if (!me) redirect("/signin");
+  if (!me) redirect(`/signin?next=${encodeURIComponent("/feed")}`);
   const tab = (await searchParams).tab;
   const following = tab === "following";
   const hiring = tab === "hiring";

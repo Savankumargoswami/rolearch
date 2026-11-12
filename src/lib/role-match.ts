@@ -6,7 +6,7 @@ import { totalMonths } from "./expertise";
 import type { JobRequirements } from "./job-requirements";
 import type { Match, Requirement } from "./match";
 import type { ProfileData } from "./profile-schema";
-import { degreeLevel, jobKeywords, mentions } from "./skills";
+import { degreeLevel, impliedIn, jobKeywords, mentions } from "./skills";
 
 const STOP = new Set(["and", "the", "for", "with", "of", "in", "to", "a", "an", "or", "skills", "skill", "experience", "knowledge", "ability", "strong", "excellent", "proficiency", "understanding", "working", "basic", "advanced", "background", "degree", "familiarity", "expertise", "related", "field", "relevant", "proven", "solid", "good", "demonstrated", "hands", "on"]);
 const EDUCATION_LEVEL = { none: 0, high_school: 0.5, associate: 1, bachelor: 2, master: 3, doctorate: 4 } as const;
@@ -15,7 +15,7 @@ const words = (s: string) => s.toLowerCase().split(/[^a-z0-9+#.]+/).filter((w) =
 
 /** Whether some text shows a requirement: dictionary synonyms first, then every meaningful word of the phrase. */
 function shows(name: string, text: string, textWords: Set<string>): boolean {
-  if (mentions(name, text) > 0) return true;
+  if (mentions(name, text) > 0 || impliedIn(name, text)) return true;
   const need = words(name);
   return need.length > 0 && need.every((w) => textWords.has(w) || [...textWords].some((t) => t.length > 4 && (t.startsWith(w) || w.startsWith(t))));
 }
@@ -29,7 +29,7 @@ export function matchProfile(
   const restText = [
     p.headline,
     p.resume.skills.join(", "),
-    ...p.resume.projects.map((x) => `${x.name} ${x.summary} ${x.skills.join(", ")}`),
+    ...p.resume.projects.map((x) => `${x.name} ${x.summary} ${x.skills.join(", ")} ${x.url}`),
     ...p.resume.certifications.map((c) => `${c.name} ${c.issuer}`),
     ...p.resume.education.map((e) => `${e.degree} ${e.field}`),
   ].join("\n");

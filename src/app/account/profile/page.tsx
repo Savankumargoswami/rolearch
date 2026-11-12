@@ -29,7 +29,7 @@ export default function EditProfilePage() {
 }
 
 async function Editor() {
-  const { id, profile, avatarUrl, accountType } = await loadAccount();
+  const { id, profile, avatarUrl, accountType } = await loadAccount("/account/profile");
   const db = await createClient();
   const [prefs, openToWork] = await Promise.all([loadPreferences(db), loadOpenToWork(db, id)]);
   return (

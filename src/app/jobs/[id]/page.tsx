@@ -499,6 +499,26 @@ function MatchSummary({ signedIn, hasProfile, match, fit }: { signedIn: boolean;
           </li>
         ))}
       </ul>
+      {fit.blockers.length > 0 && (
+        <div className="mt-4 rounded-xl bg-[#b4532a]/10 p-3 text-sm">
+          <p className="font-semibold text-[#b4532a]">{t("match.blockersTitle")}</p>
+          <ul className="mt-1 list-disc space-y-0.5 ps-4">
+            {fit.blockers.map((b) => (
+              <li key={b}>{b}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {fit.confirm.length > 0 && (
+        <div className="mt-3 rounded-xl bg-ink-soft/70 p-3 text-sm">
+          <p className="font-semibold">{t("match.checkTitle")}</p>
+          <ul className="mt-1 list-disc space-y-0.5 ps-4">
+            {fit.confirm.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <a href="#ats-h" className="mt-3 inline-flex min-h-10 items-center gap-1 text-sm font-medium underline decoration-line underline-offset-4 hover:decoration-ink">
         {t("fit.fullReport")}
         <ArrowUpRight aria-hidden="true" className="size-4" />

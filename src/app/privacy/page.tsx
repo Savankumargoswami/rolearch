@@ -101,7 +101,7 @@ const sections: LegalSection[] = [
     body: (
       <Points
         items={[
-          <><strong>Signed-in members</strong> can see your profile (name, photo, headline, location, links, experience, education, projects, certifications, skills), your posts and your follower counts. Visitors who aren&rsquo;t signed in can&rsquo;t.</>,
+          <><strong>Signed-in members</strong> can see your profile (name, photo, headline, location, links, experience, education, projects, certifications, skills), your posts and your follower counts. Visitors who aren&rsquo;t signed in can&rsquo;t. You can turn on &ldquo;Hide my profile&rdquo; in Settings and privacy to keep your profile out of member and recruiter search and off your profile page for other members.</>,
           <><strong>Only you</strong> can see your email address, your uploaded resume file and your account details.</>,
           <><strong>Employers you apply to on Rolearch</strong> see what the apply page lists before you send: your name, email, headline, location, links, photo, resume, answers, note and your match and ATS scores for that job. Only that employer sees them. Company notes about you are private to the company.</>,
           <><strong>Employers on their own sites:</strong> for jobs that link to an employer&rsquo;s careers page, you apply there, and what you share is governed by their privacy policy.</>,

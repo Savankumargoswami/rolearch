@@ -125,7 +125,7 @@ ${skillLine}
 
 /** Today's digest for one topic (the last 24 hours), for the public /today pages; kept for an hour. */
 export async function todayDigest(topicKey: string): Promise<Digest | null> {
-  "use cache";
+  "use cache: remote"; // shared across server instances
   cacheLife("hours");
   cacheTag("jobs");
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
