@@ -94,5 +94,7 @@ $do$;
 -- Keeps real jobs in the country Georgia (Tbilisi, Batumi, Kutaisi, ...). Only touches rows with country = 'Georgia'.
 update public.jobs
 set country = 'United States', country_code = 'US', region = 'north-america'
-where country = 'Georgia'
+where status = 'open'
+  and region = 'europe'
+  and country = 'Georgia'
   and coalesce(lower(city), '') not in ('tbilisi', 'batumi', 'kutaisi', 'rustavi', 'zugdidi', 'gori', 'poti');
