@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { m, t } from "@/i18n";
+import { AddToChrome } from "@/components/add-to-chrome";
 import { FitEvidence } from "@/components/fit-evidence";
 import { loadViewer } from "@/lib/profile";
 import { FreeCheck } from "./free-check";
@@ -27,6 +28,7 @@ export default function AtsPage() {
           </li>
         ))}
       </ul>
+      <AddToChrome variant="banner" className="mt-8" />
       <div className="mt-10">
         {/* The form renders once; only the scan panel waits for who's viewing (so nothing typed is ever re-mounted). */}
         <FreeCheck viewer={viewerStatus()} />

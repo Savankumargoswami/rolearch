@@ -1,6 +1,7 @@
 import { ArrowRight, Check } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AddToChrome } from "@/components/add-to-chrome";
 import { FitEvidence } from "@/components/fit-evidence";
 import { HomeShowcase } from "@/components/home-showcase";
 import { CANDIDATE_FEATURES, EMPLOYER_FEATURES, FAQ, NOT_OFFERED, type Feature } from "@/lib/features";
@@ -35,6 +36,8 @@ export default function FeaturesPage() {
           </li>
         ))}
       </ul>
+
+      <AddToChrome variant="banner" className="mt-8" />
 
       <h2 className="mt-14 font-display text-3xl font-semibold tracking-[-0.02em]">For employers</h2>
       <ul className="mt-6 grid gap-5 md:grid-cols-2">

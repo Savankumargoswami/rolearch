@@ -768,6 +768,13 @@ const en = {
     errOptimize: "We couldn't tailor your resume just now. Try again in a minute.",
     errUnexpected: "Something went wrong on our side. Try again in a minute.",
   },
+  chromeExt: {
+    button: "Add to Chrome, free",
+    title: "Check any job without copy-paste",
+    lead: "With the Rolearch extension, open a job on any site, click the Rolearch icon, and the posting lands here ready to check against your resume.",
+    footer: "Chrome extension",
+    newTab: "(opens the Chrome Web Store in a new tab)",
+  },
   atsFree: {
     metaTitle: "Free ATS resume checker: score your resume against any job",
     metaDescription: "Paste any job description and upload your resume. See your ATS score, missing keywords and parsing problems, then get a tailored, ATS-ready resume. Free.",

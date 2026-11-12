@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { t } from "@/i18n";
+import { AddToChrome } from "./add-to-chrome";
 import { Logo } from "./logo";
+
+/** The footer's extension link, as its own list item (nothing at all where the extension can't be installed). */
+function AddToChromeItem() {
+  return <AddToChrome variant="link" asListItem />;
+}
 
 export function SiteFooter() {
   return (
@@ -17,6 +23,7 @@ export function SiteFooter() {
             <li><Link className="hover:text-ink" href="/jobs">{t("nav.jobs")}</Link></li>
             <li><Link className="hover:text-ink" href="/features">Features</Link></li>
             <li><Link className="hover:text-ink" href="/ats">{t("nav.ats")}</Link></li>
+            <AddToChromeItem />
             <li><Link className="hover:text-ink" href="/skills">{t("nav.skills")}</Link></li>
             <li><Link className="hover:text-ink" href="/guides">Career-change guides</Link></li>
             <li><Link className="hover:text-ink" href="/blog">Blog</Link></li>

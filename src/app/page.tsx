@@ -3,6 +3,7 @@ import { ArrowDown, ArrowRight, Check, ScanSearch } from "lucide-react";
 import { CANDIDATE_FEATURES, EMPLOYER_FEATURES } from "@/lib/features";
 import Link from "next/link";
 import { Suspense, ViewTransition } from "react";
+import { AddToChrome } from "@/components/add-to-chrome";
 import { BestRoles } from "@/components/best-roles";
 import { HeroSearch } from "@/components/hero-search";
 import { HomeShowcase } from "@/components/home-showcase";
@@ -99,7 +100,8 @@ export default async function Home() {
             >
               {t("hero.changers")}
               <ArrowRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
-            </Link>
+            </Link>{" "}
+            <AddToChrome className="mt-4" />{" "}
             <a
               href="#what"
               className="mt-4 ms-1 inline-flex min-h-11 items-center gap-1.5 text-sm font-medium underline decoration-ink/30 underline-offset-4 transition-[text-decoration-color] duration-200 hover:decoration-ink"
