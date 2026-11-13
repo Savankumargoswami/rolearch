@@ -8,6 +8,7 @@ import { z } from "zod";
 import type { AtsDoc } from "./ats-doc";
 import { mentions } from "./skills";
 import { resumeText } from "./ats";
+import { sectionLabel } from "./tailor-evidence";
 
 export const optimizerEnabled = Boolean(process.env.ANTHROPIC_API_KEY);
 
@@ -133,7 +134,7 @@ export async function optimizeResume(input: {
         skill_groups: skill_groups.length ? skill_groups : resume.skill_groups,
         resume: { ...resume.resume, experience, projects, skills: skills.length ? skills : resume.resume.skills },
       },
-      changes: out.changes,
+      changes: out.changes.map((c) => ({ ...c, section: sectionLabel(c.section, resume) })),
       skipped: out.skipped,
     };
   } catch (e) {

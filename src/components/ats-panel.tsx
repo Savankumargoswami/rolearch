@@ -2,7 +2,7 @@
 
 import { resumeText } from "@/lib/ats";
 import { ApplicationChecklist } from "./application-checklist";
-import { applyChoices, evidenceProblem, replaceText, unsupported, withEvidence, workEvidence, type SkillEvidence } from "@/lib/tailor-evidence";
+import { applyChoices, evidenceProblem, replaceText, sectionLabel, unsupported, withEvidence, workEvidence, type SkillEvidence } from "@/lib/tailor-evidence";
 import { mentions } from "@/lib/skills";
 import { FitReportView } from "./fit-report";
 import { TrackApplication } from "./track-application";
@@ -930,7 +930,7 @@ function Improved({
             const kept = keep.has(i);
             return (
               <li key={i} className="rounded-xl bg-surface p-3 text-sm">
-                <p className="text-xs font-semibold tracking-wide text-signal-ink uppercase">{c.section}</p>
+                <p className="text-xs font-semibold tracking-wide text-signal-ink uppercase">{sectionLabel(c.section)}</p>
                 {c.requirement && (
                   <p className="mt-1.5">
                     <span className="text-xs font-semibold tracking-wide text-muted uppercase">{t("ats.evRequirement")}</span>

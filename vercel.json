@@ -17,8 +17,13 @@
       "requestMethod": "GET"
     },
     "blog": {
-      "schedule": "0 12 */2 * *",
+      "schedule": "0 12 * * 0,1,3,5",
       "path": "/api/cron/blog",
+      "requestMethod": "GET"
+    },
+    "competitor-watch": {
+      "schedule": "30 13 * * 1",
+      "path": "/api/cron/competitor-watch",
       "requestMethod": "GET"
     }
   }

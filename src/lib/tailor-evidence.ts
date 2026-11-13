@@ -6,6 +6,44 @@ import { mentions } from "./skills";
 
 export type EvidenceChange = { section: string; before: string; after: string; why: string; requirement?: string };
 
+const SECTION_PATH = /^[a-z_]+(\[\d+\])?(\.[a-z_]+(\[\d+\])?)*$/i;
+const titleCase = (s: string) => s.replace(/_/g, " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase());
+
+/**
+ * A friendly label for an edit's section. The model sometimes names a field path ("experience[1].bullets[0]")
+ * instead of a section; that becomes "Experience · Contoso Motors" (the role, project or school when the resume is
+ * given). Labels that are already friendly ("Summary", "Data Analyst, Contoso") come back unchanged.
+ */
+export function sectionLabel(section: string, doc?: AtsDoc): string {
+  const s = section.trim();
+  if (!SECTION_PATH.test(s)) return s;
+  const [, key, index] = s.match(/^([a-z_]+)(?:\[(\d+)\])?/i)!;
+  const i = index === undefined ? -1 : Number(index);
+  const r = doc?.resume;
+  const named = (label: string, name?: string) => (name?.trim() ? `${label} · ${name.trim()}` : label);
+  switch (key.toLowerCase()) {
+    case "headline":
+      return "Headline";
+    case "summary":
+      return "Summary";
+    case "skills":
+    case "skill_groups":
+      return "Skills";
+    case "experience": {
+      const e = r?.experience[i];
+      return named("Experience", e?.company || e?.title);
+    }
+    case "projects":
+      return named("Projects", r?.projects[i]?.name);
+    case "education":
+      return named("Education", r?.education[i]?.school);
+    case "certifications":
+      return named("Certifications", r?.certifications[i]?.name);
+    default:
+      return titleCase(key);
+  }
+}
+
 /** Job keywords an edit adds that the original resume never shows and the person hasn't confirmed. */
 export function unsupported(change: EvidenceChange, originalText: string, keywords: string[], confirmed: string[]): string[] {
   const ok = new Set(confirmed.map((c) => c.toLowerCase()));

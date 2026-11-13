@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { industry, planFor, postEmail, rest, sendMail, type Post } from "@/lib/blog";
 import { writePost, type Hiring } from "@/lib/blog-writer";
 
-// Vercel Cron calls this every other day (vercel.json) with "Authorization: Bearer $CRON_SECRET". It researches and
+// Vercel Schedules call this 4 times a week: Sunday, Monday, Wednesday and Friday at 12:00 UTC (vercel.json) with "Authorization: Bearer $CRON_SECRET". It researches and
 // publishes the next blog article in the rotation, then emails it to confirmed subscribers of that industry or of all.
 
 export const maxDuration = 300;
@@ -17,9 +17,10 @@ export async function GET(request: NextRequest) {
   if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ error: "not configured" }, { status: 500 });
 
   try {
-    // One article per run, and never two within 40 hours (a retried or doubled cron run publishes nothing).
+    // One article per run, and never two within 20 hours (a retried or doubled run publishes nothing; the closest
+    // scheduled runs, Sunday and Monday, are 24 hours apart).
     const last = await rest<{ published_at: string }[]>("blog_posts?select=published_at&order=published_at.desc&limit=1");
-    if (last[0] && Date.now() - Date.parse(last[0].published_at) < 40 * 3_600_000 && !request.nextUrl.searchParams.has("force")) {
+    if (last[0] && Date.now() - Date.parse(last[0].published_at) < 20 * 3_600_000 && !request.nextUrl.searchParams.has("force")) {
       return NextResponse.json({ ok: true, skipped: "published recently" });
     }
     const count = await rest<{ id: string }[]>("blog_posts?select=id", { prefer: "count=exact" }).then((r) => r.length);
