@@ -1,0 +1,19 @@
+{
+  "version": "jobfit-1.2",
+  "scores": {
+    "Manufacturing engineer -> data analyst (bank)": 58,
+    "Same-role analyst: strong fit": 86,
+    "Confirmed gaps and a confirmed skill": 37,
+    "Evidence marked wrong is not counted": 52,
+    "Too little information is not a low score": 27,
+    "Related tool is transferable, not a direct match": 91,
+    "QA AI-003: mechanical graduate vs senior backend is a poor fit": 10,
+    "QA AI-005: missing mandatory CPA is a poor fit": 32,
+    "QA AI-006: graduate capstone with repo counts as project evidence": 70,
+    "QA AI-008: PostgreSQL work proves SQL": 79,
+    "QA AI-021: 8 years vs junior role gets the level note": 60,
+    "QA AI-024: bootcamp only vs mandatory degree is a stretch": 44,
+    "QA AI-029: SQL in a project counts as listed evidence": 41,
+    "QA AI-031: preferred skill can't stand in for a required one": 53
+  }
+}

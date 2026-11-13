@@ -1,0 +1,40 @@
+# JobFit benchmark: re-scores the hand-labelled candidate/job cases (scripts/jobfit-eval.ts) whenever the scoring code
+# or the skill dictionary changes, and fails if accuracy drops or any case's score moves by more than 3 points from the
+# reviewed baseline (scripts/jobfit-baseline.json). No secrets needed: it runs the scoring code only, no AI calls.
+name: JobFit benchmark
+
+on:
+  push:
+    paths:
+      - "src/lib/fit.ts"
+      - "src/lib/skills.ts"
+      - "src/lib/role-match.ts"
+      - "src/lib/profile-schema.ts"
+      - "src/lib/job-requirements.ts"
+      - "scripts/jobfit-*"
+      - ".github/workflows/jobfit-eval.yml"
+  pull_request:
+    paths:
+      - "src/lib/fit.ts"
+      - "src/lib/skills.ts"
+      - "src/lib/role-match.ts"
+      - "src/lib/profile-schema.ts"
+      - "src/lib/job-requirements.ts"
+      - "scripts/jobfit-*"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run eval:jobfit

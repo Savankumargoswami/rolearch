@@ -1,17 +1,24 @@
 // JobFit evaluation harness (blueprint 5.7): hand-labelled candidate/job cases with the expected status of each
 // requirement and the expected category. Run with `npm run eval:jobfit`. Prints direct-match precision, transferable
 // recall, status accuracy, category accuracy and the unsupported-evidence rate, and exits non-zero on a regression.
-import { fitReport, type Tier, type Verdict } from "../src/lib/fit";
+// It also compares every case's score with scripts/jobfit-baseline.json and fails when one moves by more than 3 points,
+// so a change to the scoring can't quietly shift results. After reviewing an intended change, record the new scores
+// with `npm run eval:jobfit -- --update-baseline`. CI runs this on every push that touches the scoring code.
+import { readFileSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { FIT_VERSION, fitReport, type Tier, type Verdict } from "../src/lib/fit";
 import { withDefaults } from "../src/lib/profile-schema";
 
 type Case = {
   name: string;
   profile: { headline?: string; resume: Record<string, unknown> };
-  job: { title: string; description: string; required: string[]; preferred?: string[]; years?: number; education?: "none" | "bachelor" | "master" };
+  job: { title: string; description: string; required: string[]; preferred?: string[]; certifications?: string[]; years?: number; education?: "none" | "bachelor" | "master" };
   badges?: string[];
   corrections?: Record<string, "lack" | "have" | "wrong">;
   expect: Record<string, Tier>;
   verdict: Verdict[];
+  /** A note the candidate must see ("Check before applying"). */
+  confirm?: RegExp;
 };
 
 const role = (title: string, company: string, start: string, bullets: string[], skills: string[] = [], current = false) => ({
@@ -94,8 +101,529 @@ const CASES: Case[] = [
     expect: { AWS: "transferable", Terraform: "proven", Kubernetes: "proven" },
     verdict: ["potential", "strong", "stretch"],
   },
+  // QA round 2-4 cases (synthetic profiles; requirements as read from each job's description and stored).
+  {
+    name: "QA AI-003: mechanical graduate vs senior backend is a poor fit",
+    profile: {
+      headline: "Mechanical engineering graduate",
+      resume: {
+        experience: [],
+        education: [
+          {
+            school: "Lakeside University",
+            degree: "BS",
+            field: "Mechanical Engineering",
+            start: "2022",
+            end: "2026"
+          }
+        ],
+        projects: [
+          {
+            name: "Bridge truss design",
+            url: "",
+            summary: "Designed a truss in SolidWorks and ran FEA.",
+            skills: [
+              "SolidWorks",
+              "FEA"
+            ]
+          }
+        ],
+        certifications: [],
+        skills: [
+          "SolidWorks",
+          "AutoCAD",
+          "MATLAB"
+        ]
+      }
+    },
+    job: {
+      title: "Senior Backend Engineer",
+      description: "Senior Backend Engineer.\n\nRequirements:\n- 5+ years building production backend systems\n- Go or Java\n- Distributed systems, Kubernetes, PostgreSQL\n- On-call experience for high-traffic services\n- BS in Computer Science or equivalent\n\nAbout us: QA Synthetic Co is a fictional company used for software testing. We offer health insurance and a hybrid office.",
+      required: [
+        "Go",
+        "Java",
+        "Distributed systems",
+        "Kubernetes",
+        "PostgreSQL",
+        "On-call",
+        "High-traffic services",
+        "Production backend systems"
+      ],
+      years: 5,
+      education: "bachelor"
+    },
+    expect: {
+      Go: "missing",
+      Kubernetes: "missing",
+      PostgreSQL: "missing"
+    },
+    verdict: [
+      "poor"
+    ]
+  },
+  {
+    name: "QA AI-005: missing mandatory CPA is a poor fit",
+    profile: {
+      headline: "Data Analyst",
+      resume: {
+        experience: [
+          {
+            title: "Data Analyst",
+            company: "Northwind Retail",
+            website: "",
+            location: "Chicago, United States",
+            start: "2025-09",
+            end: "",
+            current: true,
+            bullets: [
+              "Wrote SQL reports for merchandising",
+              "Automated Excel workbooks"
+            ],
+            skills: [
+              "SQL",
+              "Excel"
+            ]
+          },
+          {
+            title: "Analytics Intern",
+            company: "Contoso Bank",
+            website: "",
+            location: "Chicago, United States",
+            start: "2025-01",
+            end: "2025-05",
+            current: false,
+            bullets: [
+              "Built Excel models"
+            ],
+            skills: [
+              "Excel"
+            ]
+          }
+        ],
+        education: [
+          {
+            school: "Lakeside University",
+            degree: "BS",
+            field: "Economics",
+            start: "2021",
+            end: "2025"
+          }
+        ],
+        projects: [],
+        certifications: [],
+        skills: [
+          "SQL",
+          "Excel",
+          "Communication"
+        ]
+      }
+    },
+    job: {
+      title: "Staff Accountant (CPA required)",
+      description: "Staff Accountant.\n\nMandatory requirements:\n- Active CPA license (required, no exceptions)\n- 2+ years of public accounting\n- US GAAP, month-end close, reconciliations\n- Excel\n\nAbout us: QA Synthetic Co is a fictional company used for software testing. We offer health insurance and a hybrid office.",
+      required: [
+        "US GAAP",
+        "Month-end close",
+        "Reconciliations",
+        "Excel",
+        "Public accounting"
+      ],
+      certifications: [
+        "CPA license"
+      ],
+      years: 2
+    },
+    expect: {
+      Excel: "proven",
+      "US GAAP": "missing",
+      "CPA license": "missing"
+    },
+    verdict: [
+      "poor"
+    ]
+  },
+  {
+    name: "QA AI-006: graduate capstone with repo counts as project evidence",
+    profile: {
+      headline: "Data science graduate",
+      resume: {
+        experience: [],
+        education: [
+          {
+            school: "Lakeside University",
+            degree: "MS",
+            field: "Data Science",
+            start: "2025",
+            end: "2026"
+          }
+        ],
+        projects: [
+          {
+            name: "Churn prediction model",
+            url: "https://github.com/example/churn",
+            summary: "Trained a scikit-learn gradient boosting model on telecom churn data; reproducible repo with report.",
+            skills: [
+              "Python",
+              "pandas",
+              "scikit-learn",
+              "Git"
+            ]
+          }
+        ],
+        certifications: [],
+        skills: [
+          "Python",
+          "pandas",
+          "scikit-learn",
+          "Statistics",
+          "Git"
+        ]
+      }
+    },
+    job: {
+      title: "Entry-Level Data Scientist",
+      description: "Entry-Level Data Scientist.\n\nRequirements:\n- Python (pandas, scikit-learn)\n- Machine learning model building\n- Statistics\n- Git/GitHub\n- Degree in a quantitative field\n\nNew graduates welcome.\n\nAbout us: QA Synthetic Co is a fictional company used for software testing. We offer health insurance and a hybrid office.",
+      required: [
+        "Python",
+        "pandas",
+        "scikit-learn",
+        "Machine learning",
+        "Statistics",
+        "Git",
+        "GitHub"
+      ],
+      education: "bachelor"
+    },
+    expect: {
+      Python: "listed",
+      "scikit-learn": "listed",
+      "Machine learning": "listed",
+      GitHub: "listed"
+    },
+    verdict: [
+      "potential"
+    ]
+  },
+  {
+    name: "QA AI-008: PostgreSQL work proves SQL",
+    profile: {
+      headline: "Analyst",
+      resume: {
+        experience: [
+          {
+            title: "Reporting Analyst",
+            company: "Tailspin",
+            website: "",
+            location: "Chicago, United States",
+            start: "2023-02",
+            end: "",
+            current: true,
+            bullets: [
+              "Wrote PostgreSQL queries with window functions and CTEs for finance reporting",
+              "Designed star-schema data models"
+            ],
+            skills: [
+              "PostgreSQL",
+              "Excel"
+            ]
+          }
+        ],
+        education: [
+          {
+            school: "Lakeside University",
+            degree: "BS",
+            field: "Finance",
+            start: "2018",
+            end: "2022"
+          }
+        ],
+        projects: [],
+        certifications: [],
+        skills: [
+          "PostgreSQL",
+          "Excel",
+          "Data modelling"
+        ]
+      }
+    },
+    job: {
+      title: "SQL Analyst",
+      description: "SQL Analyst.\n\nRequirements:\n- Expert SQL (window functions, CTEs)\n- Data modelling\n- Excel\n\nAbout us: QA Synthetic Co is a fictional company used for software testing. We offer health insurance and a hybrid office.",
+      required: [
+        "SQL",
+        "Window functions",
+        "CTEs",
+        "Data modelling",
+        "Excel"
+      ]
+    },
+    expect: {
+      SQL: "proven",
+      "Window functions": "proven",
+      CTEs: "proven",
+      "Data modelling": "listed"
+    },
+    verdict: [
+      "strong"
+    ]
+  },
+  {
+    name: "QA AI-021: 8 years vs junior role gets the level note",
+    profile: {
+      headline: "Senior Data Analyst",
+      resume: {
+        experience: [
+          {
+            title: "Senior Data Analyst",
+            company: "Contoso",
+            website: "",
+            location: "Chicago, United States",
+            start: "2018-01",
+            end: "",
+            current: true,
+            bullets: [
+              "Led analytics for pricing; SQL, Tableau, Excel"
+            ],
+            skills: [
+              "SQL",
+              "Tableau",
+              "Excel"
+            ]
+          }
+        ],
+        education: [
+          {
+            school: "Lakeside University",
+            degree: "BS",
+            field: "Mathematics",
+            start: "2013",
+            end: "2017"
+          }
+        ],
+        projects: [],
+        certifications: [],
+        skills: [
+          "SQL",
+          "Excel",
+          "Tableau",
+          "Python"
+        ]
+      }
+    },
+    job: {
+      title: "Junior Data Analyst",
+      description: "We are hiring a Junior Data Analyst.\n\nRequirements:\n- 0-1 years of experience\n- Strong SQL\n- Advanced Excel\n- Tableau dashboards\n- Bachelor's or Master's in a quantitative field\n\nResponsibilities: build weekly KPI dashboards and answer ad-hoc questions from the sales team.\n\nAbout us: QA Synthetic Co is a fictional company used for software testing. We offer health insurance and a hybrid office.",
+      required: [
+        "SQL",
+        "Excel",
+        "Tableau",
+        "KPI dashboards",
+        "Ad-hoc analysis"
+      ],
+      education: "bachelor"
+    },
+    expect: {
+      SQL: "proven",
+      Tableau: "proven"
+    },
+    verdict: [
+      "potential"
+    ],
+    confirm: /junior role/i,
+  },
+  {
+    name: "QA AI-024: bootcamp only vs mandatory degree is a stretch",
+    profile: {
+      headline: "Data analyst (bootcamp)",
+      resume: {
+        experience: [],
+        education: [
+          {
+            school: "CodeCamp",
+            degree: "Bootcamp certificate",
+            field: "Data Analytics",
+            start: "2025",
+            end: "2025"
+          }
+        ],
+        projects: [
+          {
+            name: "Airline delays dashboard",
+            url: "",
+            summary: "SQL + Tableau dashboard on 5M flights.",
+            skills: [
+              "SQL",
+              "Tableau"
+            ]
+          },
+          {
+            name: "Budget model",
+            url: "",
+            summary: "Excel model with SQL extracts.",
+            skills: [
+              "Excel",
+              "SQL"
+            ]
+          }
+        ],
+        certifications: [],
+        skills: [
+          "SQL",
+          "Excel",
+          "Tableau",
+          "Python"
+        ]
+      }
+    },
+    job: {
+      title: "Financial Analyst (degree required)",
+      description: "Financial Analyst.\n\nMandatory: an accredited bachelor's degree in Finance, Accounting or Economics (required, no equivalent experience accepted).\n\nRequirements:\n- Excel financial modelling\n- SQL\n\nAbout us: QA Synthetic Co is a fictional company used for software testing. We offer health insurance and a hybrid office.",
+      required: [
+        "Excel",
+        "Financial modelling",
+        "SQL"
+      ],
+      education: "bachelor"
+    },
+    expect: {
+      SQL: "listed",
+      "Financial modelling": "missing"
+    },
+    verdict: [
+      "stretch"
+    ]
+  },
+  {
+    name: "QA AI-029: SQL in a project counts as listed evidence",
+    profile: {
+      headline: "Reporting specialist",
+      resume: {
+        experience: [
+          {
+            title: "Reporting Specialist",
+            company: "Woodgrove",
+            website: "",
+            location: "Chicago, United States",
+            start: "2022-01",
+            end: "",
+            current: true,
+            bullets: [
+              "Built Tableau dashboards from Excel extracts"
+            ],
+            skills: [
+              "Tableau",
+              "Excel"
+            ]
+          }
+        ],
+        education: [
+          {
+            school: "Lakeside University",
+            degree: "BS",
+            field: "Business",
+            start: "2017",
+            end: "2021"
+          }
+        ],
+        projects: [
+          {
+            name: "SQL reporting",
+            url: "",
+            summary: "Wrote SQL queries for monthly reports.",
+            skills: [
+              "SQL"
+            ]
+          }
+        ],
+        certifications: [],
+        skills: [
+          "Tableau",
+          "Excel",
+          "SQL"
+        ]
+      }
+    },
+    job: {
+      title: "SQL Analyst",
+      description: "SQL Analyst.\n\nRequirements:\n- Expert SQL (window functions, CTEs)\n- Data modelling\n- Excel\n\nAbout us: QA Synthetic Co is a fictional company used for software testing. We offer health insurance and a hybrid office.",
+      required: [
+        "SQL",
+        "Window functions",
+        "CTEs",
+        "Data modelling",
+        "Excel"
+      ]
+    },
+    expect: {
+      SQL: "listed",
+      Excel: "proven"
+    },
+    verdict: [
+      "stretch"
+    ]
+  },
+  {
+    name: "QA AI-031: preferred skill can't stand in for a required one",
+    profile: {
+      headline: "Reporting specialist",
+      resume: {
+        experience: [
+          {
+            title: "Reporting Specialist",
+            company: "Woodgrove",
+            website: "",
+            location: "Chicago, United States",
+            start: "2022-01",
+            end: "",
+            current: true,
+            bullets: [
+              "Built Tableau dashboards from Excel extracts"
+            ],
+            skills: [
+              "Tableau",
+              "Excel"
+            ]
+          }
+        ],
+        education: [
+          {
+            school: "Lakeside University",
+            degree: "BS",
+            field: "Business",
+            start: "2017",
+            end: "2021"
+          }
+        ],
+        projects: [],
+        certifications: [],
+        skills: [
+          "Tableau",
+          "Excel"
+        ]
+      }
+    },
+    job: {
+      title: "Reporting Analyst",
+      description: "Reporting Analyst.\n\nRequired:\n- SQL (must have)\n- Excel\n\nPreferred:\n- Tableau\n\nAbout us: QA Synthetic Co is a fictional company used for software testing. We offer health insurance and a hybrid office.",
+      required: [
+        "SQL",
+        "Excel"
+      ],
+      preferred: [
+        "Tableau"
+      ]
+    },
+    expect: {
+      SQL: "missing",
+      Tableau: "proven"
+    },
+    verdict: [
+      "insufficient"
+    ]
+  },
 ];
 
+const scores: Record<string, number> = {};
 let statusRight = 0;
 let statusTotal = 0;
 let directPredicted = 0;
@@ -110,11 +638,14 @@ const failures: string[] = [];
 for (const c of CASES) {
   const p = withDefaults({ ...c.profile, resume: { experience: [], education: [], projects: [], certifications: [], skills: [], ...c.profile.resume } } as Parameters<typeof withDefaults>[0]);
   const fit = fitReport(
-    { title: c.job.title, description: c.job.description, required: c.job.required, preferred: c.job.preferred ?? [], certifications: [], years: c.job.years ?? 0, education: c.job.education ?? "none" },
+    { title: c.job.title, description: c.job.description, required: c.job.required, preferred: c.job.preferred ?? [], certifications: c.job.certifications ?? [], years: c.job.years ?? 0, education: c.job.education ?? "none" },
     p,
     { badges: (c.badges ?? []).map((skill) => ({ skill, level: "entry" })), corrections: c.corrections, tests: TESTS, source: "stored", now: "2026-11-07T00:00:00Z" },
   );
-  const text = JSON.stringify(p.resume).toLowerCase();
+  // The profile's own words, with lists also read the way the app shows them ("Python, pandas").
+  const lists: string[] = [];
+  JSON.stringify(p.resume, (_, v) => (Array.isArray(v) && v.every((x) => typeof x === "string") && lists.push(v.join(", ")), v));
+  const text = [JSON.stringify(p.resume), ...lists].join("\n").toLowerCase();
   for (const s of fit.skills) {
     const want = c.expect[s.name];
     if (!want) continue;
@@ -133,15 +664,40 @@ for (const c of CASES) {
     // Integrity: every quoted piece of evidence must come from the candidate's own profile.
     if (s.quote) {
       claims += 1;
-      if (!text.includes(s.quote.replace(/…$/, "").toLowerCase().slice(0, 40))) unsupported += 1;
+      if (!text.includes(s.quote.replace(/…$/, "").toLowerCase().slice(0, 40))) {
+        unsupported += 1;
+        failures.push(`${c.name}: ${s.name} quotes text that isn't in the profile: ${JSON.stringify(s.quote)}`);
+      }
     }
   }
   if (c.verdict.includes(fit.verdict)) verdictRight += 1;
   else failures.push(`${c.name}: category expected ${c.verdict.join("/")}, got ${fit.verdict} (${fit.score})`);
+  if (c.confirm && !fit.confirm.some((x) => c.confirm!.test(x))) failures.push(`${c.name}: expected a note matching ${c.confirm}`);
+  scores[c.name] = fit.score;
+}
+
+// Score drift against the reviewed baseline.
+const baselinePath = fileURLToPath(new URL("./jobfit-baseline.json", import.meta.url));
+const drift: string[] = [];
+if (process.argv.includes("--update-baseline")) {
+  writeFileSync(baselinePath, JSON.stringify({ version: FIT_VERSION, scores }, null, 2) + "\n");
+  console.log(`Baseline updated (${Object.keys(scores).length} cases, ${FIT_VERSION}).`);
+} else {
+  let baseline: { version: string; scores: Record<string, number> } | null = null;
+  try {
+    baseline = JSON.parse(readFileSync(baselinePath, "utf8"));
+  } catch {
+    drift.push("no baseline yet: run with --update-baseline after reviewing the results");
+  }
+  for (const [name, score] of Object.entries(scores)) {
+    const was = baseline?.scores[name];
+    if (baseline && was === undefined) drift.push(`${name}: new case, not in the baseline`);
+    else if (was !== undefined && Math.abs(score - was) > 3) drift.push(`${name}: score ${was} -> ${score}`);
+  }
 }
 
 const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : "n/a");
-console.log(`JobFit evaluation · ${CASES.length} cases · ${statusTotal} labelled requirements`);
+console.log(`JobFit evaluation · ${FIT_VERSION} · ${CASES.length} cases · ${statusTotal} labelled requirements`);
 console.log(`  status accuracy          ${pct(statusRight, statusTotal)}`);
 console.log(`  direct-match precision   ${pct(directCorrect, directPredicted)}`);
 console.log(`  transferable recall      ${pct(transferFound, transferExpected)}`);
@@ -151,5 +707,10 @@ if (failures.length) {
   console.log("\nMismatches:");
   for (const f of failures) console.log("  - " + f);
 }
-// Quality bar: no unsupported evidence, direct matches always right, and at most one mismatch overall.
-if (unsupported > 0 || directCorrect !== directPredicted || failures.length > 1) process.exit(1);
+if (drift.length) {
+  console.log("\nScore changes over 3 points (review, then --update-baseline if intended):");
+  for (const d of drift) console.log("  - " + d);
+}
+// Quality bar: no unsupported evidence, direct matches always right, at most one mismatch overall, and no unreviewed
+// score drift.
+if (unsupported > 0 || directCorrect !== directPredicted || failures.length > 1 || drift.length) process.exit(1);

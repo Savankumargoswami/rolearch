@@ -203,6 +203,8 @@ const en = {
     requirements: "What they ask for vs. your profile",
     reqVerified: "Shown in your work history",
     reqListed: "Listed on your profile, not shown in a role yet",
+    reqProject: "Shown in your project work",
+    reqEducation: "Matches your education",
     reqMissing: "Not on your profile",
     reqYears: "{n}+ years of experience",
     reqFromDescription: "Read from the job description. Ticks show what your profile already covers.",

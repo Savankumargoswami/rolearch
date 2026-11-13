@@ -573,7 +573,10 @@ function Requirements({ job, match, req }: { job: Job; match: Match | null; req:
             <h3 className="text-sm font-semibold tracking-wide text-signal-ink uppercase">{t(`job.reqGroup_${g}` as MessageKey)}</h3>
             <ul className="mt-1 divide-y divide-line">
               {items.map((r) => {
-                const { Icon, cls, label: statusLabel } = reqIcon[r.status];
+                const { Icon, cls, label: base } = reqIcon[r.status];
+                // Say where the evidence is: a degree isn't "work history", and project work isn't just a listed skill.
+                const statusLabel =
+                  r.group === "education" && r.status === "verified" ? t("job.reqEducation") : r.inProject ? t("job.reqProject") : base;
                 return (
                   <li key={`${g}-${r.name}`} className="flex items-center gap-4 py-3">
                     {match ? (

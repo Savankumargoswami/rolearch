@@ -33,8 +33,10 @@ export function matchProfile(
     ...p.resume.certifications.map((c) => `${c.name} ${c.issuer}`),
     ...p.resume.education.map((e) => `${e.degree} ${e.field}`),
   ].join("\n");
+  const projectText = p.resume.projects.map((x) => `${x.name} ${x.summary} ${x.skills.join(", ")} ${x.url}`).join("\n");
   const roleWords = new Set(words(roleText));
   const restWords = new Set(words(restText));
+  const projectWords = new Set(words(projectText));
   const status = (name: string): Requirement["status"] => (shows(name, roleText, roleWords) ? "verified" : shows(name, restText, restWords) ? "listed" : "missing");
 
   const reqs: Requirement[] = [];
@@ -43,7 +45,8 @@ export function matchProfile(
     const key = name.toLowerCase();
     if (seen.has(key)) return;
     seen.add(key);
-    reqs.push({ name, status: status(name), group });
+    const s = status(name);
+    reqs.push({ name, status: s, group, ...(s === "listed" && projectText && shows(name, projectText, projectWords) ? { inProject: true } : {}) });
   };
 
   if (req && req.required.length + req.preferred.length + req.certifications.length > 0) {

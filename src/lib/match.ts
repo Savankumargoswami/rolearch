@@ -2,7 +2,14 @@ import type { JobLite } from "@/data/types";
 import { sampleProfile } from "@/data/profile";
 
 export type ReqStatus = "verified" | "listed" | "missing";
-export type Requirement = { name: string; status: ReqStatus; isYears?: boolean; group?: "required" | "preferred" | "certification" | "experience" | "education" };
+export type Requirement = {
+  name: string;
+  status: ReqStatus;
+  isYears?: boolean;
+  group?: "required" | "preferred" | "certification" | "experience" | "education";
+  /** listed: shown in a project (stronger evidence than the skills list). */
+  inProject?: boolean;
+};
 export type Verdict = "strong" | "partial" | "weak";
 
 export type Match = { score: number; verdict: Verdict; reqs: Requirement[]; missing: string[] };
