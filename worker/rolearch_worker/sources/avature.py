@@ -22,8 +22,8 @@ from .jsonld import _postings
 
 MAX_PAGES = 400
 DETAILS_PER_RUN = int(os.environ.get("AVATURE_DETAILS_PER_RUN", "300"))
-_ARTICLE = re.compile(r'<article class="article article--result.*?</article>', re.S)
-_LINK = re.compile(r'<a[^>]+href="(https?://[^"]+/JobDetail/[^"]*?/(\d+))"[^>]*>(.*?)</a>', re.S)
+_ARTICLE = re.compile(r'<article class="article [^"]*?article--result.*?</article>', re.S)
+_LINK = re.compile(r'<a[^>]+href="(https?://[^"]+/JobDetail/[^"?]*?/(\d+))(?:\?[^"]*)?"[^>]*>(.*?)</a>', re.S)
 _SPAN = re.compile(r'<span class="list-item-(\w+)">(.*?)</span>', re.S)
 _DETAILS = re.compile(r'<article class="article article--details.*?</article>', re.S)
 _FIELD = re.compile(r'__field__label">\s*(.*?)\s*</div>\s*<div class="article__content__view__field__value">\s*(.*?)\s*</div>', re.S)

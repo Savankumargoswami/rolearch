@@ -1,7 +1,9 @@
 """Career sites without a public jobs API, read through their sitemap (Walmart, UnitedHealth, Kaiser, ...).
 
 Token: the sitemap URL, or the career site's host (then robots.txt's Sitemap: line or /sitemap.xml is used).
-We follow sitemap indexes, keep URLs that look like job pages, and read schema.org JobPosting data from
+Sites whose sitemap lists only category pages can give a paged job list instead, with {n} for the page
+number (Johns Hopkins: "https://jobs.hopkinsmedicine.org/jobs/?page_jobs={n}"); job links are then taken
+from those pages. We follow sitemap indexes, keep URLs that look like job pages, and read schema.org JobPosting data from
 each page (the same data the site publishes for Google for Jobs). Only pages robots.txt allows are read.
 A job page is one request, so a run reads at most DETAILS_PER_RUN new pages per company; jobs we already
 have are kept open while they stay in the sitemap.
@@ -11,13 +13,14 @@ from __future__ import annotations
 
 import asyncio
 import gzip
+import html
 import json
 import logging
 import os
 from collections import Counter
 import re
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 from urllib.robotparser import RobotFileParser
 
 from ..http import USER_AGENT, Fetcher
@@ -29,7 +32,7 @@ log = logging.getLogger(__name__)
 DETAILS_PER_RUN = int(os.environ.get("SITEMAP_DETAILS_PER_RUN", "1500"))
 MAX_SITEMAPS = 40
 _LOC = re.compile(r"<loc>\s*([^<\s]+)\s*</loc>", re.I)
-_JOB_URL = re.compile(r"/(jobs?|job-details|jobdetail|careers?/jobs?|positions?|requisitions?|opening)/", re.I)
+_JOB_URL = re.compile(r"/(jobs?|job-details|job_details|jobdetail|careers?/jobs?|positions?|requisitions?|opening)/", re.I)  # job_details: Meta
 _SKIP = re.compile(r"/(search|category|categories|location|locations|teams?|benefits|blog|events?)(/|$)|\.(pdf|jpg|png)$", re.I)
 
 
@@ -90,8 +93,9 @@ async def _robots(http: Fetcher, origin: str) -> tuple[RobotFileParser, list[str
     return rp, [m.group(1) for line in lines if (m := re.match(r"(?i)^\s*sitemap:\s*(\S+)", line))]
 
 
-async def job_urls(http: Fetcher, start: str) -> list[str]:
-    """Job page URLs from a sitemap, following sitemap indexes (breadth-first, capped)."""
+async def job_urls(http: Fetcher, start: str, keep: re.Pattern[str] | None = None) -> list[str]:
+    """Job page URLs from a sitemap, following sitemap indexes (breadth-first, capped). `keep`, when given,
+    replaces the job-page guess: only URLs it matches are kept."""
     todo, seen, found = [start], set(), []
     while todo and len(seen) < MAX_SITEMAPS:
         url = todo.pop(0)
@@ -111,19 +115,54 @@ async def job_urls(http: Fetcher, start: str) -> list[str]:
             locs.sort(key=lambda u: 0 if re.search(r"job|career|posting|requisition", u, re.I) else 1)
             todo.extend(locs)
             continue
-        found.extend(u for u in locs if _JOB_URL.search(urlsplit(u).path) and not _SKIP.search(urlsplit(u).path))
+        found.extend(u for u in locs if (keep.search(u) if keep else _JOB_URL.search(urlsplit(u).path) and not _SKIP.search(urlsplit(u).path)))
     return list(dict.fromkeys(found))
 
 
+_HREF = re.compile(r"""href=["']([^"'#]+)["']""", re.I)
+_JOB_ID = re.compile(r"\d{4,}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-", re.I)  # a numeric ID or a UUID (Columbia)
+MAX_LIST_PAGES = 300
+
+
+async def listed_urls(http: Fetcher, pattern: str, rp: RobotFileParser) -> list[str]:
+    """Job page URLs from a paged job list ("...?page={n}"): a job link looks like a job page and has an ID
+    (4+ digits) in its path, which leaves out category and paging links. Stops at the first page with no new jobs."""
+    host = urlsplit(pattern).netloc
+    found: dict[str, None] = {}
+    for n in range(1, MAX_LIST_PAGES + 1):
+        url = pattern.replace("{n}", str(n))
+        if not rp.can_fetch(USER_AGENT, url):
+            break
+        try:
+            r = await http.get(url, attempts=2)
+        except Exception:
+            break
+        if r.status_code != 200:
+            break
+        before = len(found)
+        for href in _HREF.findall(r.text):
+            u = urljoin(url, html.unescape(href))
+            path = urlsplit(u).path
+            if urlsplit(u).netloc == host and _JOB_URL.search(path) and _JOB_ID.search(path) and not _SKIP.search(path):
+                found.setdefault(u, None)
+        if len(found) == before:
+            break
+    return list(found)
+
+
 async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
-    token = company.token.strip()
+    token, _, pattern = company.token.strip().partition("#")
+    # "#regex" after the sitemap URL picks the job pages (General Dynamics: only divisions not listed elsewhere).
+    keep = re.compile(pattern) if pattern else None
     start = token if token.startswith("http") else None
     origin = f"{urlsplit(start).scheme}://{urlsplit(start).netloc}" if start else f"https://{token}"
     rp, listed = await _robots(http, origin)
-    if not start:
-        start = listed[0] if listed else f"{origin}/sitemap.xml"
-
-    urls = [u for u in await job_urls(http, start) if rp.can_fetch(USER_AGENT, u)]
+    if start and "{n}" in start:
+        urls = await listed_urls(http, start, rp)
+    else:
+        if not start:
+            start = listed[0] if listed else f"{origin}/sitemap.xml"
+        urls = [u for u in await job_urls(http, start, keep) if rp.can_fetch(USER_AGENT, u)]
 
     from ..normalize import job_id
 

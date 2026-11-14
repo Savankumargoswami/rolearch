@@ -11,6 +11,7 @@ import asyncio
 import html
 import os
 import re
+from urllib.parse import unquote
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 
@@ -146,12 +147,19 @@ def _from_job_page(page: str, url: str) -> RawJob | None:
     if not (city or region or country):
         # Builder pages label fields instead ("Posting City:", "Job Country:", "Location:").
         fields = {re.sub(r"\s+", " ", k).strip(" :").lower(): html.unescape(re.sub(r"<[^>]+>", "", v)).strip() for k, v in _LABEL.findall(page)}
-        city = next((fields[k] for k in fields if "city" in k), "") or fields.get("location", "")
+        # "Location:", "Job Location:" (BT: "GBR Cheltenham - Project Office, GBR Ipswich ..."); not "Other locations:".
+        loc = next((v for k, v in fields.items() if "location" in k and "other" not in k), "")
+        city = next((fields[k] for k in fields if "city" in k), "") or re.sub(r"^[A-Z]{3}\s+", "", loc)
         region = next((fields[k] for k in fields if "state" in k or "province" in k), "")
         country = next((fields[k] for k in fields if "country" in k), "")
         if not (city or country):
             m = re.search(r"\s[-–]\s([A-Za-z .'-]+,\s?[A-Z]{2})$", title)
             city = m.group(1) if m else ""
+        if not (city or country):
+            # Some sites start the job's URL with its place: /job/Kalgoorlie%2C-WA-Kmart-Team-Member/1369265766/ (Kmart).
+            m = re.search(r"/job/([A-Za-z.'-]+?),-([A-Z]{2,3})-[^/]*/\d+/?$", unquote(url))
+            if m:
+                city, region = m.group(1).replace("-", " "), m.group(2)
     jid = re.search(r"/(\d+)/?$", url)
     return RawJob(
         external_id=jid.group(1) if jid else url,
@@ -159,7 +167,7 @@ def _from_job_page(page: str, url: str) -> RawJob | None:
         job_url=url,
         apply_url=url,
         location_text=", ".join(dict.fromkeys(x for x in (city, region, country) if x)),
-        city_hint=city.split(",")[0].strip().title() or None,
+        city_hint=city.split(",")[0].split(" - ")[0].strip().title() or None,
         country_hint=country.upper() if re.fullmatch(r"[A-Za-z]{2}", country) else None,
         posted_at=_date(_prop(_DATE, page)),
         description=description[:20000],

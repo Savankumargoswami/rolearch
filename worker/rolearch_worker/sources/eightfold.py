@@ -38,12 +38,26 @@ async def _get(http: Fetcher, url: str, params: dict) -> dict:
         return await http.json(url, params=params)
 
 
-async def _pcsx(http: Fetcher, company: Company, host: str, domain: str) -> list[RawJob] | None:
-    first = await http.get(f"https://{host}/api/pcsx/search", params={"domain": domain, "start": 0, "sort_by": "timestamp"})
-    if first.status_code != 200:
+def _data(d) -> dict | None:
+    """The search answer: under "data" on PCSX, at the top level on /api/positions (Mercado Libre's own domain)."""
+    if not isinstance(d, dict):
         return None
-    data = first.json().get("data")
-    if not isinstance(data, dict):
+    inner = d.get("data")
+    return inner if isinstance(inner, dict) else d if isinstance(d.get("positions"), list) else None
+
+
+async def _pcsx(http: Fetcher, company: Company, host: str, domain: str) -> list[RawJob] | None:
+    search, extra, own_site = f"https://{host}/api/pcsx/search", {}, False
+    first = await http.get(search, params={"domain": domain, "start": 0, "sort_by": "timestamp"})
+    if first.status_code != 200:
+        # Mercado Libre's own domain: same positions, but its job pages are /en/positions?id=… (the
+        # positionUrl it reports is a dead link) and it has no position_details endpoint.
+        search, extra, own_site = f"https://{host}/api/positions", {"num": 100}, True
+        first = await http.get(search, params={"start": 0, "sort_by": "timestamp", **extra})
+        if first.status_code != 200:
+            return None
+    data = _data(first.json())
+    if data is None:
         return None
     total = min(int(data.get("count") or 0), MAX_JOBS)
     positions = list(data.get("positions") or [])
@@ -57,12 +71,12 @@ async def _pcsx(http: Fetcher, company: Company, host: str, domain: str) -> list
         if attempt:
             await asyncio.sleep(5 * attempt)
         pages = await asyncio.gather(
-            *(_get(http, f"https://{host}/api/pcsx/search", {"domain": domain, "start": s, "sort_by": "timestamp"}) for s in todo),
+            *(_get(http, search, {"domain": domain, "start": s, "sort_by": "timestamp", **extra}) for s in todo),
             return_exceptions=True,
         )
         failed = []
         for s, p in zip(todo, pages):
-            found = (p.get("data") or {}).get("positions") if isinstance(p, dict) and isinstance(p.get("data"), dict) else None
+            found = (_data(p) or {}).get("positions")
             if found:
                 positions.extend(found)
             else:
@@ -81,7 +95,7 @@ async def _pcsx(http: Fetcher, company: Company, host: str, domain: str) -> list
         if not pid or pid in seen or not p.get("name"):
             return None
         seen.add(pid)
-        url = f"https://{host}{p.get('positionUrl') or f'/careers/job/{pid}'}"
+        url = f"https://{host}/en/positions?id={pid}" if own_site else f"https://{host}{p.get('positionUrl') or f'/careers/job/{pid}'}"
         locs = p.get("locations") or []
         raw = RawJob(
             external_id=pid,
@@ -97,7 +111,7 @@ async def _pcsx(http: Fetcher, company: Company, host: str, domain: str) -> list
         if job_id(company, raw) in described:
             raw.touch_only = True
             return raw
-        if budget <= 0:
+        if budget <= 0 or own_site:
             return raw
         budget -= 1
         try:

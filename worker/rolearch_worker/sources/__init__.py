@@ -10,7 +10,7 @@ from collections.abc import Awaitable, Callable
 
 from ..http import Fetcher
 from ..models import Company, RawJob
-from . import adp, adzuna, amazon, apple, applitrack, ashby, avature, bamboohr, bestbuy, breezy, darwinbox, eightfold, feed, gem, keka, google, greenhouse, hireology, ibm, icims, jazzhr, jibe, jobvite, jsonld, lever, oracle, paylocity, peoplestrong, personio, phenom, recruitee, rippling, schoolspring, sitemap, smartrecruiters, successfactors, taleo, usajobs, virecruit, workable, workday, zohorecruit
+from . import activate, adp, adzuna, amazon, apple, applitrack, ashby, avature, bamboohr, bestbuy, breezy, darwinbox, eightfold, feed, gem, goldmansachs, keka, google, greenhouse, hireology, ibm, icims, jazzhr, jibe, jobvite, jsonld, lever, lidl, oracle, paylocity, peoplestrong, personio, phenom, recruitee, ripplehire, rippling, schoolspring, sitemap, smartrecruiters, successfactors, taleo, teleperformance, usajobs, virecruit, wordpress, workable, workday, zohorecruit
 
 Source = Callable[[Fetcher, Company], Awaitable[list[RawJob]]]
 
@@ -55,6 +55,12 @@ SOURCES: dict[str, Source] = {
     "zohorecruit": zohorecruit.fetch,
     "paylocity": paylocity.fetch,
     "adp": adp.fetch,
+    "wordpress": wordpress.fetch,
+    "lidl": lidl.fetch,
+    "teleperformance": teleperformance.fetch,
+    "ripplehire": ripplehire.fetch,
+    "goldmansachs": goldmansachs.fetch,
+    "activate": activate.fetch,
     # Feeds companies connect on Rolearch (db/023_employer_feeds.sql).
     "feed": feed.fetch,
     # Aggregators: one "company" row per feed; each job carries its real employer's name.

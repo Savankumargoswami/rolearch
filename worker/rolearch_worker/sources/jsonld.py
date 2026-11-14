@@ -74,8 +74,9 @@ def _to_raw(p: dict, page_url: str) -> RawJob:
         title=(p.get("title") or "").strip(),
         job_url=url,
         apply_url=url,
-        location_text=", ".join(x for x in (addr.get("addressLocality"), addr.get("addressRegion"), country) if x),
-        city_hint=addr.get("addressLocality"),
+        # Some sites print empty fields as "NULL" (Whitbread: "Bedfordshire, NULL, UK").
+        location_text=", ".join(x for x in (addr.get("addressLocality"), addr.get("addressRegion"), country) if x and str(x).strip().lower() not in ("null", "none")),
+        city_hint=addr.get("addressLocality") if str(addr.get("addressLocality") or "").strip().lower() not in ("null", "none") else None,
         workplace_hint="remote" if p.get("jobLocationType") == "TELECOMMUTE" else None,
         posted_at=parse_time(p.get("datePosted")),
         description=html_to_text(p.get("description")),

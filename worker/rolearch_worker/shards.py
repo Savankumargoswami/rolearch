@@ -28,6 +28,11 @@ def cost(key: str, jobs: int) -> int:
     return int(jobs * ATS_COST.get(key.split(":", 1)[0], 1.0))
 
 
+# Systems whose boards all sit behind one rate-limited edge: every board goes to the same shard, where the
+# source reads them one request at a time (all Lidl/Kaufland country sites share Akamai; bursts get blocked).
+ONE_SHARD = {"lidl"}
+
+
 def _hash_shard(key: str, n: int) -> int:
     return int(hashlib.sha1(key.encode()).hexdigest(), 16) % n
 
@@ -47,7 +52,11 @@ def assign(companies: list[Company], n: int, weights: dict[str, int] | None = No
     heavy = []
     for c in companies:
         w = cost(c.key, weights.get(c.key, 0))
-        if w >= HEAVY:
+        if c.ats in ONE_SHARD:
+            s = _hash_shard(c.ats, n)
+            out[c.key] = s
+            load[s] += max(w, LIGHT_COST)
+        elif w >= HEAVY:
             heavy.append((w, c.key))
         else:
             s = _hash_shard(c.key, n)
