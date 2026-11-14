@@ -2,15 +2,18 @@
 
 Token: the career site's host, e.g. "jobs.exxonmobil.com". Most sites publish every open job, with its
 full description, as an RSS feed at /sitemap.xml: one request for the whole board. Sites without the
-feed are read from their search pages (25 jobs a page; titles, places and dates, no descriptions).
+feed are read from their search pages (25 jobs a page; titles, places and dates); the description is on
+each job's page, read for up to DETAILS_PER_RUN jobs a run that don't have one stored yet.
 """
 
 from __future__ import annotations
 
 import asyncio
 import html
+import logging
 import os
 import re
+from collections import Counter
 from urllib.parse import unquote
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -18,6 +21,8 @@ from email.utils import parsedate_to_datetime
 from ..http import Fetcher
 from ..models import Company, RawJob
 from ..text import html_to_text
+
+log = logging.getLogger(__name__)
 
 MAX_PAGES = 200
 DETAILS_PER_RUN = int(os.environ.get("SUCCESSFACTORS_DETAILS_PER_RUN", "400"))
@@ -156,6 +161,10 @@ def _from_job_page(page: str, url: str) -> RawJob | None:
             m = re.search(r"\s[-–]\s([A-Za-z .'-]+,\s?[A-Z]{2})$", title)
             city = m.group(1) if m else ""
         if not (city or country):
+            # Teck: no place fields; the description starts "Location: Trail, BC, Canada".
+            m = re.search(r"^\s*Location:\s*(\S[^\n]{1,79})$", description, re.M)
+            city = m.group(1).strip() if m else ""
+        if not (city or country):
             # Some sites start the job's URL with its place: /job/Kalgoorlie%2C-WA-Kmart-Team-Member/1369265766/ (Kmart).
             m = re.search(r"/job/([A-Za-z.'-]+?),-([A-Z]{2,3})-[^/]*/\d+/?$", unquote(url))
             if m:
@@ -181,6 +190,7 @@ async def _from_sitemap(http: Fetcher, company: Company, host: str) -> list[RawJ
     known = company.known_urls or {}
     budget = DETAILS_PER_RUN
     sem = asyncio.Semaphore(4)
+    statuses: Counter[str] = Counter()
 
     async def one(url: str) -> RawJob | None:
         nonlocal budget
@@ -193,11 +203,15 @@ async def _from_sitemap(http: Fetcher, company: Company, host: str) -> list[RawJ
         try:
             async with sem:
                 r = await http.get(url, attempts=2)
+            statuses[str(r.status_code)] += 1
             return _from_job_page(r.text, url) if r.status_code == 200 else None
-        except Exception:
+        except Exception as e:
+            statuses[type(e).__name__] += 1
             return None
 
-    return [r for r in await asyncio.gather(*(one(u) for u in urls)) if r]
+    out = [r for r in await asyncio.gather(*(one(u) for u in urls)) if r]
+    log.info("successfactors %s (sitemap): %d job pages listed, %d read, responses %s", host, len(urls), len(out), dict(statuses))
+    return out
 
 
 async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
@@ -226,5 +240,43 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     for j in jobs:
         unique.setdefault(j.external_id, j)
     if unique:
-        return list(unique.values())
+        return await _describe(http, company, list(unique.values()))
     return await _from_sitemap(http, company, host)
+
+
+async def _describe(http: Fetcher, company: Company, jobs: list[RawJob]) -> list[RawJob]:
+    """Search pages carry no descriptions: read the job's own page for jobs without one stored yet."""
+    from ..normalize import job_id
+
+    described = company.described or set()
+    budget = DETAILS_PER_RUN
+    sem = asyncio.Semaphore(4)
+    statuses: Counter[str] = Counter()
+
+    async def one(raw: RawJob) -> RawJob:
+        nonlocal budget
+        if job_id(company, raw) in described:
+            raw.touch_only = True
+            return raw
+        if budget <= 0:
+            return raw
+        budget -= 1
+        try:
+            async with sem:
+                r = await http.get(raw.job_url, attempts=2)
+            statuses[str(r.status_code)] += 1
+            page = _from_job_page(r.text, raw.job_url) if r.status_code == 200 else None
+            if page and page.description:
+                raw.description = page.description
+                raw.location_text = raw.location_text or page.location_text
+                raw.city_hint = raw.city_hint or page.city_hint
+                raw.posted_at = raw.posted_at or page.posted_at
+            else:
+                statuses["no description"] += 1
+        except Exception as e:
+            statuses[type(e).__name__] += 1
+        return raw
+
+    out = list(await asyncio.gather(*(one(j) for j in jobs)))
+    log.info("successfactors %s: %d jobs listed, job pages %s", company.token, len(out), dict(statuses))
+    return out

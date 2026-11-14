@@ -10,8 +10,10 @@ from __future__ import annotations
 
 import asyncio
 import html
+import logging
 import os
 import re
+from collections import Counter
 from datetime import datetime, timezone
 from urllib.robotparser import RobotFileParser
 
@@ -20,12 +22,15 @@ from ..models import Company, RawJob
 from ..text import html_to_text
 from .jsonld import _postings
 
+log = logging.getLogger(__name__)
+
 MAX_PAGES = 400
 DETAILS_PER_RUN = int(os.environ.get("AVATURE_DETAILS_PER_RUN", "300"))
 _ARTICLE = re.compile(r'<article class="article [^"]*?article--result.*?</article>', re.S)
 _LINK = re.compile(r'<a[^>]+href="(https?://[^"]+/JobDetail/[^"?]*?/(\d+))(?:\?[^"]*)?"[^>]*>(.*?)</a>', re.S)
 _SPAN = re.compile(r'<span class="list-item-(\w+)">(.*?)</span>', re.S)
 _DETAILS = re.compile(r'<article class="article article--details.*?</article>', re.S)
+_WIDGET = re.compile(r'"(https?://[^"]+/JobDetailWidget\?jobId=\d+)"')  # Australia Post: the description loads from this
 _FIELD = re.compile(r'__field__label">\s*(.*?)\s*</div>\s*<div class="article__content__view__field__value">\s*(.*?)\s*</div>', re.S)
 
 
@@ -111,6 +116,7 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     described = company.described or set()
     budget = DETAILS_PER_RUN
     sem = asyncio.Semaphore(3)
+    statuses: Counter[str] = Counter()
 
     async def one(raw: RawJob) -> RawJob:
         nonlocal budget
@@ -123,10 +129,22 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
         try:
             async with sem:
                 r = await http.get(raw.job_url)
+            statuses[str(r.status_code)] += 1
             if r.status_code == 200:
                 _detail(raw, r.text)
-        except Exception:
-            pass
+                # Some portals fill the job's page from a widget after it loads.
+                if not raw.description and (w := _WIDGET.search(r.text)) and rp.can_fetch(USER_AGENT, w.group(1)):
+                    async with sem:
+                        wr = await http.get(w.group(1))
+                    if wr.status_code == 200:
+                        _detail(raw, wr.text)
+            if not raw.description:
+                statuses["no description"] += 1
+        except Exception as e:
+            statuses[type(e).__name__] += 1
         return raw
 
-    return list(await asyncio.gather(*(one(j) for j in found.values())))
+    out = list(await asyncio.gather(*(one(j) for j in found.values())))
+    # One line per board, so a portal whose job pages fail from the runners shows up in the run log.
+    log.info("avature %s: %d jobs listed, job pages %s", host, len(out), dict(statuses))
+    return out

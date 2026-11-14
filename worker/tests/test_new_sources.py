@@ -78,6 +78,15 @@ class LaterFixes(unittest.TestCase):
         job = _from_job_page(page, "https://jobs.kmart.com.au/KMARTAUNZ/job/Kalgoorlie%2C-WA-Kmart-Kalgoorlie-Team-Member/1369265766/")
         self.assertEqual((job.city_hint, job.location_text), ("Kalgoorlie", "Kalgoorlie, WA"))
 
+    def test_successfactors_place_from_location_line(self):
+        page = '<span itemprop="title">Sr. Pay Analyst</span><div itemprop="description"><p><strong>Location: </strong>Trail, BC, Canada<br>Full time</p></div>'
+        job = _from_job_page(page, "https://jobs.teck.com/job/Trail-Sr_-Pay-Analyst-Brit/1450614100/")
+        self.assertEqual((job.city_hint, job.location_text), ("Trail", "Trail, BC, Canada"))
+
+    def test_avature_widget_link(self):
+        page = '{"url": "https://jobs.auspost.com.au/en_GB/careers/JobDetailWidget?jobId=44165"}'
+        self.assertEqual(avature._WIDGET.search(page).group(1), "https://jobs.auspost.com.au/en_GB/careers/JobDetailWidget?jobId=44165")
+
     def test_jsonld_drops_null_parts(self):
         from rolearch_worker.sources.jsonld import _to_raw
         raw = _to_raw({"title": "Lead", "jobLocation": {"address": {"addressLocality": "Bedfordshire", "addressRegion": "NULL", "addressCountry": "UK"}}}, "https://x/job/1")

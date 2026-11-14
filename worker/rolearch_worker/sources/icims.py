@@ -74,10 +74,12 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
                 loc = data.get("jobLocation")
                 loc = loc[0] if isinstance(loc, list) and loc else loc or {}
                 addr = (loc.get("address") or {}) if isinstance(loc, dict) else {}
-                raw.location_text = ", ".join(x for x in (addr.get("addressLocality"), addr.get("addressRegion"), addr.get("addressCountry")) if isinstance(x, str) and x)
+                # iCIMS fills a missing region with "UNAVAILABLE" (Stephenson Harwood: "London, UNAVAILABLE, UK").
+                raw.location_text = ", ".join(x for x in (addr.get("addressLocality"), addr.get("addressRegion"), addr.get("addressCountry")) if isinstance(x, str) and x and x.upper() != "UNAVAILABLE")
                 country = addr.get("addressCountry")
                 raw.country_hint = country.upper() if isinstance(country, str) and len(country) == 2 else None
-                raw.city_hint = addr.get("addressLocality") or None
+                city = addr.get("addressLocality")
+                raw.city_hint = city if isinstance(city, str) and city and city.upper() != "UNAVAILABLE" else None
                 raw.posted_at = parse_time(data.get("datePosted"))
                 raw.description = html_to_text(data.get("description"))[:20000]
                 break
