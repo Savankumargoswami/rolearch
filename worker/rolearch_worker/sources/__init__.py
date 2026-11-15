@@ -10,7 +10,7 @@ from collections.abc import Awaitable, Callable
 
 from ..http import Fetcher
 from ..models import Company, RawJob
-from . import activate, adp, adzuna, amazon, apple, applitrack, ashby, avature, bamboohr, bestbuy, breezy, darwinbox, eightfold, feed, gem, goldmansachs, keka, google, greenhouse, hireology, ibm, icims, jazzhr, jibe, jobvite, jsonld, lever, lidl, oracle, paylocity, peoplestrong, personio, phenom, recruitee, ripplehire, rippling, schoolspring, sitemap, smartrecruiters, successfactors, taleo, teleperformance, usajobs, virecruit, wordpress, workable, workday, zohorecruit
+from . import activate, adp, adzuna, amazon, apple, applitrack, ashby, avature, bamboohr, bestbuy, breezy, darwinbox, edjoin, eightfold, feed, gem, goldmansachs, keka, google, greenhouse, hireology, ibm, icims, jazzhr, jibe, jobvite, jsonld, lever, lidl, oracle, paylocity, peoplestrong, personio, phenom, recruitee, ripplehire, rippling, schoolspring, sitemap, smartrecruiters, successfactors, taleo, teleperformance, usajobs, virecruit, wordpress, workable, workday, zohorecruit
 
 Source = Callable[[Fetcher, Company], Awaitable[list[RawJob]]]
 
@@ -47,6 +47,7 @@ SOURCES: dict[str, Source] = {
     "breezy": breezy.fetch,
     "hireology": hireology.fetch,
     "schoolspring": schoolspring.fetch,
+    "edjoin": edjoin.fetch,
     "jobvite": jobvite.fetch,
     "applitrack": applitrack.fetch,
     "darwinbox": darwinbox.fetch,

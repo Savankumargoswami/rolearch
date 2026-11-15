@@ -52,10 +52,12 @@ async def pull_one(http: Fetcher, store: Store, company: Company) -> Result:
             res.error = f"skipped: last fetched {hours:.0f}h ago (runs once every {AGGREGATOR_EVERY_HOURS}h to stay inside the API quota)"
             return res
     source = SOURCES.get(company.ats)
-    if company.ats in ("workday", "oracle", "eightfold", "icims", "phenom", "sitemap", "smartrecruiters", "taleo", "avature", "rippling", "bamboohr", "jazzhr", "jobvite", "successfactors"):
+    if company.ats in ("workday", "oracle", "eightfold", "icims", "phenom", "sitemap", "smartrecruiters", "taleo", "avature", "rippling", "bamboohr", "jazzhr", "jobvite", "successfactors", "edjoin"):
         company.described = store.described_ids(company)
-    if company.ats in ("sitemap", "successfactors", "bestbuy", "google"):
+    if company.ats in ("sitemap", "successfactors", "bestbuy", "google", "edjoin"):
         company.known_urls = store.known_urls(company)
+    if company.ats == "edjoin" and hasattr(store, "known_employers"):
+        company.known_employers = store.known_employers(company)
     if not source:
         res.error = f"unknown ats '{company.ats}'"
         store.record_error(company, res.error)
@@ -71,6 +73,11 @@ async def pull_one(http: Fetcher, store: Store, company: Company) -> Result:
     jobs, keys = [], set()
     for raw in raws:
         job = normalize(company, raw, now)
+        if job and job.get("touchOnly"):
+            # Already stored (and deduplicated when it was). A touch carries no location, so its key would match every
+            # other stored job with the same title: Walmart's sitemap closed thousands of open "Stocker" jobs that way.
+            jobs.append(job)
+            continue
         if job and job["dedupeKey"] not in keys:  # same title + place posted twice -> keep one
             keys.add(job["dedupeKey"])
             jobs.append(job)

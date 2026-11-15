@@ -292,6 +292,36 @@ class StoreAndGuard(unittest.TestCase):
             self.assertTrue(r.error)
             self.assertEqual(store.previous_count(co), 24)
 
+    def test_touched_jobs_with_same_title_stay_open(self):
+        # Sitemap boards keep stored jobs open with a "touch" that has no location; 30 stores' "Stocker" jobs
+        # must not collapse into one (and close the other 29).
+        from rolearch_worker.models import RawJob
+        from rolearch_worker.sources import SOURCES
+
+        co = Company("Mart", "US", "sitemap", "mart.example")
+        first = [RawJob(external_id=f"/job/{i}", title="Stocker", job_url=f"https://mart.example/job/{i}", apply_url=f"https://mart.example/job/{i}",
+                        location_text=f"Town {i}, TX") for i in range(30)]
+        touch = [RawJob(external_id=f"/job/{i}", title="Stocker", job_url=f"https://mart.example/job/{i}", apply_url=f"https://mart.example/job/{i}",
+                        touch_only=True) for i in range(30)]
+        batches = [first, touch]
+
+        async def fake(http, company):
+            return batches.pop(0)
+
+        old = SOURCES["sitemap"]
+        SOURCES["sitemap"] = fake
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                store = JsonStore(Path(d) / "s.json")
+                http = FakeHttp({})
+                r = asyncio.run(pull_one(http, store, co))
+                self.assertEqual(r.added, 30)
+                r = asyncio.run(pull_one(http, store, co))
+                self.assertEqual((r.total, r.closed), (30, 0))
+                self.assertEqual(store.previous_count(co), 30)
+        finally:
+            SOURCES["sitemap"] = old
+
 
 if __name__ == "__main__":
     unittest.main()

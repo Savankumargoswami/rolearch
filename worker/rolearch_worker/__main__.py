@@ -114,13 +114,16 @@ def main(argv: list[str] | None = None) -> int:
             since = datetime.now(timezone.utc) - timedelta(hours=args.grace_hours)
             retired = store.retire_companies(listed, since)
             stale = store.close_stale(args.stale_days) if hasattr(store, "close_stale") else 0
+            failed = []
             if hasattr(store, "refresh_summary"):
-                store.refresh_summary()
+                # Totals every run; sitemap pages and search vocabulary only on the first run after midnight UTC.
+                failed = store.refresh_summary(daily=datetime.now(timezone.utc).hour < 5)
         finally:
             store.close()
-        print(f"{len(listed)} companies listed · {retired} jobs closed from companies no longer listed · {stale} unconfirmed for {args.stale_days:g} days closed · site totals refreshed")
+        refreshed = "site totals refreshed" if not failed else f"NOT refreshed: {', '.join(failed)}"
+        print(f"{len(listed)} companies listed · {retired} jobs closed from companies no longer listed · {stale} unconfirmed for {args.stale_days:g} days closed · {refreshed}")
         _revalidate_site()
-        return 0
+        return 1 if "totals" in failed else 0  # a failed totals refresh fails the run, so it's seen
 
     companies = company_file.load(args.companies)
     if getattr(args, "shard", None):

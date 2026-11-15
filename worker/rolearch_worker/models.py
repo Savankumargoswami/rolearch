@@ -14,6 +14,7 @@ class Company:
     domain: str = ""  # the employer's website, for its logo on the site
     described: set[str] | None = field(default=None, compare=False, repr=False)  # ids with a stored description
     known_urls: dict[str, str] | None = field(default=None, compare=False, repr=False)  # job URL -> stored title
+    known_employers: dict[str, str] | None = field(default=None, compare=False, repr=False)  # job URL -> employer (aggregators)
     partial: bool = field(default=False, compare=False, repr=False)  # set by a source that read only part of the board
 
     @property

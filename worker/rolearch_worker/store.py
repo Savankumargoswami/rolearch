@@ -51,6 +51,9 @@ class JsonStore:
     def known_urls(self, company: Company) -> dict[str, str]:
         return {j["jobUrl"]: j["title"] for j in self.data["jobs"].values() if j["companyKey"] == company.key}
 
+    def known_employers(self, company: Company) -> dict[str, str]:
+        return {j["jobUrl"]: j.get("company", "") for j in self.data["jobs"].values() if j["companyKey"] == company.key}
+
     def previous_count(self, company: Company) -> int:
         return sum(1 for j in self.data["jobs"].values() if j["companyKey"] == company.key and j["status"] == "open")
 
@@ -145,6 +148,12 @@ class PostgresStore:
         # Open jobs only: closed ones pile up over time and would be downloaded on every run (database egress).
         with self.conn.cursor() as cur:
             cur.execute("select job_url, title from jobs where company_key = %s and status = 'open'", (company.key,))
+            return {r[0]: r[1] for r in cur.fetchall()}
+
+    def known_employers(self, company: Company) -> dict[str, str]:
+        # For boards that carry many employers (EdJoin): job URL -> the employer the job was stored under.
+        with self.conn.cursor() as cur:
+            cur.execute("select job_url, company from jobs where company_key = %s and status = 'open'", (company.key,))
             return {r[0]: r[1] for r in cur.fetchall()}
 
     def described_ids(self, company: Company) -> set[str]:
@@ -321,17 +330,27 @@ class PostgresStore:
     def open_jobs(self, launch_only: bool, limit: int) -> list[dict]:
         raise NotImplementedError("With a database, the website reads jobs from Supabase directly.")
 
-    def refresh_summary(self) -> None:
-        """Recompute the site's totals, category counts and map pins (db/013_fast_search.sql)."""
-        try:
-            with self.conn.cursor() as cur:
-                # With 1.5M open jobs the totals take over 3 minutes; the database's default 2-minute limit cut it off.
-                cur.execute("set statement_timeout = '15min'")
-                cur.execute("select public.refresh_job_summary_and_vocab()")
-            self.conn.commit()
-        except Exception as e:  # an older database without the summary: the site still works, just slower
-            self.conn.rollback()
-            log.warning("job summary not refreshed: %s", e)
+    def refresh_summary(self, daily: bool = True) -> list[str]:
+        """Recompute the site's totals, category counts and map pins (db/050), and, when `daily`, the job
+        sitemap pages and the search vocabulary. Each runs and commits on its own, so a slow one can't roll back
+        the others (one combined call timed out every run from 9 Nov 2026 and the site's totals froze).
+        Returns the steps that failed."""
+        steps = [("totals", "select public.refresh_job_summary()")]
+        if daily:
+            steps += [("sitemap pages", "select public.refresh_sitemap_pages()"), ("search vocabulary", "select public.refresh_job_vocab()")]
+        failed = []
+        for name, sql in steps:
+            try:
+                with self.conn.cursor() as cur:
+                    # Each step reads every open job; on a busy, disk-limited database that can take several minutes.
+                    cur.execute("set statement_timeout = '20min'")
+                    cur.execute(sql)
+                self.conn.commit()
+            except Exception as e:
+                self.conn.rollback()
+                log.error("site %s not refreshed: %s", name, e)
+                failed.append(name)
+        return failed
 
     def close(self) -> None:
         self.conn.close()

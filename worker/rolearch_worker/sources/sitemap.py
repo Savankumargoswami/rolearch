@@ -93,9 +93,10 @@ async def _robots(http: Fetcher, origin: str) -> tuple[RobotFileParser, list[str
     return rp, [m.group(1) for line in lines if (m := re.match(r"(?i)^\s*sitemap:\s*(\S+)", line))]
 
 
-async def job_urls(http: Fetcher, start: str, keep: re.Pattern[str] | None = None) -> list[str]:
+async def job_urls(http: Fetcher, start: str, keep: re.Pattern[str] | None = None, failed: list[str] | None = None) -> list[str]:
     """Job page URLs from a sitemap, following sitemap indexes (breadth-first, capped). `keep`, when given,
-    replaces the job-page guess: only URLs it matches are kept."""
+    replaces the job-page guess: only URLs it matches are kept. Sitemap files that couldn't be read are added to
+    `failed`: the list is then incomplete, and jobs missing from it may still be open."""
     todo, seen, found = [start], set(), []
     while todo and len(seen) < MAX_SITEMAPS:
         url = todo.pop(0)
@@ -103,10 +104,12 @@ async def job_urls(http: Fetcher, start: str, keep: re.Pattern[str] | None = Non
             continue
         seen.add(url)
         try:
-            r = await http.get(url, attempts=2)
+            r = await http.get(url, attempts=3)
         except Exception:
-            continue
-        if r.status_code != 200:
+            r = None
+        if r is None or r.status_code != 200:
+            if failed is not None:
+                failed.append(url)
             continue
         body = _text(r)
         locs = _LOC.findall(body)
@@ -157,12 +160,19 @@ async def fetch(http: Fetcher, company: Company) -> list[RawJob]:
     start = token if token.startswith("http") else None
     origin = f"{urlsplit(start).scheme}://{urlsplit(start).netloc}" if start else f"https://{token}"
     rp, listed = await _robots(http, origin)
+    failed: list[str] = []
+    company.partial = False
     if start and "{n}" in start:
         urls = await listed_urls(http, start, rp)
     else:
         if not start:
             start = listed[0] if listed else f"{origin}/sitemap.xml"
-        urls = [u for u in await job_urls(http, start, keep) if rp.can_fetch(USER_AGENT, u)]
+        urls = [u for u in await job_urls(http, start, keep, failed) if rp.can_fetch(USER_AGENT, u)]
+    if failed:
+        # A sitemap file timed out or errored: its jobs aren't in the list, but they haven't closed. Keep them open
+        # (Walmart lost thousands of open jobs a day this way while its sitemap still listed them).
+        company.partial = True
+        log.warning("sitemap %s: %d sitemap file(s) unreadable, keeping unseen jobs open: %s", origin, len(failed), failed[:3])
 
     from ..normalize import job_id
 

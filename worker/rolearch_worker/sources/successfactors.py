@@ -186,7 +186,9 @@ def _from_job_page(page: str, url: str) -> RawJob | None:
 async def _from_sitemap(http: Fetcher, company: Company, host: str) -> list[RawJob]:
     """Sites with neither the feed nor working search pages: job URLs from the sitemap, details from each page."""
     from .sitemap import job_urls
-    urls = await job_urls(http, f"https://{host}/sitemap.xml")
+    failed: list[str] = []
+    urls = await job_urls(http, f"https://{host}/sitemap.xml", None, failed)
+    company.partial = bool(failed)  # an unreadable sitemap file: keep the jobs we didn't see open
     known = company.known_urls or {}
     budget = DETAILS_PER_RUN
     sem = asyncio.Semaphore(4)

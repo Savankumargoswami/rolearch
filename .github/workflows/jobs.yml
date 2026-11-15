@@ -90,7 +90,7 @@ jobs:
     needs: refresh
     if: ${{ always() && needs.refresh.result != 'skipped' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60  # totals every run; sitemap pages + search vocabulary once a day (db/050)
     defaults:
       run:
         working-directory: worker
