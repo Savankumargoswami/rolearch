@@ -20,7 +20,7 @@ LIGHT_COST = 40  # rough cost of one small company
 # Reading time per job differs by system: Eightfold returns 10 jobs a request, Oracle 50 one page at a time,
 # SchoolSpring 500. Sitemap boards fetch each new job's page. Rough relative costs per job:
 ATS_COST = {"eightfold": 3.0, "oracle": 1.5, "sitemap": 2.0, "phenom": 1.0, "workday": 1.0, "icims": 1.5, "taleo": 1.5,
-            "avature": 1.5, "successfactors": 1.5, "schoolspring": 0.1, "edjoin": 1.5, "usajobs": 0.3, "amazon": 0.5}
+            "avature": 1.5, "successfactors": 1.5, "schoolspring": 0.1, "edjoin": 1.5, "hireologyall": 3, "usajobs": 0.3, "amazon": 0.5}
 
 
 def cost(key: str, jobs: int) -> int:

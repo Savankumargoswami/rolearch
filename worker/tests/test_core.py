@@ -322,6 +322,50 @@ class StoreAndGuard(unittest.TestCase):
         finally:
             SOURCES["sitemap"] = old
 
+    def test_hireology_all_sites_reads_once_then_keeps_open(self):
+        # Every Hireology site from one board: the first run reads each site's jobs (each names its own employer),
+        # keeps the newest copy of a job posted twice, and later runs keep them open without calling the API again.
+        from rolearch_worker.sources import hireologyall as h
+
+        listed = [f"https://careers.hireology.com/{s}/{i}/description" for s, i in
+                  [("acme", 10), ("acme", 11), ("acme", 12), ("bestcare", 20), ("joestaffing", 30)]]
+
+        def job(i, site, title, org):
+            return {"id": i, "name": title, "status": "Open", "career_site_path": f"/{site}/{i}/description",
+                    "locations": [{"city": "Austin", "state": "TX"}], "organization": {"name": org}, "job_description": "<p>Do the work well.</p>"}
+
+        api = {"acme": [job(10, "acme", "Mechanic", "Acme Motors"), job(11, "acme", "Mechanic", "Acme Motors"),
+                        job(12, "acme", "General Application", "Acme Motors")],
+               "bestcare": [job(20, "bestcare", "Caregiver", "Best Care")]}
+        calls = []
+
+        async def fake_urls(http, start, keep=None, failed=None):
+            return listed
+
+        async def fake_jobs(http, site, limit=None):
+            calls.append(site)
+            return len(api.get(site, [])), api.get(site, [])
+
+        saved = h.job_urls, h.jobs, h._own_sites, h.MIN_LISTED
+        h.job_urls, h.jobs, h._own_sites, h.MIN_LISTED = fake_urls, fake_jobs, lambda: set(), 1
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                store = JsonStore(Path(d) / "s.json")
+                co = Company("Hireology", "US", "hireologyall", "all")
+                r = asyncio.run(pull_one(FakeHttp({}), store, co))
+                self.assertEqual(r.error, "")
+                self.assertEqual(sorted(calls), ["acme", "bestcare"])  # the staffing agency's site isn't read
+                self.assertEqual(r.added, 2)  # one Mechanic (the newest copy, 11) + Caregiver; no general application
+                urls = {j["jobUrl"]: j["company"] for j in store.open_jobs(launch_only=False, limit=10)}
+                self.assertEqual(urls, {"https://careers.hireology.com/acme/11/description": "Acme Motors",
+                                        "https://careers.hireology.com/bestcare/20/description": "Best Care"})
+                calls.clear()
+                r = asyncio.run(pull_one(FakeHttp({}), store, co))
+                # acme is checked again (its newest post is a skipped general application), but the old copy stays out
+                self.assertEqual((calls, r.total, r.added, r.closed), (["acme"], 2, 0, 0))
+        finally:
+            h.job_urls, h.jobs, h._own_sites, h.MIN_LISTED = saved
+
 
 if __name__ == "__main__":
     unittest.main()

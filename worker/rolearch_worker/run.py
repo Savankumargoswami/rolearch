@@ -54,9 +54,9 @@ async def pull_one(http: Fetcher, store: Store, company: Company) -> Result:
     source = SOURCES.get(company.ats)
     if company.ats in ("workday", "oracle", "eightfold", "icims", "phenom", "sitemap", "smartrecruiters", "taleo", "avature", "rippling", "bamboohr", "jazzhr", "jobvite", "successfactors", "edjoin"):
         company.described = store.described_ids(company)
-    if company.ats in ("sitemap", "successfactors", "bestbuy", "google", "edjoin"):
+    if company.ats in ("sitemap", "successfactors", "bestbuy", "google", "edjoin", "hireologyall"):
         company.known_urls = store.known_urls(company)
-    if company.ats == "edjoin" and hasattr(store, "known_employers"):
+    if company.ats in ("edjoin", "hireologyall") and hasattr(store, "known_employers"):
         company.known_employers = store.known_employers(company)
     if not source:
         res.error = f"unknown ats '{company.ats}'"

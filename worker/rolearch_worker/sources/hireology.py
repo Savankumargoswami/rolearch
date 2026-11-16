@@ -29,7 +29,9 @@ def _salary(c: dict | None) -> Salary | None:
 
 def _to_raw(token: str, j: dict) -> RawJob:
     jid = str(j.get("id"))
-    url = j.get("career_site_url") or f"https://careers.hireology.com/{token}/{jid}/description"
+    # career_site_url is sometimes the site's home page; the path always points at the job itself.
+    path = str(j.get("career_site_path") or "")
+    url = f"https://careers.hireology.com{path}" if path.endswith(f"/{jid}/description") else f"https://careers.hireology.com/{token}/{jid}/description"
     locs = [x for x in (j.get("locations") or []) if isinstance(x, dict)]
     place = lambda x: ", ".join(p for p in [x.get("city"), x.get("state")] if p)  # noqa: E731
     first = locs[0] if locs else {}
