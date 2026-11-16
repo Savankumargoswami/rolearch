@@ -37,6 +37,18 @@ export function TrackButton({ id, status }: { id: string; status: string | null 
   );
 }
 
+/** Counts the click for partner reports (db/051): the job only, once per job per tab. Never delays the link. */
+export function countApplyClick(id: string) {
+  try {
+    const key = `apply-click:${id}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+  } catch {}
+  try {
+    navigator.sendBeacon?.("/api/apply-click", new Blob([JSON.stringify({ id })], { type: "application/json" }));
+  } catch {}
+}
+
 /** "Apply on company site", then asks whether they applied so the tracker can record it. */
 export function ExternalApply({ id, url, company, applied }: { id: string; url: string; company: string; applied: boolean }) {
   const router = useRouter();
@@ -51,6 +63,7 @@ export function ExternalApply({ id, url, company, applied }: { id: string; url: 
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => {
+          countApplyClick(id);
           if (!done) setAsking(true);
         }}
         className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-5 font-medium text-paper transition-colors duration-200 hover:bg-ink-hover"
@@ -93,4 +106,9 @@ export function ExternalApply({ id, url, company, applied }: { id: string; url: 
       )}
     </>
   );
+}
+
+/** A link to the employer's site that counts the click like the apply button does. */
+export function CountedLink({ id, ...props }: { id: string } & React.AnchorHTMLAttributes<HTMLAnchorElement>) {
+  return <a {...props} onClick={() => countApplyClick(id)} />;
 }

@@ -11,7 +11,7 @@ import { AtsPanel } from "@/components/ats-panel";
 import { HiringTeam } from "@/components/hiring-team";
 import { JobRow } from "@/components/job-row";
 import { MatchRing } from "@/components/match-ring";
-import { ExternalApply, TrackButton } from "@/components/track-button";
+import { CountedLink, ExternalApply, TrackButton } from "@/components/track-button";
 import { getJob, getJobFeed, getJobText, searchJobs } from "@/data/db";
 import { freeResources, hasResources } from "@/data/learning";
 import { FreeLearningCard } from "@/components/free-learning";
@@ -424,7 +424,8 @@ function VisitorApply({ job }: { job: Job }) {
 async function EmployerLink({ job }: { job: Job }) {
   if (!job.jobUrl || job.source === "Rolearch" || !(await loadViewer())) return null;
   return (
-    <a
+    <CountedLink
+      id={job.id}
       href={job.jobUrl}
       target="_blank"
       rel="noopener noreferrer"
@@ -432,7 +433,7 @@ async function EmployerLink({ job }: { job: Job }) {
     >
       {t("job.applyOnSite", { c: job.company })}
       <ArrowUpRight aria-hidden="true" className="size-4 rtl:-scale-x-100" />
-    </a>
+    </CountedLink>
   );
 }
 
