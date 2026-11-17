@@ -132,7 +132,11 @@ export const NOT_OFFERED = [
 export const FAQ: { q: string; a: string }[] = [
   {
     q: "What is Rolearch?",
-    a: "Rolearch (www.rolearch.com) is a career intelligence and job platform. It searches about 1.7 million live jobs from employers' own career sites, then helps you understand your fit before you apply: a reasoned job-fit report, evidence-based resume tailoring and cover letters, proctored skill tests with verified badges, career roadmaps, an application tracker with outcome analytics, and interview preparation. It is free for job seekers.",
+    a: "Rolearch (www.rolearch.com) is a career intelligence and job platform. It searches over 2 million live jobs from employers' own career sites, then helps you understand your fit before you apply: a reasoned job-fit report, evidence-based resume tailoring and cover letters, proctored skill tests with verified badges, career roadmaps, an application tracker with outcome analytics, and interview preparation. It is free for job seekers.",
+  },
+  {
+    q: "Does Rolearch have a Chrome extension?",
+    a: "Yes. Rolearch: Job Fit Check is a free extension for Chrome and Edge (www.rolearch.com/extension). Click it on any job posting, on LinkedIn, Indeed, Glassdoor, Greenhouse, Lever, Workday, Ashby or a company careers page, and the posting opens in Rolearch's free job-fit check, already filled in.",
   },
   {
     q: "Where do Rolearch's jobs come from?",

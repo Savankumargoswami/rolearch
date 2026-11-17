@@ -248,7 +248,8 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
       await db.rpc("record_job_view", { p_job: job.id });
     });
   }
-  const [similar, text, state] = await Promise.all([similarTo(job), getJobText(job.id), usState(job)]);
+  // Similar jobs stream in after the job itself: ranking them can take seconds, and search engines only need the job.
+  const [text, state] = await Promise.all([getJobText(job.id), usState(job)]);
   const where = place(job);
 
   return (
@@ -348,20 +349,30 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
           </aside>
         </div>
 
-        <section aria-labelledby="similar" className="mt-16">
-          <h2 id="similar" className="border-b border-ink pb-3 font-display text-2xl font-semibold tracking-[-0.02em]">
-            {t("job.similar")}
-          </h2>
-          <ul className="-mx-3 divide-y divide-line sm:-mx-4">
-            {similar.map((j) => (
-              <li key={j.id}>
-                <JobRow job={j} />
-              </li>
-            ))}
-          </ul>
-        </section>
+        <Suspense fallback={null}>
+          <SimilarJobs job={job} />
+        </Suspense>
       </article>
     </ViewTransition>
+  );
+}
+
+async function SimilarJobs({ job }: { job: Job }) {
+  const similar = await similarTo(job);
+  if (!similar.length) return null;
+  return (
+    <section aria-labelledby="similar" className="mt-16">
+      <h2 id="similar" className="border-b border-ink pb-3 font-display text-2xl font-semibold tracking-[-0.02em]">
+        {t("job.similar")}
+      </h2>
+      <ul className="-mx-3 divide-y divide-line sm:-mx-4">
+        {similar.map((j) => (
+          <li key={j.id}>
+            <JobRow job={j} />
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

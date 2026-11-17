@@ -27,6 +27,7 @@ export function GET() {
     `- Features: ${base}/features`,
     `- About: ${base}/about`,
     `- Free job-fit and ATS check: ${base}/ats`,
+    `- Chrome and Edge extension (Rolearch: Job Fit Check, free): check your fit on any job posting on LinkedIn, Indeed, Glassdoor, Greenhouse, Lever, Workday, Ashby or a company careers page: ${base}/extension`,
     `- Skill tests: ${base}/skills`,
     `- Career-change guides: ${base}/guides`,
     `- Blog (skills each industry is hiring for, every other day): ${base}/blog`,
