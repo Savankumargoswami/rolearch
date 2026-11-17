@@ -116,8 +116,8 @@ def main(argv: list[str] | None = None) -> int:
             stale = store.close_stale(args.stale_days) if hasattr(store, "close_stale") else 0
             failed = []
             if hasattr(store, "refresh_summary"):
-                # Totals every run; sitemap pages and search vocabulary only on the first run after midnight UTC.
-                failed = store.refresh_summary(daily=datetime.now(timezone.utc).hour < 5)
+                # Totals every run; sitemap pages and search vocabulary once a day: the 00:15 UTC run finishes in the morning.
+                failed = store.refresh_summary(daily=datetime.now(timezone.utc).hour < 12)
         finally:
             store.close()
         refreshed = "site totals refreshed" if not failed else f"NOT refreshed: {', '.join(failed)}"
