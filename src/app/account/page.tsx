@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { BestRoles } from "@/components/best-roles";
 import { CompanyAccount } from "@/components/company-account";
 import { FeedbackPrompt } from "@/components/feedback-prompt";
+import { JobAlertsCard } from "@/components/job-alerts-card";
 import { NewsletterCard } from "@/components/newsletter-card";
 import { ProfileView } from "@/components/profile-view";
 import { t } from "@/i18n";
@@ -50,6 +51,9 @@ async function Account() {
         <BestRoles viewer={account} />
       </Suspense>
       <NewsletterCard userId={account.id} />
+      <Suspense fallback={null}>
+        <JobAlertsCard />
+      </Suspense>
     </>
   );
 }

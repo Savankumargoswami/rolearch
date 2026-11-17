@@ -49,7 +49,9 @@ const sections: LegalSection[] = [
           We don&rsquo;t use advertising cookies or tracking pixels. We count page visits with Vercel Web Analytics, run by our hosting provider: it
           uses no cookies, doesn&rsquo;t follow you across sites and doesn&rsquo;t identify you, and we see only totals per page, referring site, device type
           and country. Job-page views on jobs posted on Rolearch are counted per day without recording who viewed them. Clicks on
-          &ldquo;Apply on company site&rdquo; are counted per job, without recording who clicked.
+          &ldquo;Apply on company site&rdquo; are counted per job, without recording who clicked. If you turn on job
+          alerts, we keep your browser&rsquo;s notification address for that device so we can send at most one alert a day; turning
+          alerts off or deleting your account removes it.
         </p>
         <p>
           <strong>Rolearch browser extension:</strong> it reads a page only when you click its button, and only the tab you&rsquo;re on. It takes the job

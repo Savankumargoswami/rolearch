@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Geist } from "next/font/google";
 import { SiteAnalytics } from "@/components/analytics";
+import { ServiceWorker } from "@/components/service-worker";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { dir, locale, t } from "@/i18n";
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <SiteFooter />
         <SiteAnalytics />
+        <ServiceWorker />
       </body>
     </html>
   );

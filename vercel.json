@@ -25,6 +25,11 @@
       "schedule": "30 13 * * 1",
       "path": "/api/cron/competitor-watch",
       "requestMethod": "GET"
+    },
+    "job-alerts": {
+      "schedule": "0 15 * * *",
+      "path": "/api/cron/job-alerts",
+      "requestMethod": "GET"
     }
   }
 }

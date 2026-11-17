@@ -24,7 +24,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // The service worker (job-alert notifications, offline page) must update as soon as a new one is deployed.
+      { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }] },
+    ];
   },
   cacheComponents: true,
   partialPrefetching: true,
