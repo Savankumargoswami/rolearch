@@ -157,7 +157,9 @@ def main(argv: list[str] | None = None) -> int:
         full_run = not args.only and not getattr(args, "shard", None) and args.companies == DEFAULTS["companies"]
         # Companies whose jobs another run stored after this one began (e.g. a list updated mid-run) stay open.
         retired = store.retire_companies({c.key for c in companies}, run_start) if full_run else 0
-        if hasattr(store, "refresh_summary"):
+        # A shard leaves the site totals to the finalize job: 24 shards each recomputing totals, sitemap pages and the
+        # search vocabulary over every open job tied up the database for hours (runs took 13h on 18 Nov 2026).
+        if hasattr(store, "refresh_summary") and not getattr(args, "shard", None):
             store.refresh_summary()
         feed_count = None
         if str(args.feed) != "-" and isinstance(store, JsonStore):
