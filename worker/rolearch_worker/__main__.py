@@ -112,18 +112,29 @@ def main(argv: list[str] | None = None) -> int:
         try:
             listed = {c.key for c in company_file.load(args.companies)}
             since = datetime.now(timezone.utc) - timedelta(hours=args.grace_hours)
-            retired = store.retire_companies(listed, since)
-            stale = store.close_stale(args.stale_days) if hasattr(store, "close_stale") else 0
-            failed = []
+            failed, retired, stale = [], 0, 0
+            # Closing jobs is cleanup: if it fails, the site totals still refresh (they froze when it didn't, Nov 2026).
+            try:
+                retired = store.retire_companies(listed, since)
+            except Exception as e:
+                getattr(store, "recover", lambda: None)()
+                print(f"jobs of removed companies not closed: {e}", file=sys.stderr)
+                failed.append("removed companies")
+            try:
+                stale = store.close_stale(args.stale_days) if hasattr(store, "close_stale") else 0
+            except Exception as e:
+                getattr(store, "recover", lambda: None)()
+                print(f"stale jobs not closed: {e}", file=sys.stderr)
+                failed.append("stale jobs")
             if hasattr(store, "refresh_summary"):
                 # Totals every run; sitemap pages and search vocabulary once a day: the 00:15 UTC run finishes in the morning.
-                failed = store.refresh_summary(daily=datetime.now(timezone.utc).hour < 12)
+                failed += store.refresh_summary(daily=datetime.now(timezone.utc).hour < 12)
         finally:
             store.close()
-        refreshed = "site totals refreshed" if not failed else f"NOT refreshed: {', '.join(failed)}"
+        refreshed = "site totals refreshed" if not failed else f"failed: {', '.join(failed)}"
         print(f"{len(listed)} companies listed · {retired} jobs closed from companies no longer listed · {stale} unconfirmed for {args.stale_days:g} days closed · {refreshed}")
         _revalidate_site()
-        return 1 if "totals" in failed else 0  # a failed totals refresh fails the run, so it's seen
+        return 1 if {"totals", "removed companies", "stale jobs"} & set(failed) else 0  # so a failure is seen
 
     companies = company_file.load(args.companies)
     if getattr(args, "shard", None):

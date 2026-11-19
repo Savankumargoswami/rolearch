@@ -269,16 +269,19 @@ class PostgresStore:
 
     def retire_companies(self, keep: set[str], since: datetime | None = None) -> int:
         with self.conn.cursor() as cur:
+            # The open companies and when each was last seen, read from the small open-jobs index (db/053) instead of
+            # scanning every job: the full scans ran past the 10-minute limit and failed finalize (Nov 2026).
+            cur.execute("select company_key, max(last_seen_at) from jobs where status = 'open' group by company_key")
+            open_cos = cur.fetchall()
+            # A company another run refreshed after `since` is on a newer list than ours: leave it alone.
             if since:
-                # A company another run refreshed after `since` is on a newer list than ours: leave it alone.
-                cur.execute("select distinct company_key from jobs where last_seen_at >= %s", (since,))
-                keep = keep | {r[0] for r in cur.fetchall()}
+                keep = keep | {k for k, seen in open_cos if seen and seen >= since}
             # Jobs companies post on Rolearch itself ("rolearch:<account>") and jobs from feeds they connected
             # ("feed:<id>") aren't on the list; their companies close them (removing a feed closes its jobs).
+            gone = [k for k, _ in open_cos if k not in keep and not k.startswith(("rolearch:", "feed:"))]
             cur.execute(
-                "update jobs set status = 'closed', closed_at = now(), description = '' "
-                "where status = 'open' and not (company_key = any(%s)) and company_key not like 'rolearch:%%' and company_key not like 'feed:%%'",
-                (list(keep),),
+                "update jobs set status = 'closed', closed_at = now(), description = '' where status = 'open' and company_key = any(%s)",
+                (gone,),
             )
             n = cur.rowcount
             cur.execute("update companies set active = (key = any(%s)) where key not like 'rolearch:%%' and key not like 'feed:%%'", (list(keep),))
