@@ -18,6 +18,7 @@ export function SiteFooter() {
             <li><Link className="hover:text-ink" href="/features">Features</Link></li>
             <li><Link className="hover:text-ink" href="/ats">{t("nav.ats")}</Link></li>
             <li><Link className="hover:text-ink" href="/extension">Chrome extension</Link></li>
+            <li><Link className="hover:text-ink" href="/students">For students and advisors</Link></li>
             <li><Link className="hover:text-ink" href="/skills">{t("nav.skills")}</Link></li>
             <li><Link className="hover:text-ink" href="/guides">Career-change guides</Link></li>
             <li><Link className="hover:text-ink" href="/blog">Blog</Link></li>
