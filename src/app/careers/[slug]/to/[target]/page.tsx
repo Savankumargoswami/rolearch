@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { SkillTestLinks } from "@/components/skill-test-links";
 import { roadmapEntry } from "@/lib/roadmaps";
 import { linksFrom, roleProfile } from "@/lib/skill-graph";
+import { fitTitle } from "@/lib/seo-title";
 
 type Props = { params: Promise<{ slug: string; target: string }> };
 
@@ -33,7 +34,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const d = await load(slug, target);
   if (!d) return { robots: { index: false } };
   return {
-    title: `${d.from} to ${d.to}: skills that carry over and what to learn`,
+    // The longest wording that fits in search results (long role names leave room for less).
+    title:
+      [`: skills that carry over and what to learn`, `: skills that carry over`, `: career move`]
+        .map((tail) => `${d.from} to ${d.to}${tail}`)
+        .find((full) => full.length + 11 <= 62) ?? fitTitle(`${d.from} to ${d.to}`),
     description: `Can a ${d.from.toLowerCase()} become a ${d.to.toLowerCase()}? Measured from ${(d.a.jobs + d.b.jobs).toLocaleString("en-US")} job postings: ${pct(d.link.score)} skill overlap, the skills you already have, and the ones to add.`,
     alternates: { canonical: `/careers/${slug}/to/${target}` },
   };

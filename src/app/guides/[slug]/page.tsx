@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { breadcrumbs, JsonLd, publisher } from "@/components/json-ld";
 import { t } from "@/i18n";
+import { fitTitle } from "@/lib/seo-title";
 import { GUIDES, guide } from "@/lib/transition-guides";
 
 export function generateStaticParams() {
@@ -14,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const g = guide((await params).slug);
   if (!g) return { robots: { index: false } };
   const title = t("guides.metaTitle", { from: g.from, to: g.to });
-  return { title, description: t("guides.metaDescription", { from: g.from.toLowerCase(), to: g.to.toLowerCase() }), alternates: { canonical: `/guides/${g.slug}` } };
+  return { title: fitTitle(title), description: t("guides.metaDescription", { from: g.from.toLowerCase(), to: g.to.toLowerCase() }), alternates: { canonical: `/guides/${g.slug}` } };
 }
 
 /** A public career-change guide: what carries over, what to learn, the proof to build, and a fit check. */
@@ -31,6 +33,21 @@ async function Guide({ params }: { params: Promise<{ slug: string }> }) {
   if (!g) notFound();
   return (
     <article className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+      <JsonLd
+        data={[
+          breadcrumbs([["Career change guides", "/guides"], [t("guides.h1", { from: g.from, to: g.to }), `/guides/${g.slug}`]]),
+          {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: t("guides.h1", { from: g.from, to: g.to }),
+            description: t("guides.metaDescription", { from: g.from.toLowerCase(), to: g.to.toLowerCase() }),
+            url: `https://www.rolearch.com/guides/${g.slug}`,
+            mainEntityOfPage: `https://www.rolearch.com/guides/${g.slug}`,
+            author: publisher,
+            publisher,
+          },
+        ]}
+      />
       <Link href="/guides" className="text-sm text-muted hover:text-ink">
         {t("guides.all")}
       </Link>

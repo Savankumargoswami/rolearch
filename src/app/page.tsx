@@ -57,6 +57,13 @@ export default async function Home() {
                 email: "admin@rolearch.com",
               },
               {
+                // The site's name in Google results (otherwise it may show the bare domain).
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "Rolearch",
+                url: "https://www.rolearch.com",
+              },
+              {
                 "@context": "https://schema.org",
                 "@type": "WebApplication",
                 name: "Rolearch",

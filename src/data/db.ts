@@ -147,25 +147,47 @@ export async function getJobFeed(): Promise<JobFeed> {
 }
 
 /** One job by id, straight from the database (any open job, not just the newest). */
+/**
+ * An open job's row and description in one request: its page needs both, and three separate lookups (is it open, the
+ * job, the description) made an uncached job page wait on the database three times in a row. Null when the database
+ * answered that the job isn't open. Throws when the database couldn't be asked, so a failure is never cached.
+ */
+async function openJobRecord(id: string): Promise<(Row & { description: string | null }) | null> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("jobs");
+  if (!URL || !KEY) throw new Error("no database");
+  const res = await fetch(`${URL}/rest/v1/jobs?select=${COLUMNS},description&id=eq.${encodeURIComponent(id)}&status=eq.open`, { headers: { apikey: KEY }, cache: "no-store" });
+  if (!res.ok) throw new Error(`job lookup failed: ${res.status}`);
+  const [row] = (await res.json()) as (Row & { description: string | null })[];
+  return row ?? null;
+}
+
 export async function getJob(id: string): Promise<Job | undefined> {
   "use cache";
   cacheLife("hours");
   cacheTag("jobs");
+  if (!/^[\w.-]{1,160}$/.test(id)) return undefined;
   if (URL && KEY) {
-    if (!/^[\w.-]{1,160}$/.test(id)) return undefined;
     try {
-      const res = await fetch(`${URL}/rest/v1/jobs?select=${COLUMNS}&id=eq.${encodeURIComponent(id)}&status=eq.open`, { headers: { apikey: KEY }, cache: "no-store" });
-      if (res.ok) {
-        // The database answered: no row means the job closed. Crawlers ask for closed jobs constantly, so this
-        // must not fall through to loading the whole feed.
-        const [row] = (await res.json()) as Row[];
-        return row ? toJob(row, Date.now()) : undefined;
-      }
+      // The database answered: no row means the job closed. Crawlers ask for closed jobs constantly, so this
+      // must not fall through to loading the whole feed.
+      const row = await openJobRecord(id);
+      return row ? toJob(row, Date.now()) : undefined;
     } catch (e) {
       console.error("[jobs] job lookup failed:", e);
     }
   }
   return (await getJobFeed()).jobs.find((j) => j.id === id);
+}
+
+/**
+ * True only when the database answered that this job isn't open (closed, or never existed), so its page can return a
+ * real 404. Throws when the database couldn't be asked: a failed lookup must never tell Google a live job is gone.
+ */
+export async function jobIsGone(id: string): Promise<boolean> {
+  if (!/^[\w.-]{1,160}$/.test(id)) return true;
+  return (await openJobRecord(id)) === null;
 }
 
 export type JobStats = { total: number; updatedAt: string | null; companies: number; countries: number };
@@ -256,35 +278,59 @@ export async function searchJobs(f: JobQuery, page = 1, perPage = 40, near: Near
     const all = filterJobs((await getJobFeed()).jobs, { ...emptyFilters, q: f.q });
     return { jobs: all.slice((page - 1) * perPage, page * perPage), total: all.length };
   }
+  return { total: Number(rows[0]?.total ?? 0), jobs: searchRowsToJobs(rows) };
+}
+
+/** search_jobs rows as the site's job list items. */
+function searchRowsToJobs(rows: Omit<SearchRow, "total">[]): JobLite[] {
   const now = Date.now();
-  return {
-    total: Number(rows[0]?.total ?? 0),
-    jobs: rows.map((r) => {
-      const posted = r.posted_at ? Date.parse(r.posted_at) : now;
-      return {
-        id: r.id,
-        title: r.title,
-        company: r.company,
-        city: r.city,
-        country: r.country,
-        region: r.region,
-        workplace: r.workplace,
-        visa: r.visa,
-        salary:
-          r.salary_min != null && r.salary_max != null && r.salary_currency
-            ? { min: Number(r.salary_min), max: Number(r.salary_max), currency: r.salary_currency, period: r.salary_period ?? "year" }
-            : null,
-        level: r.level,
-        years: r.years,
-        skills: r.skills ?? [],
-        postedDaysAgo: Math.max(0, Math.floor((now - posted) / DAY)),
-        category: r.category,
-        verified: r.verified,
-        companyDomain: r.company_domain,
-        source: r.source,
-      };
-    }),
-  };
+  return rows.map((r) => {
+    const posted = r.posted_at ? Date.parse(r.posted_at) : now;
+    return {
+      id: r.id,
+      title: r.title,
+      company: r.company,
+      city: r.city,
+      country: r.country,
+      region: r.region,
+      workplace: r.workplace,
+      visa: r.visa,
+      salary:
+        r.salary_min != null && r.salary_max != null && r.salary_currency
+          ? { min: Number(r.salary_min), max: Number(r.salary_max), currency: r.salary_currency, period: r.salary_period ?? "year" }
+          : null,
+      level: r.level,
+      years: r.years,
+      skills: r.skills ?? [],
+      postedDaysAgo: Math.max(0, Math.floor((now - posted) / DAY)),
+      category: r.category,
+      verified: r.verified,
+      companyDomain: r.company_domain,
+      source: r.source,
+    };
+  });
+}
+
+export type RoleListing = { total: number; jobs: JobLite[]; paid: JobLite[] };
+
+/**
+ * A role page's saved jobs (db/054: refreshed a few pages at a time by a database schedule, so a visit never waits
+ * on a live search), kept for an hour. Throws when there's no saved copy yet or the lookup failed, so a miss is
+ * never kept.
+ */
+export async function roleListing(roleSlug: string, placeSlug: string): Promise<RoleListing> {
+  "use cache: remote";
+  cacheLife("hours");
+  cacheTag("jobs");
+  if (!URL || !KEY) throw new Error("no database");
+  const res = await fetch(
+    `${URL}/rest/v1/role_listings?select=total,jobs,paid&role_slug=eq.${encodeURIComponent(roleSlug)}&place_slug=eq.${encodeURIComponent(placeSlug)}&refreshed_at=not.is.null`,
+    { headers: { apikey: KEY }, cache: "no-store" },
+  );
+  if (!res.ok) throw new Error(`role_listings failed: ${res.status}`);
+  const [row] = (await res.json()) as { total: number; jobs: SearchRow[] | null; paid: SearchRow[] | null }[];
+  if (!row) throw new Error("no saved listing yet");
+  return { total: Number(row.total ?? 0), jobs: searchRowsToJobs(row.jobs ?? []), paid: searchRowsToJobs(row.paid ?? []) };
 }
 
 /** How many open jobs each category has, for the browse chips. */
@@ -304,9 +350,14 @@ export async function getJobText(id: string): Promise<string> {
   "use cache";
   cacheLife("hours");
   cacheTag("jobs");
-  const job = await getJob(id);
+  if (!/^[\w.-]{1,160}$/.test(id)) return "";
+  // An open job's description comes with the job itself (one request, shared with its page).
+  const open = URL && KEY ? await openJobRecord(id).catch(() => undefined) : undefined;
+  if (open?.description) return open.description;
+  const job = open ? toJob(open, Date.now()) : await getJob(id);
   const fallback = job ? [job.summary, ...job.duties].filter(Boolean).join("\n") : "";
-  if (!URL || !KEY) return fallback;
+  if (!URL || !KEY || open) return fallback;
+  // Closed jobs (an employer's past posting, an application to it) still show their description.
   try {
     const res = await fetch(`${URL}/rest/v1/jobs?select=description&id=eq.${encodeURIComponent(id)}`, { headers: { apikey: KEY }, cache: "no-store" });
     if (!res.ok) return fallback;

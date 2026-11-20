@@ -9,10 +9,11 @@ import { CompanyLogo } from "@/components/company-logo";
 import { JobDescription } from "@/components/job-description";
 import { AtsPanel } from "@/components/ats-panel";
 import { HiringTeam } from "@/components/hiring-team";
+import { breadcrumbs, JsonLd } from "@/components/json-ld";
 import { JobRow } from "@/components/job-row";
 import { MatchRing } from "@/components/match-ring";
 import { CountedLink, ExternalApply, TrackButton } from "@/components/track-button";
-import { getJob, getJobFeed, getJobText, searchJobs } from "@/data/db";
+import { getJob, getJobFeed, getJobText, jobIsGone, searchJobs } from "@/data/db";
 import { freeResources, hasResources } from "@/data/learning";
 import { FreeLearningCard } from "@/components/free-learning";
 import type { Job } from "@/data/types";
@@ -25,6 +26,7 @@ import type { Match, ReqStatus, Requirement } from "@/lib/match";
 import { loadViewer } from "@/lib/profile";
 import { matchProfile } from "@/lib/role-match";
 import { roadmapForTitle } from "@/lib/roadmaps";
+import { fitTitle, notARealJob } from "@/lib/seo-title";
 import { SKILLS } from "@/lib/skill-tests";
 import { createClient } from "@/lib/supabase/server";
 
@@ -40,17 +42,22 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Promise<Metadata> {
   const { id } = await params;
   const job = await getJob(id);
-  if (!job) return { robots: { index: false } };
+  if (!job) {
+    // Gone jobs answer 404 from the page itself (below); if the database couldn't be asked, the page stays, unindexed.
+    return { robots: { index: false } };
+  }
   const where = place(job);
   // Until a refresh stores the description, the page is a title and a line: too thin to index. db/028 keeps the same
   // jobs out of the sitemap; both pick the job up once its description arrives.
   const thin = (await getJobText(job.id)).trim().length < 300;
   // Job pages are public so search engines can list them; match, ATS check and tracking need an account.
+  const description = [job.summary, `${job.company} · ${where}.`, job.salary ? `${salaryRange(job.salary)}.` : ""].filter(Boolean).join(" ");
   return {
-    title: `${job.title} at ${job.company}`,
-    description: [job.summary, `${job.company} · ${where}.`, job.salary ? `${salaryRange(job.salary)}.` : ""].filter(Boolean).join(" "),
+    title: fitTitle(job.title, ` at ${job.company}`),
+    // A short summary leaves results with a fragment: say what the page offers too (Google shows about 155 characters).
+    description: description.length >= 110 ? description : `${description} See the skills this ${job.title} job asks for and check your resume against it, free.`,
     alternates: { canonical: `/jobs/${job.id}` },
-    ...(thin && { robots: { index: false, follow: true } }),
+    ...((thin || notARealJob(job.title)) && { robots: { index: false, follow: true } }),
   };
 }
 
@@ -229,7 +236,10 @@ const viewerMatch = cache(async (id: string): Promise<ViewerMatch> => {
   return { signedIn: true, hasProfile, match: matchProfile({ title: job.title, skills: job.skills, years: job.years, description }, p, req), req, fit };
 });
 
-export default function JobPage({ params }: PageProps<"/jobs/[id]">) {
+export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
+  // A closed or unknown job answers a real 404 so search engines drop it; this runs before the page starts
+  // streaming (a notFound() inside the stream still answers 200). A failed lookup never counts as gone.
+  if (await jobIsGone((await params).id).catch(() => false)) notFound();
   return (
     <Suspense fallback={<div className="mx-auto h-[70vh] max-w-6xl animate-pulse px-4 pt-10 sm:px-6" aria-hidden="true" />}>
       <JobBody params={params} />
@@ -259,14 +269,16 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
       default="none"
     >
       <article className="mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pt-10">
-        {/* Search engines require a description, so jobs without one get no listing data. */}
-        {(text.trim() || job.summary.trim()) && (
+        {/* Search engines require a description, so jobs without one get no listing data; nor do talent-community sign-ups. */}
+        {(text.trim() || job.summary.trim()) && !notARealJob(job.title) && (
           <script
             type="application/ld+json"
             // Structured data for search engines' job listings; "<" is escaped so the text can't close the tag.
             dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingLd(job, text, state)).replace(/</g, "\\u003c") }}
           />
         )}
+        {/* /jobs asks visitors to sign in; the public list of jobs is by role. */}
+        <JsonLd data={breadcrumbs([["Jobs by role", "/roles"], [job.title, `/jobs/${job.id}`]])} />
         <Link
           href="/jobs"
           transitionTypes={["nav-back"]}
@@ -358,7 +370,10 @@ async function JobBody({ params }: { params: PageProps<"/jobs/[id]">["params"] }
 }
 
 async function SimilarJobs({ job }: { job: Job }) {
-  const similar = await similarTo(job);
+  // Ranking can take seconds when the database is busy, and the page isn't finished until this arrives: a crawler
+  // waiting on it crawls fewer pages. Past 2.5 seconds the page ends without the list (the search still finishes and
+  // is cached for the next visit).
+  const similar = await Promise.race([similarTo(job).catch((): never[] => []), new Promise<never[]>((done) => setTimeout(() => done([]), 2500))]);
   if (!similar.length) return null;
   return (
     <section aria-labelledby="similar" className="mt-16">

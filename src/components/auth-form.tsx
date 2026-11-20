@@ -31,15 +31,19 @@ export function AuthFormInner({
   oauthError = false,
   next = "",
   providers = { google: false, github: false },
+  placeholder = false,
 }: {
   mode: "signup" | "signin";
   initialKind: Kind;
   linkError?: boolean;
   oauthError?: boolean;
   next?: string;
+  /** The loading copy shown while providers load: its title isn't a second h1 in the page's HTML. */
+  placeholder?: boolean;
   providers?: Providers;
 }) {
   const signup = mode === "signup";
+  const Title = placeholder ? "p" : "h1";
   const [kind, setKind] = useState<Kind>(initialKind);
   const [state, action, pending] = useActionState<AuthState, FormData>(signup ? signUp : signIn, {});
   const errors = state.errors ?? {};
@@ -66,7 +70,7 @@ export function AuthFormInner({
 
   return (
     <div className="w-full max-w-md">
-      <h1 className="font-display text-4xl font-semibold tracking-[-0.03em]">{signup ? t("auth.signUpTitle") : t("auth.signInTitle")}</h1>
+      <Title className="font-display text-4xl font-semibold tracking-[-0.03em]">{signup ? t("auth.signUpTitle") : t("auth.signInTitle")}</Title>
 
       {signup && (
         <div role="tablist" aria-label="Account type" className="mt-6 grid grid-cols-2 gap-1 rounded-full bg-ink-soft p-1">

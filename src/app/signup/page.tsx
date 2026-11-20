@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: t("auth.signUpTitle"), alternates: { 
 export default function SignUpPage() {
   return (
     <div className="mx-auto flex max-w-6xl justify-center px-4 py-12 sm:px-6 sm:py-20">
-      <Suspense fallback={<AuthFormInner mode="signup" initialKind="seeker" />}>
+      <Suspense fallback={<AuthFormInner mode="signup" initialKind="seeker" placeholder />}>
         <WithProviders />
       </Suspense>
     </div>

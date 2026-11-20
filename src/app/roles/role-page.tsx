@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 import Link from "next/link";
 import { JobRow } from "@/components/job-row";
-import { searchJobs, type JobQuery } from "@/data/db";
+import { roleListing, searchJobs, type JobQuery } from "@/data/db";
 import type { JobLite } from "@/data/types";
 import { formatJobCount } from "@/lib/job-query";
 import { findPlace, findRole, heading, METROS, ROLES, SPECIAL, stats, type Place, type Role } from "@/lib/seo-pages";
@@ -44,7 +44,16 @@ async function cachedPaid(roleSlug: string, placeSlug: string): Promise<JobLite[
 }
 
 /** null when the search failed this time (it's tried again on the next visit). */
-async function listing(roleSlug: string, placeSlug: string): Promise<{ jobs: JobLite[]; total: number } | null> {
+type Found = { jobs: JobLite[]; total: number; paid?: JobLite[] };
+
+/** The saved copy (db/054) when there is one, else a live search. null when both failed this time. */
+async function listing(roleSlug: string, placeSlug: string): Promise<Found | null> {
+  try {
+    const saved = await roleListing(roleSlug, placeSlug);
+    return { total: saved.total, jobs: saved.jobs, paid: saved.paid };
+  } catch {
+    // no saved copy yet (a new role or place): search live
+  }
   try {
     return await cachedListing(roleSlug, placeSlug);
   } catch {
@@ -76,8 +85,9 @@ export async function roleMetadata(roleSlug: string, placeSlug = ""): Promise<Me
     title,
     description: `${formatJobCount(total)} open ${r.name} jobs ${where(p)}, straight from employers' own career sites. No staffing agencies, no reposts. Check your resume against any of them for free.`,
     alternates: { canonical: path(r, p) },
-    // Thin pages help nobody: only pages with real listings are offered to search engines.
-    robots: total >= 3 ? undefined : { index: false },
+    // Thin pages help nobody: only pages with real listings are offered to search engines. A failed load says
+    // nothing about the page, so it never hides it (it did, and Google was told to drop most role pages).
+    robots: found && total < 3 ? { index: false } : undefined,
   };
 }
 
@@ -96,7 +106,7 @@ export async function RolePage({ roleSlug, placeSlug = "" }: { roleSlug: string;
   }
   const { jobs, total } = found;
   // Pay insight from the wider set of listings that publish pay; the rest from the newest listings shown.
-  const paid = await cachedPaid(roleSlug, placeSlug).catch(() => [] as JobLite[]);
+  const paid = found.paid ?? (await cachedPaid(roleSlug, placeSlug).catch(() => [] as JobLite[]));
   const s = { ...stats(jobs), payInsight: stats(paid).payInsight ?? stats(jobs).payInsight };
   const near = p?.kind === "metro" ? METROS.filter((m) => m.kind === "metro" && m.state === p.state && m.slug !== p.slug) : [];
   const otherPlaces = [...near, ...METROS.filter((m) => !near.includes(m) && m.slug !== p?.slug)].slice(0, 12);

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { breadcrumbs, JsonLd, publisher } from "@/components/json-ld";
 import { RoadmapViewer } from "@/components/roadmap-viewer";
 import { loadViewer } from "@/lib/profile";
 import { roadmapEntry, roadmapPreview } from "@/lib/roadmaps";
@@ -31,6 +32,21 @@ async function Body({ params }: { params: PageProps<"/roadmaps/[slug]">["params"
   const viewer = await loadViewer();
   return (
     <>
+      <JsonLd
+        data={[
+          breadcrumbs([["Career roadmaps", "/roadmaps"], [entry.role, `/roadmaps/${slug}`]]),
+          {
+            "@context": "https://schema.org",
+            "@type": "LearningResource",
+            name: `${entry.role} career roadmap`,
+            description: entry.summary,
+            url: `https://www.rolearch.com/roadmaps/${slug}`,
+            learningResourceType: "Career roadmap",
+            isAccessibleForFree: true,
+            publisher,
+          },
+        ]}
+      />
       <nav aria-label="Breadcrumb" className="text-sm text-muted">
         <Link href="/roadmaps" className="hover:text-ink">Career roadmaps</Link> / <span>{entry.role}</span>
       </nav>

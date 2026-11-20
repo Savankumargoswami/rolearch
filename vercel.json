@@ -30,6 +30,11 @@
       "schedule": "0 15 * * *",
       "path": "/api/cron/job-alerts",
       "requestMethod": "GET"
+    },
+    "role-listings": {
+      "schedule": "0 2 * * *",
+      "path": "/api/cron/role-listings",
+      "requestMethod": "GET"
     }
   }
 }

@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: t("auth.signInTitle"), alternates: { 
 export default function SignInPage() {
   return (
     <div className="mx-auto flex max-w-6xl justify-center px-4 py-12 sm:px-6 sm:py-20">
-      <Suspense fallback={<AuthFormInner mode="signin" initialKind="seeker" />}>
+      <Suspense fallback={<AuthFormInner mode="signin" initialKind="seeker" placeholder />}>
         <WithProviders />
       </Suspense>
     </div>

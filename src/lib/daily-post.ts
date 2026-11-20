@@ -123,7 +123,8 @@ ${skillLine}
 </div></body></html>`;
 }
 
-/** Today's digest for one topic (the last 24 hours), for the public /today pages; kept for an hour. */
+/** Today's digest for one topic (the last 24 hours), for the public /today pages; kept for an hour. Reads the
+ * saved copy (db/055) and only runs the live digest when there is none yet. */
 export async function todayDigest(topicKey: string): Promise<Digest | null> {
   "use cache: remote"; // shared across server instances
   cacheLife("hours");
@@ -131,7 +132,16 @@ export async function todayDigest(topicKey: string): Promise<Digest | null> {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
   const key = dataKey;
   const secret = process.env.POST_REVIEW_SECRET;
-  if (!base || !key || !secret || !TOPICS.some((t) => t.key === topicKey)) return null;
+  if (!base || !key || !TOPICS.some((t) => t.key === topicKey)) return null;
+  // The saved copy a database schedule refreshes twice an hour (db/055): the live digest took up to a minute.
+  const saved = await fetch(`${base}/rest/v1/today_digests?select=digest&topic=eq.${encodeURIComponent(topicKey)}`, {
+    headers: { apikey: key },
+    cache: "no-store",
+  })
+    .then(async (r) => (r.ok ? ((await r.json()) as { digest: Digest }[])[0]?.digest : undefined))
+    .catch(() => undefined);
+  if (saved) return saved;
+  if (!secret) return null;
   // Rounded to the hour so the hour's cache entry and the query agree.
   const since = new Date(Math.floor(Date.now() / 3_600_000) * 3_600_000 - 86_400_000).toISOString();
   const res = await fetch(`${base}/rest/v1/rpc/jobs_digest`, {
